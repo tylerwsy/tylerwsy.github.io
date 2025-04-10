@@ -1,64 +1,111 @@
-/* Set a modern and cute base */
-body {
+/* Base resets */
+* {
   margin: 0;
   padding: 0;
-  background: linear-gradient(135deg, #fceabb, #f8b500);
+  box-sizing: border-box;
+}
+
+/* Body styles */
+body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #fceabb, #f8b500);
   color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
 }
 
-/* Container centers everything and limits width */
+/* Container styles */
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1rem;
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
   text-align: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-/* Header styling */
+/* Header styles */
 header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  margin-bottom: 1rem;
 }
-
 header p {
   font-size: 1.2rem;
-  margin-top: 0;
+  margin-bottom: 1.5rem;
 }
 
-/* Main content area */
-main {
-  margin: 2rem 0;
+/* Profile Choice Section */
+.profile-choice p {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+.profile-choice button {
+  background-color: #ff7f50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.8rem 1.2rem;
+  font-size: 1.2rem;
+  margin: 0.5rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.profile-choice button:hover {
+  background-color: #ff6347;
+  transform: scale(1.05);
 }
 
-/* Quiz area styling */
-#quizArea {
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 10px;
-  padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+/* Password Section */
+.password-section {
+  margin-top: 1.5rem;
+}
+.password-section p {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+.password-section input[type="password"] {
+  width: 80%;
+  padding: 0.8rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.password-section button {
+  margin-top: 1rem;
+  background-color: #ff7f50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.8rem 1.2rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.password-section button:hover {
+  background-color: #ff6347;
+  transform: scale(1.05);
 }
 
-/* Question Count display */
+/* Quiz Area */
 #questionCount {
   font-size: 1.5rem;
   margin-bottom: 1rem;
 }
 
-/* Quiz word styling */
-#quizWord {
+#quizBox h2 {
   font-size: 3rem;
   margin: 1rem 0;
 }
 
-/* Instructions */
 #instructions {
   font-size: 1.2rem;
   margin-bottom: 1rem;
 }
 
-/* Interactive button styles */
-.interactive-btn {
+.buttons button {
   background-color: #ff7f50;
   border: none;
   border-radius: 5px;
@@ -67,36 +114,35 @@ main {
   padding: 0.8rem 1.2rem;
   margin: 0.5rem;
   cursor: pointer;
-  transition: transform 0.2s, background-color 0.2s;
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
-.interactive-btn:hover,
-.interactive-btn:focus {
+.buttons button:hover {
   background-color: #ff6347;
   transform: scale(1.05);
 }
 
-/* Footer styling */
+/* Footer */
 footer p {
   font-size: 1rem;
-  margin: 1rem 0 0;
+  margin-top: 1rem;
 }
 
-/* Force landscape orientation for best experience */
+/* Landscape Orientation (prompt rotation if not in landscape) */
 @media screen and (orientation: portrait) {
   #rotateNotice {
     display: block;
+    background-color: #ff7f50;
+    color: white;
+    padding: 1rem;
+    text-align: center;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    background: #ff7f50;
-    color: white;
-    padding: 1rem;
-    font-size: 1.2rem;
     z-index: 1000;
+    font-size: 1.2rem;
   }
-  /* Optionally, hide the main container when in portrait */
   .container {
     display: none;
   }

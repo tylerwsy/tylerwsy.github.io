@@ -2,45 +2,128 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Spelling Fun for Kids!</title>
-  <link rel="stylesheet" href="style.css" />
-  <!-- Include external libraries as needed -->
-  <!-- For example, if you're using pinyin-pro, include it here -->
-  <!-- <script src="https://cdn.jsdelivr.net/npm/pinyin-pro" defer></script> -->
-  <!-- And include your quiz.js if you have additional quiz code -->
-  <script src="quiz.js" defer></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spelling Fun - Choose Your Profile</title>
+  <style>
+    /* Basic reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #fceabb, #f8b500);
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .container {
+      text-align: center;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 500px;
+    }
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 2rem;
+    }
+    .profile-choice, .password-section {
+      margin: 1.5rem 0;
+    }
+    button {
+      background-color: #ff7f50;
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      font-size: 1.2rem;
+      padding: 0.8rem 1.2rem;
+      margin: 0.5rem;
+      cursor: pointer;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    button:hover {
+      background-color: #ff6347;
+      transform: scale(1.05);
+    }
+    input[type="password"] {
+      padding: 0.8rem;
+      font-size: 1.1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 80%;
+      margin-top: 1rem;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-  <div id="rotateNotice">Please rotate your device to landscape</div>
   <div class="container">
-    <header>
-      <h1>Spelling Fun for Kids!</h1>
-      <p>Practice your Chinese words in a fun way!</p>
-    </header>
-    
-    <main>
-      <!-- This section could serve as both landing and quiz page -->
-      <div id="quizArea">
-        <!-- You can change content with JS as needed -->
-        <div id="questionCount">Question 1 of 10</div>
-        <div id="quizBox">
-          <!-- For example, show a word to be pronounced -->
-          <h2 id="quizWord">词语</h2>
-          <p id="instructions">Tap "Start" and then pronounce the word.</p>
-        </div>
-        <div id="controls">
-          <button id="startBtn" class="interactive-btn">Start Quiz</button>
-          <!-- Other interactive buttons can be inserted dynamically -->
-        </div>
-      </div>
-    </main>
-    
-    <footer>
-      <p>© 2025 Spelling Fun. All rights reserved.</p>
-    </footer>
+    <h1>Welcome to Spelling Fun!</h1>
+    <div class="profile-choice">
+      <p>Are you a boy or a girl?</p>
+      <button id="boyBtn">Boy</button>
+      <button id="girlBtn">Girl</button>
+    </div>
+    <div id="passwordSection" class="password-section hidden">
+      <p id="passwordPrompt"></p>
+      <input type="password" id="passwordInput" placeholder="Enter password" />
+      <br>
+      <button id="passwordSubmitBtn">Enter</button>
+    </div>
   </div>
   
-  <!-- Optionally include additional scripts -->
+  <script>
+    // Define the passwords for boy and girl.
+    const boyPassword = "WeEK1000They";
+    const girlPassword = "DaY0406Me";
+
+    const boyBtn = document.getElementById("boyBtn");
+    const girlBtn = document.getElementById("girlBtn");
+    const passwordSection = document.getElementById("passwordSection");
+    const passwordPrompt = document.getElementById("passwordPrompt");
+    const passwordInput = document.getElementById("passwordInput");
+    const passwordSubmitBtn = document.getElementById("passwordSubmitBtn");
+
+    let selectedProfile = ""; // "boy" or "girl"
+
+    // When user clicks on either Boy or Girl
+    boyBtn.addEventListener("click", () => {
+      selectedProfile = "boy";
+      showPasswordPrompt();
+    });
+    girlBtn.addEventListener("click", () => {
+      selectedProfile = "girl";
+      showPasswordPrompt();
+    });
+
+    // Show the password input section.
+    function showPasswordPrompt() {
+      passwordPrompt.textContent = selectedProfile === "boy" ? "Enter password for Boy:" : "Enter password for Girl:";
+      passwordSection.classList.remove("hidden");
+    }
+
+    // Validate password upon clicking the submit button.
+    passwordSubmitBtn.addEventListener("click", () => {
+      const entered = passwordInput.value;
+      if (
+        (selectedProfile === "boy" && entered === boyPassword) ||
+        (selectedProfile === "girl" && entered === girlPassword)
+      ) {
+        // If correct, redirect to the select page (change "select.html" as needed).
+        window.location.href = "select.html";
+      } else {
+        alert("Incorrect password. Please try again.");
+        passwordInput.value = "";
+      }
+    });
+  </script>
 </body>
 </html>
