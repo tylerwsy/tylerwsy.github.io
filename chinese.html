@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chinese Word Practice</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Ensure quiz.js is deferred so DOM is ready -->
+  <script src="quiz.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/pinyin-pro" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🧠 Chinese Word Practice</h1>
+      <p>Click the microphone to pronounce the word. We’ll check if it sounds right!</p>
+    </header>
+
+    <!-- (Optional) Element for a question counter -->
+    <div id="questionCount" style="font-size:1.2em; margin-bottom:1rem;"></div>
+
+    <section class="quiz">
+      <div id="quizBox">
+        <h2 id="quizWord">Loading...</h2>
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom:1rem">
+          <button id="pinyinHintBtn">Pinyin Hint 🔊</button>
+          <p id="pinyinHint" style="display:none; font-style:italic; margin:0;"></p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom:1rem">
+          <button id="englishHintBtn">English Hint 🔊</button>
+          <p id="englishHint" style="display:none; font-style:italic; margin:0;"></p>
+        </div>
+        <div class="buttons">
+          <button id="startRecordingBtn" style="min-width:180px; transition:all 0.3s ease;">🎤 Start Speaking</button>
+          <p id="recordingResult" style="margin-top:1rem; font-style:italic;"></p>
+          <p id="countdownDisplay" style="margin-top:0.5rem; font-weight:bold;"></p>
+          <!-- The submit button will be dynamically created and appended here -->
+          <div id="controlsContainer"></div>
+        </div>
+      </div>
+
+      <div id="resultBox" style="display:none">
+        <h2>Quiz Completed!</h2>
+        <p id="scoreText"></p>
+        <button onclick="location.reload()">Try Again</button>
+      </div>
+    </section>
+
+    <div style="text-align:center; margin:2rem 0;">
+      <button onclick="location.href='index.html'">← Back to Home</button>
+    </div>
+
+    <footer>
+      © 2025 Spelling Fun. All rights reserved.
+    </footer>
+  </div>
+</body>
+</html>
