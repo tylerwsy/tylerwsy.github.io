@@ -42,6 +42,8 @@
     }
     .start-test-row input[type="number"] {
       /* Adjust width or other styling as desired */
+      padding: 0.8rem;
+      font-size: 1.2rem;
       width: 100px;
       text-align: center;
     }
@@ -67,14 +69,15 @@
       <button id="dictionaryBtn" class="interactive-btn" style="display: none;">Go to Word Dictionary</button>
       <!-- Start test row (bottom), includes numeric input to left of Start button -->
       <div class="start-test-row" id="startTestRow" style="display: none;">
-        <input type="number" id="wordCountInput" min="1" value="10" />
+        <p>Select number of questions:</p>
+        <input type="number" id="wordCountInput" min="10" value="50" />
         <button id="goTestBtn" class="interactive-btn">Start Test</button>
       </div>
     </div>
   </div>
   
   <footer>
-    <p>© 2025 Spelling Fun. All rights reserved.</p>
+    <p>© 2025 Learning App. All rights reserved.</p>
   </footer>
   
   <script>
