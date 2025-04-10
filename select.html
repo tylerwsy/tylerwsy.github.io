@@ -6,7 +6,7 @@
   <title>Select Your Test</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Inline styles specific to the select page (optional) */
+    /* Inline styles specific to the select page */
     .select-container {
       margin: 2rem auto;
       text-align: center;
@@ -20,7 +20,6 @@
       max-width: 400px;
       margin-bottom: 1rem;
     }
-    /* Container to group buttons inline */
     .button-container {
       display: inline-flex;
       gap: 1rem;
@@ -30,6 +29,7 @@
   </style>
 </head>
 <body>
+  <div id="rotateNotice">Please rotate your device to landscape</div>
   <div class="container">
     <header>
       <h1>Select Your Test</h1>
@@ -45,7 +45,6 @@
       
       <!-- Single container for both buttons -->
       <div class="button-container" id="buttonContainer" style="display: none;">
-        <!-- Both buttons have class "interactive-btn" -->
         <button id="dictionaryBtn" class="interactive-btn" style="display: none;">Go to Word Dictionary</button>
         <button id="goTestBtn" class="interactive-btn" style="display: none;">Start Test</button>
       </div>
@@ -68,17 +67,17 @@
       // Show container for buttons
       buttonContainer.style.display = "flex";
       
-      // Show dictionary button if test is one of the Pronunciation Tests.
+      // If a pronunciation test is selected, show the dictionary button.
       if (selected === "Chinese - Pronunciation Test" || selected === "English - Pronunciation Test") {
         dictionaryBtn.style.display = "inline-block";
       } else {
         dictionaryBtn.style.display = "none";
       }
       
-      // Always show start button.
+      // Always show the start test button.
       goTestBtn.style.display = "inline-block";
       
-      goTestBtn.onclick = function() {
+      goTestBtn.onclick = () => {
         if (selected === "Chinese - Pronunciation Test") {
           window.location.href = "chinese_quiz.html";
         } else if (selected === "English - Pronunciation Test") {
@@ -88,7 +87,7 @@
         }
       };
       
-      dictionaryBtn.onclick = function() {
+      dictionaryBtn.onclick = () => {
         window.location.href = "dictionary.html";
       };
     });
