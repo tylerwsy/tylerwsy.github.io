@@ -6,7 +6,7 @@
   <title>Select Your Test</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Styles specific to the select page can go here */
+    /* Inline styles for select page can also be placed in style.css */
     .select-container {
       margin: 2rem auto;
       text-align: center;
@@ -27,20 +27,17 @@
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>Select Your Test</h1>
-    </header>
-    
-    <main class="select-container">
+    <h1>Select Your Test</h1>
+    <div class="select-container">
       <p>Please select the test you want to take:</p>
       <select id="testSelect">
         <option value="" disabled selected>Select a test...</option>
-        <option value="chinese-pronunciation">Chinese - Pronunciation Test</option>
-        <option value="english-pronunciation">English - Pronunciation Test</option>
-        <option value="english-singular-plural">English - Singular vs Plural</option>
+        <option value="Chinese - Pronunciation Test">Chinese - Pronunciation Test</option>
+        <option value="English - Pronunciation Test">English - Pronunciation Test</option>
+        <option value="English - Singular vs Plural">English - Singular vs Plural</option>
       </select>
       
-      <!-- This container will show the "Word Dictionary" button if appropriate -->
+      <!-- This container will show the "Go to Word Dictionary" button if appropriate -->
       <div class="button-container" id="dictionaryBtnContainer" style="display: none;">
         <button id="dictionaryBtn" class="interactive-btn">Go to Word Dictionary</button>
       </div>
@@ -49,8 +46,7 @@
       <div class="button-container" id="goTestBtnContainer" style="display: none;">
         <button id="goTestBtn" class="interactive-btn">Start Test</button>
       </div>
-    </main>
-    
+    </div>
     <footer>
       <p>© 2025 Spelling Fun. All rights reserved.</p>
     </footer>
@@ -65,33 +61,31 @@
     
     testSelect.addEventListener("change", function() {
       const selected = testSelect.value;
+      console.log("Selected test:", selected);
       
-      // Show dictionary button only if test is one of the Pronunciation Tests.
-      if (selected === "chinese-pronunciation" || selected === "english-pronunciation") {
+      // Show dictionary button only if test is "Chinese - Pronunciation Test" or "English - Pronunciation Test"
+      if (selected === "Chinese - Pronunciation Test" || selected === "English - Pronunciation Test") {
         dictionaryBtnContainer.style.display = "block";
       } else {
         dictionaryBtnContainer.style.display = "none";
       }
       
-      // In all cases, show the "Start Test" button.
+      // Always show the Start Test button
       goTestBtnContainer.style.display = "block";
       
-      // Set the Start Test button to redirect appropriately.
+      // Set the Start Test button to redirect appropriately based on the selected test
       goTestBtn.onclick = function() {
-        if (selected === "chinese-pronunciation") {
-          // Redirect to Chinese pronunciation test page
+        if (selected === "Chinese - Pronunciation Test") {
           window.location.href = "chinese_quiz.html";
-        } else if (selected === "english-pronunciation") {
-          // Redirect to English pronunciation test page
+        } else if (selected === "English - Pronunciation Test") {
           window.location.href = "english_quiz.html";
-        } else if (selected === "english-singular-plural") {
-          // Redirect to a Singular vs Plural test page
+        } else if (selected === "English - Singular vs Plural") {
           window.location.href = "english_plural.html";
         }
       };
     });
     
-    // Set up action for the dictionary button.
+    // Dictionary button redirects to the dictionary page.
     dictionaryBtn.addEventListener("click", function() {
       window.location.href = "dictionary.html";
     });

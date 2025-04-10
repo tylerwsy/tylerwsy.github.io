@@ -5,7 +5,7 @@
   padding: 0;
 }
 
-body {
+body, html {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #fceabb, #f8b500);
   color: #333;
@@ -16,159 +16,62 @@ body {
   padding: 1rem;
 }
 
-/* Container Style */
+/* Container styling */
 .container {
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-  width: 95%;
-  max-width: 900px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  width: 90%;
+  max-width: 600px;
   padding: 2rem;
   margin: 1rem;
   text-align: center;
 }
 
-/* Header & Footer */
+/* Header */
 header h1 {
   font-size: 2rem;
   margin-bottom: 0.5rem;
   color: #ff7f50;
 }
 
-header p {
-  font-size: 1.2rem;
-  margin-bottom: 1.5rem;
-}
-
+/* Footer */
 footer p {
-  font-size: 0.9rem;
-  margin-top: 2rem;
-}
-
-/* Form for Adding New Words */
-.add-word h2 {
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
-  color: #ff7f50;
-}
-
-form {
-  margin-bottom: 1.5rem;
-}
-
-form input[type="text"] {
-  padding: 0.8rem;
   font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  width: 40%;
-  margin: 0.5rem;
+  margin-top: 1rem;
 }
 
-form button {
+/* Buttons - Interactive Style */
+.interactive-btn {
   background-color: #ff7f50;
   border: none;
-  color: #fff;
-  font-size: 1rem;
-  padding: 0.8rem 1rem;
   border-radius: 5px;
+  color: #fff;
+  padding: 0.8rem 1.2rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.2s, transform 0.2s;
+  margin: 0.5rem 0;
 }
 
-form button:hover,
-form button:focus {
+.interactive-btn:hover,
+.interactive-btn:focus {
   background-color: #ff6347;
   transform: scale(1.05);
 }
 
-/* Import/Export & Reset Section */
-.import-export {
-  margin: 1.5rem 0;
-}
-.import-export button {
-  margin: 0.5rem;
-}
-
-/* Dictionary Table Styling */
-.dictionary-table {
-  overflow-x: auto;
-  margin: 1.5rem 0;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.95rem;
-}
-
-th, td {
-  padding: 0.75rem;
-  text-align: center;
-  border: 1px solid #ddd;
-}
-
-th {
-  background-color: #ff7f50;
-  color: #fff;
-  font-weight: bold;
-}
-
-td {
-  background-color: #fafafa;
-}
-
-/* Buttons Inside the Table */
-table button {
-  background-color: #ff7f50;
-  border: none;
-  border-radius: 5px;
-  color: #fff;
-  font-size: 0.9rem;
-  padding: 0.4rem 0.8rem;
-  margin: 0.2rem;
-  cursor: pointer;
-  transition: transform 0.2s, background-color 0.2s;
-}
-
-table button:hover {
-  background-color: #ff6347;
-  transform: scale(1.05);
-}
-
-/* Profile Selector Style (for dictionary page) */
-.profile-selector {
-  margin-bottom: 1.5rem;
-}
-
-.profile-selector label {
-  font-size: 1.2rem;
-  margin-right: 0.5rem;
-}
-
-.profile-selector select {
+/* Dropdown and form elements */
+select, input[type="text"], input[type="password"] {
   padding: 0.8rem;
-  font-size: 1.2rem;
+  font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 5px;
-  width: 50%;
-  max-width: 250px;
+  width: 100%;
+  max-width: 400px;
+  margin-top: 0.5rem;
 }
 
-/* Responsive Adjustments */
-@media screen and (max-width: 768px) {
-  .container {
-    max-width: 95%;
-    padding: 1rem;
-  }
-  header h1 {
-    font-size: 1.8rem;
-  }
-  form input[type="text"], .profile-selector select {
-    width: 80%;
-  }
-  th, td {
-    padding: 0.5rem;
-    font-size: 0.9rem;
-  }
+/* Utility classes */
+.hidden {
+  display: none;
 }
