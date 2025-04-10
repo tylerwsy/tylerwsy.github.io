@@ -7,7 +7,12 @@
   <link rel="stylesheet" href="style.css" />
   <style>
     /* Additional styles specific to the landing page can go here */
-    .profile-choice, .password-section {
+    .profile-choice {
+      text-align: center;
+      margin: 1.5rem 0;
+    }
+    .password-section {
+      text-align: center;
       margin: 1.5rem 0;
       justify-content: center;
       align-items: center;
@@ -18,27 +23,45 @@
       align-items: center;
       gap: 0.5rem;
     }
+    /* New container to center content vertically/horizontally */
+    .center-container {
+      display: flex;
+      margin: 1.5rem 0;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column; /* Stack profile choice and password sections vertically */
+    }
+    /* The hidden class to hide elements */
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <div id="rotateNotice">Please rotate your device to landscape</div>
-  <div class="container">
-    <h1>Welcome to Spelling Fun!</h1>
-    <div class="profile-choice">
-      <p>Are you a boy or a girl?</p>
-      <button id="boyBtn" class="interactive-btn">Boy</button>
-      <button id="girlBtn" class="interactive-btn">Girl</button>
-    </div>
-    <div id="passwordSection" class="password-section hidden">
-      <p id="passwordPrompt"></p>
-      <div class="password-container">
-        <input type="password" id="passwordInput" placeholder="Enter password" />
-        <button id="togglePasswordBtn" class="interactive-btn">View</button>
+  <div class="center-container">
+    <div class="container">
+      <h1>Welcome to Learning App!</h1>
+      <div class="profile-choice">
+        <p>Choose your user</p>
+        <button id="boyBtn" class="interactive-btn">Boy</button>
+        <button id="girlBtn" class="interactive-btn">Girl</button>
       </div>
-      <br>
-      <button id="passwordSubmitBtn" class="interactive-btn">Enter</button>
+      <div id="passwordSection" class="password-section hidden">
+        <p id="passwordPrompt"></p>
+        <div class="password-container">
+          <!-- Start with disabled attribute added -->
+          <input type="password" id="passwordInput" placeholder="Enter password" disabled />
+          <button id="togglePasswordBtn" class="interactive-btn" disabled>View</button>
+        </div>
+        <br>
+        <button id="passwordSubmitBtn" class="interactive-btn" disabled>Enter</button>
+      </div>
     </div>
   </div>
+
+  <footer>
+    <p>© 2025 Learning App. All rights reserved.</p>
+  </footer>
   
   <script>
     // Define passwords for profiles.
@@ -69,6 +92,10 @@
         ? "Enter password for Boy:" 
         : "Enter password for Girl:";
       passwordSection.classList.remove("hidden");
+      // Enable the password controls now that a profile is chosen.
+      passwordInput.disabled = false;
+      togglePasswordBtn.disabled = false;
+      passwordSubmitBtn.disabled = false;
     }
     
     // Toggle password visibility.
