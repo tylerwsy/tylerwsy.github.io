@@ -20,20 +20,34 @@
       max-width: 400px;
       margin-bottom: 1rem;
     }
+    
+    /* The main container for the dictionary and start test row */
     .button-container {
-      display: inline-flex;
+      display: flex;
+      flex-direction: column; /* Stack items vertically */
+      align-items: center;
       gap: 1rem;
       justify-content: center;
-      margin-top: 1rem;
+      margin-top: 1.5rem;
     }
-    
-    /* You can further adjust spacing or alignment here if needed. */
+
+    /* The row that holds the numeric input and Start Test button side-by-side */
+    .start-test-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 350px; /* Optional to keep them centered neatly */
+    }
+    .start-test-row input[type="number"] {
+      /* Adjust width or other styling as desired */
+      width: 100px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <!-- Removed rotateNotice -->
-  <!-- Removed container or replaced it with a simpler wrapper -->
-
   <header>
     <h1>Select Your Test</h1>
   </header>
@@ -47,9 +61,15 @@
       <option value="English - Singular vs Plural">English - Singular vs Plural</option>
     </select>
     
-    <div class="button-container" id="buttonContainer" style="display: none;">
+    <!-- Single container to hold both dictionary button and start test row -->
+    <div class="button-container" id="testOptionsContainer" style="display: none;">
+      <!-- Dictionary button (top) -->
       <button id="dictionaryBtn" class="interactive-btn" style="display: none;">Go to Word Dictionary</button>
-      <button id="goTestBtn" class="interactive-btn" style="display: none;">Start Test</button>
+      <!-- Start test row (bottom), includes numeric input to left of Start button -->
+      <div class="start-test-row" id="startTestRow" style="display: none;">
+        <input type="number" id="wordCountInput" min="1" value="10" />
+        <button id="goTestBtn" class="interactive-btn">Start Test</button>
+      </div>
     </div>
   </div>
   
@@ -59,40 +79,60 @@
   
   <script>
     const testSelect = document.getElementById("testSelect");
-    const buttonContainer = document.getElementById("buttonContainer");
+    const testOptionsContainer = document.getElementById("testOptionsContainer");
     const dictionaryBtn = document.getElementById("dictionaryBtn");
+    const startTestRow = document.getElementById("startTestRow");
     const goTestBtn = document.getElementById("goTestBtn");
+    const wordCountInput = document.getElementById("wordCountInput");
     
     testSelect.addEventListener("change", () => {
       const selected = testSelect.value;
       console.log("Selected test:", selected);
       
-      // Show container for the buttons
-      buttonContainer.style.display = "flex";
+      // Show the container that holds both dictionary button and start test row
+      testOptionsContainer.style.display = "flex";
       
-      // If a pronunciation test is selected, show the dictionary button
       if (selected === "Chinese - Pronunciation Test" || selected === "English - Pronunciation Test") {
+        // Show dictionary button
         dictionaryBtn.style.display = "inline-block";
+        // Show start test row, which includes numeric input
+        startTestRow.style.display = "flex";
       } else {
+        // Hide dictionary button if user picks "English - Singular vs Plural"
         dictionaryBtn.style.display = "none";
+        // Optionally hide the numeric input row or keep it:
+        // If you want it hidden for "Singular vs Plural," do:
+        // startTestRow.style.display = "none";
+        // but if you'd prefer to still allow a numeric input, leave it visible:
+        startTestRow.style.display = "flex";
       }
+    });
+    
+    // Dictionary button redirect
+    dictionaryBtn.addEventListener("click", () => {
+      window.location.href = "dictionary.html";
+    });
+    
+    // Start test button logic
+    goTestBtn.addEventListener("click", () => {
+      const selected = testSelect.value;
+      const wordCount = parseInt(wordCountInput.value, 10);
+      console.log("Word count input:", wordCount); // for debugging
       
-      // Always show the start test button
-      goTestBtn.style.display = "inline-block";
-      
-      goTestBtn.onclick = () => {
-        if (selected === "Chinese - Pronunciation Test") {
-          window.location.href = "chinese_quiz.html";
-        } else if (selected === "English - Pronunciation Test") {
-          window.location.href = "english_quiz.html";
-        } else if (selected === "English - Singular vs Plural") {
-          window.location.href = "english_plural.html";
-        }
-      };
-      
-      dictionaryBtn.onclick = () => {
-        window.location.href = "dictionary.html";
-      };
+      // You can pass this wordCount to your quiz page via query param or localStorage
+      // For demonstration, we do a simple redirect:
+      if (selected === "Chinese - Pronunciation Test") {
+        // e.g. you might do something like:
+        // localStorage.setItem('pronTestWordCount', wordCount);
+        // then redirect:
+        window.location.href = "chinese_quiz.html";
+      } else if (selected === "English - Pronunciation Test") {
+        // localStorage.setItem('pronTestWordCount', wordCount);
+        window.location.href = "english_quiz.html";
+      } else if (selected === "English - Singular vs Plural") {
+        // Possibly do something different
+        window.location.href = "english_plural.html";
+      }
     });
   </script>
 </body>
