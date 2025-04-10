@@ -1,11 +1,11 @@
-/* Base resets */
+/* Basic reset */
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
-/* Body styles */
+/* Body styling */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #fceabb, #f8b500);
@@ -16,140 +16,88 @@ body {
   min-height: 100vh;
 }
 
-/* Container styles */
+/* Container styling */
 .container {
-  background: #ffffff;
+  text-align: center;
+  background: #fff;
   padding: 2rem;
   border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   width: 90%;
   max-width: 500px;
-  text-align: center;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-/* Header styles */
-header h1 {
+/* Header styling */
+h1 {
   font-size: 2rem;
   margin-bottom: 1rem;
 }
-header p {
-  font-size: 1.2rem;
-  margin-bottom: 1.5rem;
+
+/* Profile choice section */
+.profile-choice {
+  margin: 1.5rem 0;
 }
 
-/* Profile Choice Section */
 .profile-choice p {
   font-size: 1.2rem;
   margin-bottom: 1rem;
 }
-.profile-choice button {
+
+/* Button styling */
+button {
   background-color: #ff7f50;
-  color: #fff;
   border: none;
   border-radius: 5px;
-  padding: 0.8rem 1.2rem;
+  color: #fff;
   font-size: 1.2rem;
+  padding: 0.8rem 1.2rem;
   margin: 0.5rem;
   cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition: transform 0.2s, background-color 0.2s;
 }
-.profile-choice button:hover {
+
+button:hover,
+button:focus {
   background-color: #ff6347;
   transform: scale(1.05);
 }
 
-/* Password Section */
+/* Password section styling */
 .password-section {
-  margin-top: 1.5rem;
+  margin: 1.5rem 0;
 }
+
 .password-section p {
-  margin-bottom: 0.5rem;
   font-size: 1.2rem;
+  margin-bottom: 0.5rem;
 }
-.password-section input[type="password"] {
-  width: 80%;
+
+/* Layout for the password input and the toggle button */
+.password-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Input field styling */
+input[type="password"],
+input[type="text"] {
   padding: 0.8rem;
-  font-size: 1rem;
+  font-size: 1.1rem;
   border: 1px solid #ccc;
   border-radius: 5px;
-}
-.password-section button {
+  width: 70%;
   margin-top: 1rem;
-  background-color: #ff7f50;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  padding: 0.8rem 1.2rem;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-}
-.password-section button:hover {
-  background-color: #ff6347;
-  transform: scale(1.05);
 }
 
-/* Quiz Area */
-#questionCount {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
+/* Utility class for hiding elements */
+.hidden {
+  display: none;
 }
 
-#quizBox h2 {
-  font-size: 3rem;
-  margin: 1rem 0;
-}
-
-#instructions {
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-}
-
-.buttons button {
-  background-color: #ff7f50;
-  border: none;
-  border-radius: 5px;
-  color: white;
-  font-size: 1.2rem;
-  padding: 0.8rem 1.2rem;
-  margin: 0.5rem;
-  cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-}
-
-.buttons button:hover {
-  background-color: #ff6347;
-  transform: scale(1.05);
-}
-
-/* Footer */
-footer p {
+/* Footer styling */
+footer {
+  margin-top: 1rem;
   font-size: 1rem;
-  margin-top: 1rem;
-}
-
-/* Landscape Orientation (prompt rotation if not in landscape) */
-@media screen and (orientation: portrait) {
-  #rotateNotice {
-    display: block;
-    background-color: #ff7f50;
-    color: white;
-    padding: 1rem;
-    text-align: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    font-size: 1.2rem;
-  }
-  .container {
-    display: none;
-  }
-}
-
-@media screen and (orientation: landscape) {
-  #rotateNotice {
-    display: none;
-  }
 }
