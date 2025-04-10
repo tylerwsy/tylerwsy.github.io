@@ -1,12 +1,14 @@
 // File: dictionary.js
-// NOTE: This file expects that pinyin-pro and XLSX libraries are loaded as shown in dictionary.html
+// NOTE: This file expects that pinyin-pro and SheetJS are loaded as per dictionary.html.
 
 const form = document.getElementById("wordForm");
 const wordList = document.getElementById("wordList");
+const tableHead = document.getElementById("tableHead");
 const exportExcelBtn = document.getElementById("exportExcelBtn");
 const importExcelBtn = document.getElementById("importExcelBtn");
 const importExcelInput = document.getElementById("importExcelInput");
 const resetDictionaryBtn = document.getElementById("resetDictionaryBtn");
+const profileSelect = document.getElementById("profileSelect");
 
 let db;
 let dictionary = []; // Array to hold dictionary entries
@@ -14,9 +16,18 @@ let dictionary = []; // Array to hold dictionary entries
 const DB_NAME = "SpellingAppDB";
 const STORE_NAME = "words";
 
+// Global variable that determines which profile's progress is shown; default "boy"
+let selectedProfile = "boy";
+
+// When the profile selection changes, update selectedProfile and re-render the table.
+profileSelect.addEventListener("change", () => {
+  selectedProfile = profileSelect.value;
+  renderWords();
+});
+
 /**
  * normalizeEnglish(english)
- *   Capitalizes the first letter of each word.
+ *   Capitalizes first letter of each word.
  */
 function normalizeEnglish(english) {
   return english
@@ -28,9 +39,7 @@ function normalizeEnglish(english) {
 
 /**
  * generateCompositeKey(word)
- *   Returns a composite key in the form:
- *       normalizedEnglish + "_" + numeric-tone-pinyin-of-Chinese
- *   Example: "father_fu4qin1"
+ *   Returns a composite key in the form "normalizedEnglish_numericTonePinyin"
  */
 function generateCompositeKey(word) {
   const eng = word.english.trim().toLowerCase();
@@ -43,26 +52,25 @@ function generateCompositeKey(word) {
 
 /**
  * openDB()
- *   Opens the IndexedDB database; creates the "words" object store with keyPath "english_chinesepinyinnumeric"
- *   if it does not exist.
+ *   Opens the IndexedDB database and creates an object store with keyPath "english_chinesepinyinnumeric"
  */
 function openDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 1);
-    request.onupgradeneeded = (e) => {
+    request.onupgradeneeded = e => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: "english_chinesepinyinnumeric" });
       }
     };
-    request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
   });
 }
 
 /**
  * loadWords()
- *   Loads all dictionary entries from IndexedDB and sorts them alphabetically by English.
+ *   Loads all entries from IndexedDB.
  */
 async function loadWords() {
   db = await openDB();
@@ -72,6 +80,7 @@ async function loadWords() {
   request.onsuccess = () => {
     dictionary = request.result;
     console.log("loadWords: Loaded", dictionary.length, "records.");
+    // Sort alphabetically by English, case-insensitive.
     dictionary.sort((a, b) => a.english.toLowerCase().localeCompare(b.english.toLowerCase()));
     renderWords();
   };
@@ -80,22 +89,38 @@ async function loadWords() {
 
 /**
  * renderWords()
- *   Renders the dictionary entries in the table.
+ *   Rebuilds the table header and rows based on the selected profile.
  */
 function renderWords() {
+  // Build the header row based on the selected profile.
+  tableHead.innerHTML = `
+    <tr>
+      <th>English</th>
+      <th>Chinese</th>
+      <th>Pinyin</th>
+      <th>Attempts (${selectedProfile === "boy" ? "Boy" : "Girl"})</th>
+      <th>Correct (${selectedProfile === "boy" ? "Boy" : "Girl"})</th>
+      <th>Percentage</th>
+      <th>Actions</th>
+    </tr>
+  `;
+  
   wordList.innerHTML = "";
   dictionary.forEach((word, index) => {
     const row = document.createElement("tr");
-    // Use composite key as a data attribute.
     row.dataset.key = word.english_chinesepinyinnumeric;
+    // Get attempts and correct values based on the selected profile.
+    let attempts = selectedProfile === "boy" ? word.attempts_boy : word.attempts_girl;
+    let correct = selectedProfile === "boy" ? word.correct_boy : word.correct_girl;
+    let percentage = attempts > 0 ? ((correct / attempts) * 100).toFixed(1) + "%" : "-";
+    
     row.innerHTML = `
       <td data-field="english">${word.english}</td>
       <td data-field="chinese">${word.chinese}</td>
       <td data-field="pinyin">${word.pinyin}</td>
-      <td data-field="attempts_boy">${word.attempts_boy || 0}</td>
-      <td data-field="correct_boy">${word.correct_boy || 0}</td>
-      <td data-field="attempts_girl">${word.attempts_girl || 0}</td>
-      <td data-field="correct_girl">${word.correct_girl || 0}</td>
+      <td data-field="attempts">${attempts || 0}</td>
+      <td data-field="correct">${correct || 0}</td>
+      <td data-field="percentage">${percentage}</td>
       <td>
         <button data-index="${index}" class="editBtn">Edit</button>
         <button data-index="${index}" class="deleteBtn">Delete</button>
@@ -106,19 +131,18 @@ function renderWords() {
   
   // Attach event listeners.
   document.querySelectorAll(".deleteBtn").forEach(button => {
-    button.addEventListener("click", async (e) => {
+    button.addEventListener("click", async e => {
       const index = e.target.getAttribute("data-index");
       const word = dictionary[index];
-      if(word) {
-        const key = word.english_chinesepinyinnumeric;
-        await deleteWord(key);
+      if (word) {
+        await deleteWord(word.english_chinesepinyinnumeric);
         await loadWords();
       }
     });
   });
   
   document.querySelectorAll(".editBtn").forEach(button => {
-    button.addEventListener("click", (e) => {
+    button.addEventListener("click", e => {
       const index = e.target.getAttribute("data-index");
       editWord(index);
     });
@@ -127,19 +151,20 @@ function renderWords() {
 
 /**
  * saveWord(word)
- *   Saves a new word entry to IndexedDB. When a word is added manually or via Excel import,
- *   its pinyin is generated automatically. Progress fields are initialized to 0.
+ *   Saves a new or updated word record. It auto-generates the pinyin from the Chinese word
+ *   and initializes progress fields if not provided.
  */
 async function saveWord(word) {
   word.english = normalizeEnglish(word.english);
   word.chinese = word.chinese.trim();
   word.pinyin = window.pinyinPro.pinyin(word.chinese, { toneType: "symbol" });
-  // Initialize progress tracking fields if not provided.
+  // Initialize progress fields
   word.attempts_boy = word.attempts_boy || 0;
   word.correct_boy = word.correct_boy || 0;
   word.attempts_girl = word.attempts_girl || 0;
   word.correct_girl = word.correct_girl || 0;
   word.english_chinesepinyinnumeric = generateCompositeKey(word);
+  
   const tx = db.transaction(STORE_NAME, "readwrite");
   const store = tx.objectStore(STORE_NAME);
   store.put(word);
@@ -148,7 +173,7 @@ async function saveWord(word) {
 
 /**
  * deleteWord(key)
- *   Deletes a dictionary entry by composite key.
+ *   Deletes a record by its composite key.
  */
 async function deleteWord(key) {
   return new Promise((resolve, reject) => {
@@ -162,7 +187,7 @@ async function deleteWord(key) {
 
 /**
  * editWord(index)
- *   Allows user to edit the English and Chinese fields of a record.
+ *   Makes the row editable.
  */
 function editWord(index) {
   const row = wordList.children[index];
@@ -170,13 +195,9 @@ function editWord(index) {
   const englishCell = row.querySelector('td[data-field="english"]');
   const chineseCell = row.querySelector('td[data-field="chinese"]');
   const pinyinCell = row.querySelector('td[data-field="pinyin"]');
-  const attemptsBoyCell = row.querySelector('td[data-field="attempts_boy"]');
-  const correctBoyCell = row.querySelector('td[data-field="correct_boy"]');
-  const attemptsGirlCell = row.querySelector('td[data-field="attempts_girl"]');
-  const correctGirlCell = row.querySelector('td[data-field="correct_girl"]');
   const actionsCell = row.querySelector("td:last-child");
   
-  // Create input fields for English and Chinese. (Progress fields remain read-only.)
+  // Create input fields for English and Chinese.
   const englishInput = document.createElement("input");
   englishInput.type = "text";
   englishInput.value = englishCell.textContent;
@@ -189,7 +210,6 @@ function editWord(index) {
   englishCell.appendChild(englishInput);
   chineseCell.innerHTML = "";
   chineseCell.appendChild(chineseInput);
-  // pinyin and progress will be regenerated
   pinyinCell.textContent = "";
   
   actionsCell.innerHTML = "";
@@ -202,13 +222,12 @@ function editWord(index) {
       alert("Both fields are required.");
       return;
     }
-    // Prevent duplicates: skip if there is another entry with same English and Chinese.
+    // Check duplicate (other than the current record).
     if (dictionary.some(w => w.english.toLowerCase() === newEnglish.toLowerCase() && w.chinese === newChinese && w.english_chinesepinyinnumeric !== key)) {
       alert("This combination already exists.");
       return;
     }
     const newPinyin = window.pinyinPro.pinyin(newChinese, { toneType: "symbol" });
-    // Keep progress values as they were.
     let oldRecord = dictionary.find(w => w.english_chinesepinyinnumeric === key) || {};
     const updatedWord = {
       english: newEnglish,
@@ -234,7 +253,7 @@ function editWord(index) {
 
 /**
  * updateWord(word)
- *   Updates an existing dictionary entry.
+ *   Updates an existing record.
  */
 async function updateWord(word) {
   const tx = db.transaction(STORE_NAME, "readwrite");
@@ -244,14 +263,13 @@ async function updateWord(word) {
 }
 
 /**
- * Form submission handler: Add a new word to the dictionary.
+ * Form submission: Adds a new word record.
  */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   let english = document.getElementById("englishInput").value;
   let chinese = document.getElementById("chineseInput").value;
   if (!english || !chinese) return;
-  // Check for duplicates: Only if both English and Chinese exactly match an entry.
   if (dictionary.some(w => w.english.toLowerCase() === english.trim().toLowerCase() && w.chinese === chinese.trim())) {
     alert("Duplicate word combination exists.");
     return;
@@ -264,7 +282,7 @@ form.addEventListener("submit", async (e) => {
     attempts_boy: 0,
     correct_boy: 0,
     attempts_girl: 0,
-    correct_girl: 0 
+    correct_girl: 0
   };
   try {
     await saveWord(newWord);
@@ -277,7 +295,7 @@ form.addEventListener("submit", async (e) => {
 
 /**
  * Excel Export:
- *   Exports the dictionary to an Excel file (.xlsx) containing only the English and Chinese columns.
+ *   Exports the dictionary to an Excel file (.xlsx) containing only English and Chinese columns.
  */
 function exportExcel() {
   let data = [["English", "Chinese"]];
@@ -292,8 +310,8 @@ function exportExcel() {
 
 /**
  * Excel Import:
- *   Imports words from an Excel file. Expects only English and Chinese columns.
- *   Pinyin is regenerated, and progress fields are initialized to 0.
+ *   Imports words from an Excel file (expects only English and Chinese columns).
+ *   Pinyin is regenerated and progress fields are set to 0.
  */
 function importExcel(file) {
   const reader = new FileReader();
@@ -302,10 +320,8 @@ function importExcel(file) {
     const workbook = XLSX.read(data, { type: "array" });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    // Convert worksheet to an array of arrays.
     const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     console.log("Excel Import: Read", rows.length - 1, "data rows.");
-    // Assume the first row is header.
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       if (row && row.length >= 2) {
@@ -335,7 +351,7 @@ function importExcel(file) {
 
 exportExcelBtn?.addEventListener("click", exportExcel);
 importExcelBtn?.addEventListener("click", () => { importExcelInput.click(); });
-importExcelInput?.addEventListener("change", (e) => {
+importExcelInput?.addEventListener("change", e => {
   const file = e.target.files[0];
   if (file) {
     importExcel(file);
