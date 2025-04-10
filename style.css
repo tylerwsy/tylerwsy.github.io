@@ -1,4 +1,4 @@
-/* Reset & Basic Setup */
+/* Reset & Base Styling */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -16,18 +16,19 @@ body {
   padding: 1rem;
 }
 
-/* Container */
+/* Container Style */
 .container {
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  width: 90%;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  width: 95%;
   max-width: 900px;
   padding: 2rem;
   margin: 1rem;
+  text-align: center;
 }
 
-/* Header */
+/* Header & Footer */
 header h1 {
   font-size: 2rem;
   margin-bottom: 0.5rem;
@@ -39,7 +40,12 @@ header p {
   margin-bottom: 1.5rem;
 }
 
-/* Form for adding new words */
+footer p {
+  font-size: 0.9rem;
+  margin-top: 2rem;
+}
+
+/* Form for Adding New Words */
 .add-word h2 {
   font-size: 1.8rem;
   margin-bottom: 1rem;
@@ -80,12 +86,11 @@ form button:focus {
 .import-export {
   margin: 1.5rem 0;
 }
-
 .import-export button {
   margin: 0.5rem;
 }
 
-/* Dictionary Table Styles */
+/* Dictionary Table Styling */
 .dictionary-table {
   overflow-x: auto;
   margin: 1.5rem 0;
@@ -94,10 +99,11 @@ form button:focus {
 table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.95rem;
 }
 
 th, td {
-  padding: 0.8rem;
+  padding: 0.75rem;
   text-align: center;
   border: 1px solid #ddd;
 }
@@ -105,14 +111,14 @@ th, td {
 th {
   background-color: #ff7f50;
   color: #fff;
-  font-size: 1.1rem;
+  font-weight: bold;
 }
 
 td {
-  font-size: 1rem;
+  background-color: #fafafa;
 }
 
-/* Action Buttons in Table */
+/* Buttons Inside the Table */
 table button {
   background-color: #ff7f50;
   border: none;
@@ -120,8 +126,8 @@ table button {
   color: #fff;
   font-size: 0.9rem;
   padding: 0.4rem 0.8rem;
-  cursor: pointer;
   margin: 0.2rem;
+  cursor: pointer;
   transition: transform 0.2s, background-color 0.2s;
 }
 
@@ -130,14 +136,27 @@ table button:hover {
   transform: scale(1.05);
 }
 
-/* Footer */
-footer p {
-  font-size: 0.9rem;
-  margin-top: 2rem;
+/* Profile Selector Style (for dictionary page) */
+.profile-selector {
+  margin-bottom: 1.5rem;
 }
 
-/* Responsive: Landscape Orientation for better experience on phone */
-@media screen and (orientation: portrait) {
+.profile-selector label {
+  font-size: 1.2rem;
+  margin-right: 0.5rem;
+}
+
+.profile-selector select {
+  padding: 0.8rem;
+  font-size: 1.2rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 50%;
+  max-width: 250px;
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 768px) {
   .container {
     max-width: 95%;
     padding: 1rem;
@@ -145,15 +164,11 @@ footer p {
   header h1 {
     font-size: 1.8rem;
   }
-  th, td {
-    font-size: 0.9rem;
-    padding: 0.5rem;
+  form input[type="text"], .profile-selector select {
+    width: 80%;
   }
-}
-
-@media screen and (min-width: 768px) {
-  /* Ensure the dictionary page looks good on tablets and larger devices */
-  table {
-    font-size: 1rem;
+  th, td {
+    padding: 0.5rem;
+    font-size: 0.9rem;
   }
 }
