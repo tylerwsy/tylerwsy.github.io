@@ -16,7 +16,7 @@ body, html {
   padding: 1rem;
 }
 
-/* Container styling */
+/* Container */
 .container {
   background: #fff;
   border-radius: 10px;
@@ -35,43 +35,10 @@ header h1 {
   color: #ff7f50;
 }
 
+header p {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
 /* Footer */
-footer p {
-  font-size: 1rem;
-  margin-top: 1rem;
-}
-
-/* Buttons - Interactive Style */
-.interactive-btn {
-  background-color: #ff7f50;
-  border: none;
-  border-radius: 5px;
-  color: #fff;
-  padding: 0.8rem 1.2rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.2s;
-  margin: 0.5rem 0;
-}
-
-.interactive-btn:hover,
-.interactive-btn:focus {
-  background-color: #ff6347;
-  transform: scale(1.05);
-}
-
-/* Dropdown and form elements */
-select, input[type="text"], input[type="password"] {
-  padding: 0.8rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  width: 100%;
-  max-width: 400px;
-  margin-top: 0.5rem;
-}
-
-/* Utility classes */
-.hidden {
-  display: none;
-}
+footer p

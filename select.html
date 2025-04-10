@@ -6,7 +6,7 @@
   <title>Select Your Test</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Inline styles for select page can also be placed in style.css */
+    /* Specific styles for the select page */
     .select-container {
       margin: 2rem auto;
       text-align: center;
@@ -21,13 +21,18 @@
       margin-bottom: 1rem;
     }
     .button-container {
+      display: inline-flex;
+      gap: 1rem;
+      justify-content: center;
       margin-top: 1rem;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Select Your Test</h1>
+    <header>
+      <h1>Select Your Test</h1>
+    </header>
     <div class="select-container">
       <p>Please select the test you want to take:</p>
       <select id="testSelect">
@@ -37,14 +42,10 @@
         <option value="English - Singular vs Plural">English - Singular vs Plural</option>
       </select>
       
-      <!-- This container will show the "Go to Word Dictionary" button if appropriate -->
-      <div class="button-container" id="dictionaryBtnContainer" style="display: none;">
-        <button id="dictionaryBtn" class="interactive-btn">Go to Word Dictionary</button>
-      </div>
-      
-      <!-- This container will hold the Start Test button -->
-      <div class="button-container" id="goTestBtnContainer" style="display: none;">
-        <button id="goTestBtn" class="interactive-btn">Start Test</button>
+      <!-- Single container for both buttons -->
+      <div class="button-container" id="buttonContainer" style="display: none;">
+        <button id="dictionaryBtn" class="interactive-btn" style="display: none;">Go to Word Dictionary</button>
+        <button id="goTestBtn" class="interactive-btn" style="display: none;">Start Test</button>
       </div>
     </div>
     <footer>
@@ -54,27 +55,29 @@
   
   <script>
     const testSelect = document.getElementById("testSelect");
-    const dictionaryBtnContainer = document.getElementById("dictionaryBtnContainer");
+    const buttonContainer = document.getElementById("buttonContainer");
     const dictionaryBtn = document.getElementById("dictionaryBtn");
-    const goTestBtnContainer = document.getElementById("goTestBtnContainer");
     const goTestBtn = document.getElementById("goTestBtn");
-    
-    testSelect.addEventListener("change", function() {
+
+    testSelect.addEventListener("change", () => {
       const selected = testSelect.value;
       console.log("Selected test:", selected);
       
-      // Show dictionary button only if test is "Chinese - Pronunciation Test" or "English - Pronunciation Test"
+      // Always show container when a test is chosen
+      buttonContainer.style.display = "flex";
+      
+      // Show dictionary button if test is a Pronunciation Test.
       if (selected === "Chinese - Pronunciation Test" || selected === "English - Pronunciation Test") {
-        dictionaryBtnContainer.style.display = "block";
+        dictionaryBtn.style.display = "inline-block";
       } else {
-        dictionaryBtnContainer.style.display = "none";
+        dictionaryBtn.style.display = "none";
       }
       
       // Always show the Start Test button
-      goTestBtnContainer.style.display = "block";
+      goTestBtn.style.display = "inline-block";
       
-      // Set the Start Test button to redirect appropriately based on the selected test
-      goTestBtn.onclick = function() {
+      // Set the Start Test button redirect based on selection.
+      goTestBtn.onclick = () => {
         if (selected === "Chinese - Pronunciation Test") {
           window.location.href = "chinese_quiz.html";
         } else if (selected === "English - Pronunciation Test") {
@@ -83,11 +86,11 @@
           window.location.href = "english_plural.html";
         }
       };
-    });
-    
-    // Dictionary button redirects to the dictionary page.
-    dictionaryBtn.addEventListener("click", function() {
-      window.location.href = "dictionary.html";
+      
+      // Dictionary button action.
+      dictionaryBtn.onclick = () => {
+        window.location.href = "dictionary.html";
+      };
     });
   </script>
 </body>
