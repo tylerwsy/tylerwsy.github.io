@@ -6,7 +6,7 @@
   <title>Select Your Test</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Specific styles for the select page */
+    /* Inline styles specific to the select page (optional) */
     .select-container {
       margin: 2rem auto;
       text-align: center;
@@ -20,6 +20,7 @@
       max-width: 400px;
       margin-bottom: 1rem;
     }
+    /* Container to group buttons inline */
     .button-container {
       display: inline-flex;
       gap: 1rem;
@@ -44,6 +45,7 @@
       
       <!-- Single container for both buttons -->
       <div class="button-container" id="buttonContainer" style="display: none;">
+        <!-- Both buttons have class "interactive-btn" -->
         <button id="dictionaryBtn" class="interactive-btn" style="display: none;">Go to Word Dictionary</button>
         <button id="goTestBtn" class="interactive-btn" style="display: none;">Start Test</button>
       </div>
@@ -58,26 +60,25 @@
     const buttonContainer = document.getElementById("buttonContainer");
     const dictionaryBtn = document.getElementById("dictionaryBtn");
     const goTestBtn = document.getElementById("goTestBtn");
-
+    
     testSelect.addEventListener("change", () => {
       const selected = testSelect.value;
       console.log("Selected test:", selected);
       
-      // Always show container when a test is chosen
+      // Show container for buttons
       buttonContainer.style.display = "flex";
       
-      // Show dictionary button if test is a Pronunciation Test.
+      // Show dictionary button if test is one of the Pronunciation Tests.
       if (selected === "Chinese - Pronunciation Test" || selected === "English - Pronunciation Test") {
         dictionaryBtn.style.display = "inline-block";
       } else {
         dictionaryBtn.style.display = "none";
       }
       
-      // Always show the Start Test button
+      // Always show start button.
       goTestBtn.style.display = "inline-block";
       
-      // Set the Start Test button redirect based on selection.
-      goTestBtn.onclick = () => {
+      goTestBtn.onclick = function() {
         if (selected === "Chinese - Pronunciation Test") {
           window.location.href = "chinese_quiz.html";
         } else if (selected === "English - Pronunciation Test") {
@@ -87,8 +88,7 @@
         }
       };
       
-      // Dictionary button action.
-      dictionaryBtn.onclick = () => {
+      dictionaryBtn.onclick = function() {
         window.location.href = "dictionary.html";
       };
     });
