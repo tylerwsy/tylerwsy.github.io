@@ -47,20 +47,29 @@
       cursor: pointer;
       transition: transform 0.2s, background-color 0.2s;
     }
-    button:hover {
+    button:hover,
+    button:focus {
       background-color: #ff6347;
       transform: scale(1.05);
     }
-    input[type="password"] {
+    input[type="password"],
+    input[type="text"] {
       padding: 0.8rem;
       font-size: 1.1rem;
       border: 1px solid #ccc;
       border-radius: 5px;
-      width: 80%;
+      width: 70%;
       margin-top: 1rem;
     }
     .hidden {
       display: none;
+    }
+    /* Container for password input and toggle */
+    .password-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
     }
   </style>
 </head>
@@ -74,7 +83,10 @@
     </div>
     <div id="passwordSection" class="password-section hidden">
       <p id="passwordPrompt"></p>
-      <input type="password" id="passwordInput" placeholder="Enter password" />
+      <div class="password-container">
+        <input type="password" id="passwordInput" placeholder="Enter password" />
+        <button id="togglePasswordBtn">View</button>
+      </div>
       <br>
       <button id="passwordSubmitBtn">Enter</button>
     </div>
@@ -84,16 +96,17 @@
     // Define the passwords for boy and girl.
     const boyPassword = "WeEK1000They";
     const girlPassword = "DaY0406Me";
-
+  
     const boyBtn = document.getElementById("boyBtn");
     const girlBtn = document.getElementById("girlBtn");
     const passwordSection = document.getElementById("passwordSection");
     const passwordPrompt = document.getElementById("passwordPrompt");
     const passwordInput = document.getElementById("passwordInput");
     const passwordSubmitBtn = document.getElementById("passwordSubmitBtn");
-
+    const togglePasswordBtn = document.getElementById("togglePasswordBtn");
+  
     let selectedProfile = ""; // "boy" or "girl"
-
+  
     // When user clicks on either Boy or Girl
     boyBtn.addEventListener("click", () => {
       selectedProfile = "boy";
@@ -103,13 +116,24 @@
       selectedProfile = "girl";
       showPasswordPrompt();
     });
-
+  
     // Show the password input section.
     function showPasswordPrompt() {
       passwordPrompt.textContent = selectedProfile === "boy" ? "Enter password for Boy:" : "Enter password for Girl:";
       passwordSection.classList.remove("hidden");
     }
-
+  
+    // Toggle password visibility.
+    togglePasswordBtn.addEventListener("click", () => {
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        togglePasswordBtn.textContent = "Hide";
+      } else {
+        passwordInput.type = "password";
+        togglePasswordBtn.textContent = "View";
+      }
+    });
+  
     // Validate password upon clicking the submit button.
     passwordSubmitBtn.addEventListener("click", () => {
       const entered = passwordInput.value;
