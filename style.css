@@ -1,4 +1,4 @@
-/* Reset & Base Styling */
+/* Reset & Basic Setup */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -16,123 +16,144 @@ body {
   padding: 1rem;
 }
 
-/* Container common to all pages */
+/* Container */
 .container {
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   width: 90%;
-  max-width: 600px;
+  max-width: 900px;
   padding: 2rem;
-  text-align: center;
+  margin: 1rem;
 }
 
-/* Header and Footer */
+/* Header */
 header h1 {
   font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #ff7f50;
+}
+
+header p {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Form for adding new words */
+.add-word h2 {
+  font-size: 1.8rem;
   margin-bottom: 1rem;
+  color: #ff7f50;
 }
 
-footer p {
+form {
+  margin-bottom: 1.5rem;
+}
+
+form input[type="text"] {
+  padding: 0.8rem;
   font-size: 1rem;
-  margin-top: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 40%;
+  margin: 0.5rem;
 }
 
-/* Buttons - Interactive Style */
-button {
+form button {
   background-color: #ff7f50;
   border: none;
-  border-radius: 5px;
   color: #fff;
-  font-size: 1.2rem;
-  padding: 0.8rem 1.2rem;
-  margin: 0.5rem;
+  font-size: 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: 5px;
   cursor: pointer;
-  transition: transform 0.2s, background-color 0.2s;
+  transition: background-color 0.2s, transform 0.2s;
 }
 
-button:hover,
-button:focus {
+form button:hover,
+form button:focus {
   background-color: #ff6347;
   transform: scale(1.05);
 }
 
-/* Form Elements for Dictionary / Landing Pages */
-input[type="password"],
-input[type="text"],
-select {
-  padding: 0.8rem;
-  font-size: 1.1rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  width: 80%;
-  max-width: 300px;
-  margin-top: 1rem;
-}
-
-/* Utility classes */
-.hidden {
-  display: none;
-}
-
-/* Specific Styles for the Landing Page / Select Page */
-
-/* The select page container inside .container */
-.select-container {
-  margin: 2rem auto;
-  text-align: center;
-}
-
-/* Dropdown (Select) Styling */
-select {
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 0.8rem;
-  font-size: 1.2rem;
-  width: 80%;
-  max-width: 400px;
-  margin-bottom: 1rem;
-}
-
-/* Styles for password section */
-.password-section {
+/* Import/Export & Reset Section */
+.import-export {
   margin: 1.5rem 0;
 }
 
-.password-section p {
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
+.import-export button {
+  margin: 0.5rem;
 }
 
-.password-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+/* Dictionary Table Styles */
+.dictionary-table {
+  overflow-x: auto;
+  margin: 1.5rem 0;
 }
 
-/* Quiz Page Specifics */
-#quizBox h2 {
-  font-size: 3rem;
-  margin: 1rem 0;
+table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-#questionCount {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
+th, td {
+  padding: 0.8rem;
+  text-align: center;
+  border: 1px solid #ddd;
 }
 
-/* Responsive adjustments for landscape orientation if desired */
-@media screen and (max-width: 768px) {
+th {
+  background-color: #ff7f50;
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+td {
+  font-size: 1rem;
+}
+
+/* Action Buttons in Table */
+table button {
+  background-color: #ff7f50;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  margin: 0.2rem;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+table button:hover {
+  background-color: #ff6347;
+  transform: scale(1.05);
+}
+
+/* Footer */
+footer p {
+  font-size: 0.9rem;
+  margin-top: 2rem;
+}
+
+/* Responsive: Landscape Orientation for better experience on phone */
+@media screen and (orientation: portrait) {
   .container {
-    max-width: 90%;
+    max-width: 95%;
     padding: 1rem;
   }
   header h1 {
     font-size: 1.8rem;
   }
-  #quizBox h2 {
-    font-size: 2.5rem;
+  th, td {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  /* Ensure the dictionary page looks good on tablets and larger devices */
+  table {
+    font-size: 1rem;
   }
 }

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- For best display on mobile (landscape preferred) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Word Dictionary - Spelling Fun</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Load pinyin-pro and SheetJS libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/pinyin-pro" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+  <script src="dictionary.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Word Dictionary</h1>
+      <p>Track progress for each word and manage your dictionary.</p>
+    </header>
+    
+    <section class="add-word">
+      <h2>Add New Word</h2>
+      <form id="wordForm">
+        <input type="text" id="englishInput" placeholder="Enter English word" required />
+        <input type="text" id="chineseInput" placeholder="Enter Chinese word" required />
+        <button type="submit" class="interactive-btn">Add Word</button>
+      </form>
+    </section>
+    
+    <section class="import-export">
+      <button id="exportExcelBtn" class="interactive-btn">Export Excel</button>
+      <input type="file" id="importExcelInput" accept=".xlsx" style="display:none" />
+      <button id="importExcelBtn" class="interactive-btn">Import Excel</button>
+      <button id="resetDictionaryBtn" class="interactive-btn">Reset Dictionary</button>
+    </section>
+    
+    <section class="dictionary-table">
+      <table id="wordTable">
+        <thead>
+          <tr>
+            <th>English</th>
+            <th>Chinese</th>
+            <th>Pinyin</th>
+            <th>Attempts (Boy)</th>
+            <th>Correct (Boy)</th>
+            <th>Attempts (Girl)</th>
+            <th>Correct (Girl)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="wordList">
+          <!-- Dictionary entries will appear here -->
+        </tbody>
+      </table>
+    </section>
+    
+    <footer>
+      <p>© 2025 Spelling Fun. All rights reserved.</p>
+    </footer>
+  </div>
+</body>
+</html>
