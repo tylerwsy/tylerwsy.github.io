@@ -7,53 +7,21 @@
 
 html, body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* Single continuous gradient background */
   background: linear-gradient(135deg, #fceabb, #f8b500);
   color: #333;
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-}
-
-/* Container – now uses more horizontal space */
-.container {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  width: 95%;
-  max-width: 1200px;  /* Increased max-width to utilize extra space in landscape mode */
-  padding: 2rem;
-  margin: 0 auto;
-  text-align: left;
-}
-
-/* Rotate Notice (for portrait mode) */
-#rotateNotice {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: #ff7f50;
-  color: white;
-  font-size: 1.5rem;
-  text-align: center;
-  padding: 1rem;
-  z-index: 1000;
 }
 
 /* Header & Footer */
+header {
+  text-align: center;
+  padding: 1rem;
+}
 header h1 {
   font-size: 2rem;
   margin-bottom: 0.5rem;
   color: #ff7f50;
-}
-
-header p,
-footer p {
-  font-size: 1.2rem;
-  margin-top: 0.5rem;
 }
 
 /* Interactive Buttons */
@@ -76,123 +44,41 @@ footer p {
 }
 
 /* Form Elements */
+select,
 input[type="text"],
-input[type="password"],
-select {
+input[type="password"] {
   padding: 0.8rem;
   font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 5px;
+  margin-top: 0.5rem;
   width: 100%;
   max-width: 400px;
-  margin-top: 0.5rem;
 }
 
-/* Specific styles for the Select Page */
+/* Footer */
+footer {
+  text-align: center;
+  margin: 2rem 0;
+}
+footer p {
+  font-size: 1rem;
+  color: #333;
+}
+
+/* Additional spacing or containers can be added as needed. */
+
+/* Example: style .select-container */
 .select-container {
+  max-width: 600px;
   margin: 2rem auto;
   text-align: center;
 }
 
+/* .button-container is already handled inline or in separate styling, but can also be placed here */
 .button-container {
   display: inline-flex;
   gap: 1rem;
   justify-content: center;
   margin-top: 1rem;
-}
-
-/* Landing / Profile Password Section */
-.profile-choice {
-  margin: 1.5rem 0;
-}
-
-.password-section {
-  margin: 1.5rem 0;
-}
-
-.password-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* Dictionary Table Styles */
-.dictionary-table {
-  overflow-x: auto;
-  margin: 1.5rem 0;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th, td {
-  padding: 0.8rem;
-  text-align: center;
-  border: 1px solid #ddd;
-}
-
-th {
-  background-color: #ff7f50;
-  color: #fff;
-  font-size: 1.1rem;
-}
-
-td {
-  font-size: 1rem;
-}
-
-/* Action buttons in table */
-table button {
-  background-color: #ff7f50;
-  border: none;
-  border-radius: 5px;
-  color: white;
-  font-size: 0.9rem;
-  padding: 0.4rem 0.8rem;
-  cursor: pointer;
-  margin: 0.2rem;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-}
-
-table button:hover,
-table button:focus {
-  background-color: #ff6347;
-  transform: scale(1.05);
-}
-
-/* Responsive Adjustments */
-@media screen and (max-width: 768px) {
-  .container {
-    max-width: 90%;
-    padding: 1rem;
-  }
-  header h1 {
-    font-size: 1.8rem;
-  }
-  th, td {
-    font-size: 0.9rem;
-    padding: 0.5rem;
-  }
-}
-
-/* Landscape/Portrait Orientation Handling */
-@media screen and (orientation: portrait) {
-  .container {
-    display: none;
-  }
-  #rotateNotice {
-    display: block;
-  }
-}
-
-@media screen and (orientation: landscape) {
-  .container {
-    display: block;
-  }
-  #rotateNotice {
-    display: none;
-  }
 }
