@@ -1,0 +1,4 @@
+cd "C:\Users\tyler\Documents\LearningApp"
+
+git push -u origin main
+

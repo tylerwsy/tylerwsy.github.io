@@ -2,166 +2,45 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- Use UTF-8, necessary for Chinese characters -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spelling Fun</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Spelling Fun for Kids!</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- pinyin-pro library -->
-  <script src="https://cdn.jsdelivr.net/npm/pinyin-pro" defer></script>
-  <!-- SheetJS (XLSX) Library for Excel Import/Export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+  <!-- Include external libraries as needed -->
+  <!-- For example, if you're using pinyin-pro, include it here -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/pinyin-pro" defer></script> -->
+  <!-- And include your quiz.js if you have additional quiz code -->
+  <script src="quiz.js" defer></script>
 </head>
 <body>
+  <div id="rotateNotice">Please rotate your device to landscape</div>
   <div class="container">
     <header>
       <h1>Spelling Fun for Kids!</h1>
+      <p>Practice your Chinese words in a fun way!</p>
     </header>
-
-    <section class="feature">
-      <h2>🈶 Chinese Spelling</h2>
-      <button id="chineseBtn" onclick="location.href='chinese.html'">Start</button>
-      <div>
-        <button onclick="resetScores('chinese')">Reset Scores</button>
-        <button onclick="toggleShowAll('chinese')" id="toggleChineseBtn">Show All</button>
+    
+    <main>
+      <!-- This section could serve as both landing and quiz page -->
+      <div id="quizArea">
+        <!-- You can change content with JS as needed -->
+        <div id="questionCount">Question 1 of 10</div>
+        <div id="quizBox">
+          <!-- For example, show a word to be pronounced -->
+          <h2 id="quizWord">词语</h2>
+          <p id="instructions">Tap "Start" and then pronounce the word.</p>
+        </div>
+        <div id="controls">
+          <button id="startBtn" class="interactive-btn">Start Quiz</button>
+          <!-- Other interactive buttons can be inserted dynamically -->
+        </div>
       </div>
-      <canvas id="chineseChart" height="75"></canvas>
-    </section>
-
-    <section class="feature">
-      <h2>🔤 English Spelling</h2>
-      <button id="englishBtn">Start</button>
-      <div>
-        <button onclick="resetScores('english')">Reset Scores</button>
-        <button onclick="toggleShowAll('english')" id="toggleEnglishBtn">Show All</button>
-      </div>
-      <canvas id="englishChart" height="75"></canvas>
-    </section>
-
-    <section class="feature">
-      <h2>📚 Word Library</h2>
-      <form id="wordForm">
-        <input type="text" id="englishInput" placeholder="Enter English Word" required />
-        <input type="text" id="chineseInput" placeholder="Enter Chinese Word" required />
-        <button type="submit">Add Word</button>
-      </form>
-      <!-- Controls for Excel import/export and dictionary reset -->
-      <div class="dictionary-controls">
-        <button id="exportExcelBtn">Export Excel</button>
-        <input type="file" id="importExcelInput" accept=".xlsx" style="display: none" />
-        <button id="importExcelBtn">Import Excel</button>
-        <button id="resetDictionaryBtn">Reset Dictionary</button>
-      </div>
-      <table id="wordTable">
-        <thead>
-          <tr>
-            <th>English</th>
-            <th>Chinese</th>
-            <th>Pinyin</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="wordList">
-          <!-- Dynamic dictionary content -->
-        </tbody>
-      </table>
-    </section>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script>
-      let showAll = { chinese: false, english: false };
-
-      function loadChart() {
-        const rawData = JSON.parse(localStorage.getItem('quizResults') || '[]');
-        const chineseData = rawData.filter(q => q.mode === 'chinese');
-        const englishData = rawData.filter(q => q.mode === 'english');
-
-        renderLineChart('chineseChart', chineseData, 'chinese');
-        renderLineChart('englishChart', englishData, 'english');
-      }
-
-      function renderLineChart(canvasId, data, mode) {
-        const canvas = document.getElementById(canvasId);
-        if (!data.length) {
-          canvas.insertAdjacentHTML('beforebegin', `<p>No ${canvasId.includes('chinese') ? 'Chinese' : 'English'} quiz results yet.</p>`);
-          return;
-        }
-
-        const scores = showAll[mode] ? data : data.slice(-5);
-        const labels = scores.map(s => new Date(s.date).toLocaleString());
-        const correct = scores.map(s => Math.round((s.correct / s.total) * 100));
-
-        const ctx = canvas.getContext('2d');
-        if (canvas._chart instanceof Chart) canvas._chart.destroy();
-        canvas._chart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels,
-            datasets: [
-              {
-                label: 'Correct (%)',
-                data: correct,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                fill: true,
-                tension: 0.3
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              tooltip: {
-                callbacks: {
-                  label: ctx => `${ctx.dataset.label}: ${ctx.raw}%`
-                }
-              }
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                max: 100,
-                title: {
-                  display: true,
-                  text: 'Correct Answer (%)'
-                },
-                ticks: {
-                  callback: function(value) { return value + '%'; }
-                }
-              },
-              x: {
-                title: {
-                  display: true,
-                  text: 'Date'
-                }
-              }
-            }
-          }
-        });
-      }
-
-      function resetScores(mode) {
-        if (confirm('Are you sure you want to reset all scores?')) {
-          localStorage.removeItem('quizResults');
-          loadChart();
-        }
-      }
-
-      function toggleShowAll(mode) {
-        showAll[mode] = !showAll[mode];
-        document.getElementById(`toggle${mode.charAt(0).toUpperCase() + mode.slice(1)}Btn`).textContent = showAll[mode] ? 'Show Latest 5' : 'Show All';
-        loadChart();
-      }
-
-      window.addEventListener('DOMContentLoaded', loadChart);
-    </script>
-
+    </main>
+    
     <footer>
-      © 2025 Spelling Fun. All rights reserved.
+      <p>© 2025 Spelling Fun. All rights reserved.</p>
     </footer>
   </div>
-
-  <!-- Load dictionary management script -->
-  <script src="dictionary.js"></script>
-  <!-- Your quiz-related scripts can remain separate -->
+  
+  <!-- Optionally include additional scripts -->
 </body>
 </html>

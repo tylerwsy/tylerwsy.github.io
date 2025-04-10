@@ -1,0 +1,109 @@
+/* Set a modern and cute base */
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #fceabb, #f8b500);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+/* Container centers everything and limits width */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  text-align: center;
+}
+
+/* Header styling */
+header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+header p {
+  font-size: 1.2rem;
+  margin-top: 0;
+}
+
+/* Main content area */
+main {
+  margin: 2rem 0;
+}
+
+/* Quiz area styling */
+#quizArea {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Question Count display */
+#questionCount {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Quiz word styling */
+#quizWord {
+  font-size: 3rem;
+  margin: 1rem 0;
+}
+
+/* Instructions */
+#instructions {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+/* Interactive button styles */
+.interactive-btn {
+  background-color: #ff7f50;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-size: 1.2rem;
+  padding: 0.8rem 1.2rem;
+  margin: 0.5rem;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.interactive-btn:hover,
+.interactive-btn:focus {
+  background-color: #ff6347;
+  transform: scale(1.05);
+}
+
+/* Footer styling */
+footer p {
+  font-size: 1rem;
+  margin: 1rem 0 0;
+}
+
+/* Force landscape orientation for best experience */
+@media screen and (orientation: portrait) {
+  #rotateNotice {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #ff7f50;
+    color: white;
+    padding: 1rem;
+    font-size: 1.2rem;
+    z-index: 1000;
+  }
+  /* Optionally, hide the main container when in portrait */
+  .container {
+    display: none;
+  }
+}
+
+@media screen and (orientation: landscape) {
+  #rotateNotice {
+    display: none;
+  }
+}
