@@ -1,5 +1,5 @@
 // File: dictionary.js
-// NOTE: This file expects that pinyin-pro and SheetJS are loaded as per dictionary.html.
+// NOTE: Expects pinyin-pro and XLSX libraries loaded via dictionary.html.
 
 const form = document.getElementById("wordForm");
 const wordList = document.getElementById("wordList");
@@ -16,10 +16,9 @@ let dictionary = []; // Array to hold dictionary entries
 const DB_NAME = "SpellingAppDB";
 const STORE_NAME = "words";
 
-// Global variable that determines which profile's progress is shown; default "boy"
+// Global variable to determine which profile's progress to show (default "boy").
 let selectedProfile = "boy";
 
-// When the profile selection changes, update selectedProfile and re-render the table.
 profileSelect.addEventListener("change", () => {
   selectedProfile = profileSelect.value;
   renderWords();
@@ -27,7 +26,7 @@ profileSelect.addEventListener("change", () => {
 
 /**
  * normalizeEnglish(english)
- *   Capitalizes first letter of each word.
+ *   Capitalizes the first letter of each word.
  */
 function normalizeEnglish(english) {
   return english
@@ -39,7 +38,7 @@ function normalizeEnglish(english) {
 
 /**
  * generateCompositeKey(word)
- *   Returns a composite key in the form "normalizedEnglish_numericTonePinyin"
+ *   Returns a composite key in the form: normalizedEnglish + "_" + numericTonePinyinOfChinese
  */
 function generateCompositeKey(word) {
   const eng = word.english.trim().toLowerCase();
@@ -52,12 +51,12 @@ function generateCompositeKey(word) {
 
 /**
  * openDB()
- *   Opens the IndexedDB database and creates an object store with keyPath "english_chinesepinyinnumeric"
+ *   Opens the IndexedDB database; creates an object store with keyPath "english_chinesepinyinnumeric" if needed.
  */
 function openDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 1);
-    request.onupgradeneeded = e => {
+    request.onupgradeneeded = (e) => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: "english_chinesepinyinnumeric" });
@@ -70,7 +69,7 @@ function openDB() {
 
 /**
  * loadWords()
- *   Loads all entries from IndexedDB.
+ *   Loads all dictionary entries from IndexedDB.
  */
 async function loadWords() {
   db = await openDB();
@@ -80,7 +79,7 @@ async function loadWords() {
   request.onsuccess = () => {
     dictionary = request.result;
     console.log("loadWords: Loaded", dictionary.length, "records.");
-    // Sort alphabetically by English, case-insensitive.
+    // Sort alphabetically by English (case-insensitive).
     dictionary.sort((a, b) => a.english.toLowerCase().localeCompare(b.english.toLowerCase()));
     renderWords();
   };
@@ -92,7 +91,7 @@ async function loadWords() {
  *   Rebuilds the table header and rows based on the selected profile.
  */
 function renderWords() {
-  // Build the header row based on the selected profile.
+  // Build table header dynamically.
   tableHead.innerHTML = `
     <tr>
       <th>English</th>
@@ -109,7 +108,6 @@ function renderWords() {
   dictionary.forEach((word, index) => {
     const row = document.createElement("tr");
     row.dataset.key = word.english_chinesepinyinnumeric;
-    // Get attempts and correct values based on the selected profile.
     let attempts = selectedProfile === "boy" ? word.attempts_boy : word.attempts_girl;
     let correct = selectedProfile === "boy" ? word.correct_boy : word.correct_girl;
     let percentage = attempts > 0 ? ((correct / attempts) * 100).toFixed(1) + "%" : "-";
@@ -122,8 +120,8 @@ function renderWords() {
       <td data-field="correct">${correct || 0}</td>
       <td data-field="percentage">${percentage}</td>
       <td>
-        <button data-index="${index}" class="editBtn">Edit</button>
-        <button data-index="${index}" class="deleteBtn">Delete</button>
+        <button data-index="${index}" class="interactive-btn editBtn">Edit</button>
+        <button data-index="${index}" class="interactive-btn deleteBtn">Delete</button>
       </td>
     `;
     wordList.appendChild(row);
@@ -151,20 +149,18 @@ function renderWords() {
 
 /**
  * saveWord(word)
- *   Saves a new or updated word record. It auto-generates the pinyin from the Chinese word
- *   and initializes progress fields if not provided.
+ *   Saves a new or updated dictionary record.
  */
 async function saveWord(word) {
   word.english = normalizeEnglish(word.english);
   word.chinese = word.chinese.trim();
   word.pinyin = window.pinyinPro.pinyin(word.chinese, { toneType: "symbol" });
-  // Initialize progress fields
+  // Initialize progress fields.
   word.attempts_boy = word.attempts_boy || 0;
   word.correct_boy = word.correct_boy || 0;
   word.attempts_girl = word.attempts_girl || 0;
   word.correct_girl = word.correct_girl || 0;
   word.english_chinesepinyinnumeric = generateCompositeKey(word);
-  
   const tx = db.transaction(STORE_NAME, "readwrite");
   const store = tx.objectStore(STORE_NAME);
   store.put(word);
@@ -173,7 +169,7 @@ async function saveWord(word) {
 
 /**
  * deleteWord(key)
- *   Deletes a record by its composite key.
+ *   Deletes a dictionary record using its composite key.
  */
 async function deleteWord(key) {
   return new Promise((resolve, reject) => {
@@ -187,7 +183,7 @@ async function deleteWord(key) {
 
 /**
  * editWord(index)
- *   Makes the row editable.
+ *   Makes a row in the table editable.
  */
 function editWord(index) {
   const row = wordList.children[index];
@@ -197,7 +193,7 @@ function editWord(index) {
   const pinyinCell = row.querySelector('td[data-field="pinyin"]');
   const actionsCell = row.querySelector("td:last-child");
   
-  // Create input fields for English and Chinese.
+  // Create input fields.
   const englishInput = document.createElement("input");
   englishInput.type = "text";
   englishInput.value = englishCell.textContent;
@@ -213,8 +209,10 @@ function editWord(index) {
   pinyinCell.textContent = "";
   
   actionsCell.innerHTML = "";
+  // Create Save button with interactive style.
   const saveBtn = document.createElement("button");
   saveBtn.textContent = "Save";
+  saveBtn.classList.add("interactive-btn");
   saveBtn.addEventListener("click", async () => {
     const newEnglish = englishInput.value.trim();
     const newChinese = chineseInput.value.trim();
@@ -222,8 +220,9 @@ function editWord(index) {
       alert("Both fields are required.");
       return;
     }
-    // Check duplicate (other than the current record).
-    if (dictionary.some(w => w.english.toLowerCase() === newEnglish.toLowerCase() && w.chinese === newChinese && w.english_chinesepinyinnumeric !== key)) {
+    if (dictionary.some(w => w.english.toLowerCase() === newEnglish.toLowerCase() &&
+        w.chinese === newChinese &&
+        w.english_chinesepinyinnumeric !== key)) {
       alert("This combination already exists.");
       return;
     }
@@ -243,8 +242,10 @@ function editWord(index) {
     await loadWords();
   });
   
+  // Create Cancel button with interactive style.
   const cancelBtn = document.createElement("button");
   cancelBtn.textContent = "Cancel";
+  cancelBtn.classList.add("interactive-btn");
   cancelBtn.addEventListener("click", loadWords);
   
   actionsCell.appendChild(saveBtn);
@@ -310,7 +311,7 @@ function exportExcel() {
 
 /**
  * Excel Import:
- *   Imports words from an Excel file (expects only English and Chinese columns).
+ *   Imports words from an Excel file, expecting only English and Chinese columns.
  *   Pinyin is regenerated and progress fields are set to 0.
  */
 function importExcel(file) {
@@ -351,7 +352,7 @@ function importExcel(file) {
 
 exportExcelBtn?.addEventListener("click", exportExcel);
 importExcelBtn?.addEventListener("click", () => { importExcelInput.click(); });
-importExcelInput?.addEventListener("change", e => {
+importExcelInput?.addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (file) {
     importExcel(file);

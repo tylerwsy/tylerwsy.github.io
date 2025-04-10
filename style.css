@@ -20,7 +20,7 @@ html, body {
 .container {
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
   width: 90%;
   max-width: 600px;
   padding: 2rem;
@@ -101,7 +101,7 @@ select {
   gap: 0.5rem;
 }
 
-/* Dictionary Table Styles (if needed) */
+/* Dictionary Table Styles */
 .dictionary-table {
   overflow-x: auto;
   margin: 1.5rem 0;
