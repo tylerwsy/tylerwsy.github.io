@@ -12,6 +12,13 @@ function convertDigitsToChinese(str) {
   return str.replace(/\d/g, match => digitMap[match]);
 }
 
+// Helper: Clean the transcript by removing punctuation and extra spaces.
+// Keeps word characters, whitespace, and Chinese characters.
+function cleanTranscript(str) {
+  // Remove punctuation (anything that is not a word character, whitespace, or Chinese characters)
+  return str.replace(/[^\w\s\u4e00-\u9fa5]/g, "").replace(/\s+/g, " ").trim();
+}
+
 // Global variables.
 let words = [];
 let currentIndex = 0;
@@ -80,7 +87,7 @@ function openDB() {
     request.onupgradeneeded = (e) => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: "english_chinese", autoIncrement: false });
+        db.createObjectStore(STORE_NAME, { keyPath: "english_chinesepinyinnumeric", autoIncrement: false });
       }
     };
   });
@@ -114,14 +121,14 @@ async function loadQuizWords() {
   }
 }
 
-/* Update dictionary record: increment attempts and if correct, increment correct count. */
+/* Update dictionary record: increment attempts and, if correct, increment correct count. */
 async function updateWordRecord(word, isCorrect) {
   try {
     const db = await openDB();
     return new Promise((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, "readwrite");
       const store = tx.objectStore(STORE_NAME);
-      const key = word.english_chinese || (word.english + "_" + word.chinese);
+      const key = word.english_chinesepinyinnumeric || (word.english + "_" + word.chinese);
       const getRequest = store.get(key);
       getRequest.onsuccess = () => {
         let record = getRequest.result;
@@ -312,7 +319,7 @@ function stopRecording(recognitionInstance) {
     startRecordingBtn.textContent = "Retry";
     countdownDisplay.textContent = "";
     console.log("[recording] Stopped");
-    // Release mic tracks and close audio context to free up resources.
+    // Release mic tracks and close audio context.
     if (micStream) {
       micStream.getTracks().forEach(track => track.stop());
       micStream = null;
@@ -326,8 +333,11 @@ function stopRecording(recognitionInstance) {
 }
 
 function checkAndCreateSubmitButton() {
-  const convertedTranscript = convertDigitsToChinese(recordedTranscript);
+  let convertedTranscript = convertDigitsToChinese(recordedTranscript);
+  // Remove punctuation that might interfere.
+  convertedTranscript = convertedTranscript.replace(/[^\w\s\u4e00-\u9fa5]/g, "").trim();
   const recordedPinyinFull = window.pinyinPro.pinyin(convertedTranscript, { toneType: "symbol", segment: true });
+  console.log("Cleaned Recorded Pinyin:", recordedPinyinFull);
   const tokens = recordedPinyinFull.split(" ");
   const expectedPromptPinyin = window.pinyinPro.pinyin(KNOWN_PROMPT, { toneType: "symbol", segment: true }).trim();
   const promptTokens = expectedPromptPinyin.split(" ");
@@ -388,7 +398,7 @@ async function handleSubmit() {
   startRecordingBtn.disabled = true;
   startRecordingBtn.style.backgroundColor = "grey";
   await updateWordRecord(words[currentIndex], isCorrect);
-  // End mic access explicitly after submission.
+  // End mic access after submission.
   if (micStream) {
     micStream.getTracks().forEach(track => track.stop());
     micStream = null;
@@ -504,7 +514,9 @@ document.addEventListener("DOMContentLoaded", () => {
   loadQuizWords();
 });
 
-/* Start Recording button event: always request a fresh mic stream. */
+/* Start Recording button event.
+   Always request a fresh mic stream.
+*/
 startRecordingBtn.addEventListener("click", () => {
   navigator.mediaDevices.getUserMedia({ audio: true })
     .then(stream => {
