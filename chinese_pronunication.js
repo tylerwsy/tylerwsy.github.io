@@ -86,7 +86,7 @@ function openDB() {
   });
 }
 
-// Load quiz words based on stored "wordCount".
+// Load quiz words based on stored wordCount.
 async function loadQuizWords() {
   try {
     const db = await openDB();
@@ -114,7 +114,7 @@ async function loadQuizWords() {
   }
 }
 
-/* Update dictionary record: increment attempt count; if correct, increment correct count. */
+/* Update dictionary record: increment attempts and if correct, increment correct count. */
 async function updateWordRecord(word, isCorrect) {
   try {
     const db = await openDB();
@@ -234,6 +234,7 @@ function setupMediaRecorder(stream) {
   };
   mediaRecorder.onstop = () => {
     latestRecordingBlob = new Blob(recordedChunks, { type: "audio/webm" });
+    console.log("MediaRecorder stopped; blob size:", latestRecordingBlob.size);
     updatePlaybackButton(latestRecordingBlob);
     recordedChunks = [];
   };
@@ -241,19 +242,28 @@ function setupMediaRecorder(stream) {
 
 function updatePlaybackButton(blob) {
   const audioUrl = URL.createObjectURL(blob);
+  console.log("Created blob URL:", audioUrl);
   if (!playbackBtn) {
     playbackBtn = document.createElement("button");
     playbackBtn.textContent = "Play Recorded Audio";
     playbackBtn.classList.add("interactive-btn");
     playbackBtn.addEventListener("click", () => {
-      const audio = new Audio(audioUrl);
-      audio.play().catch(e => console.error("Playback error:", e));
+      try {
+        const audio = new Audio(audioUrl);
+        audio.play().catch(e => console.error("Playback error:", e));
+      } catch (e) {
+        console.error("Error in playback button click:", e);
+      }
     });
     ensureButtonGroup().row1.appendChild(playbackBtn);
   } else {
     playbackBtn.onclick = () => {
-      const audio = new Audio(audioUrl);
-      audio.play().catch(e => console.error("Playback error:", e));
+      try {
+        const audio = new Audio(audioUrl);
+        audio.play().catch(e => console.error("Playback error:", e));
+      } catch (e) {
+        console.error("Error in playback button onclick:", e);
+      }
     };
   }
 }
@@ -302,10 +312,13 @@ function stopRecording(recognitionInstance) {
     startRecordingBtn.textContent = "Retry";
     countdownDisplay.textContent = "";
     console.log("[recording] Stopped");
-    // Release microphone tracks to unblock playback on mobile.
+    // Release mic tracks (if any) and close audio context.
     if (micStream) {
       micStream.getTracks().forEach(track => track.stop());
       micStream = null;
+    }
+    if (audioContext && audioContext.state !== "closed") {
+      audioContext.close().catch(e => console.error("AudioContext close error:", e));
     }
     setTimeout(() => { checkAndCreateSubmitButton(); }, 200);
   }
