@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Select Your Test</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Include Chart.js library and Data Labels plugin -->
+  <!-- Include Chart.js library for drawing the result chart -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Include the Chart.js Data Labels plugin -->
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <script src="testResults.js" defer></script>
   <style>
@@ -104,19 +105,19 @@
       <p>© 2025 Learning App. All rights reserved.</p>
     </footer>
     <script>
-      // Reset the test dropdown on page load.
+      // On load, reset test dropdown.
       window.addEventListener("load", () => {
         document.getElementById("testSelect").selectedIndex = 0;
       });
 
-      // Build a line chart from quizResults stored in localStorage.
+      // Build a line chart using quizResults from localStorage.
       let showAll = false;
       function updateResultChart() {
         const selectedTest = document.getElementById("testSelect").value;
         const ctx = document.getElementById("resultChart").getContext("2d");
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         if (!selectedTest) return;
-
+        
         let mode = "";
         if (selectedTest === "Chinese - Pronunciation Test") {
           mode = "chinese";
@@ -135,9 +136,13 @@
         }
         results.sort((a, b) => new Date(a.date) - new Date(b.date));
         let displayResults = showAll ? results : results.slice(-5);
+        // Create multiline labels: [Date, Time, Ratio]
         const labels = displayResults.map(r => {
-          const ts = new Date(r.date).toLocaleString();
-          return `${ts} (Correct: ${r.correct}/${r.total})`;
+          const d = new Date(r.date);
+          const date = d.toLocaleDateString();
+          const time = d.toLocaleTimeString();
+          const ratio = `${r.correct}/${r.total}`;
+          return [date, time, ratio];
         });
         const percentages = displayResults.map(r => Math.round((r.correct / r.total) * 100));
         if (window.quizChart) { window.quizChart.destroy(); }
@@ -171,7 +176,7 @@
       }
       window.addEventListener("load", updateResultChart);
 
-      // Reset Test Results function.
+      // Reset test results for the selected mode, then update the chart.
       function resetTestResults() {
         const selectedTest = document.getElementById("testSelect").value;
         if (!selectedTest) return;
@@ -188,8 +193,8 @@
         localStorage.setItem("quizResults", JSON.stringify(allLogs));
         updateResultChart();
       }
-      
-      // Create extra buttons below the chart.
+
+      // Update extra buttons (toggle and reset) below the chart.
       function updateExtraButtons() {
         const extraDiv = document.getElementById("chartExtraButtons");
         extraDiv.innerHTML = "";
