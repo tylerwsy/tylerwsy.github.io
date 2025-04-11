@@ -230,9 +230,7 @@ function createRecognitionInstance() {
 function setupMediaRecorder(stream) {
   mediaRecorder = new MediaRecorder(stream);
   mediaRecorder.ondataavailable = event => {
-    if (event.data && event.data.size > 0) {
-      recordedChunks.push(event.data);
-    }
+    if (event.data && event.data.size > 0) { recordedChunks.push(event.data); }
   };
   mediaRecorder.onstop = () => {
     latestRecordingBlob = new Blob(recordedChunks, { type: "audio/webm" });
@@ -314,10 +312,11 @@ function stopRecording(recognitionInstance) {
     startRecordingBtn.textContent = "Retry";
     countdownDisplay.textContent = "";
     console.log("[recording] Stopped");
-    // Release mic tracks and close audio context.
+    // Release mic tracks and close audio context to free up resources.
     if (micStream) {
       micStream.getTracks().forEach(track => track.stop());
       micStream = null;
+      console.log("Mic tracks stopped.");
     }
     if (audioContext && audioContext.state !== "closed") {
       audioContext.close().then(() => console.log("AudioContext closed")).catch(e => console.error("AudioContext close error:", e));
@@ -389,6 +388,15 @@ async function handleSubmit() {
   startRecordingBtn.disabled = true;
   startRecordingBtn.style.backgroundColor = "grey";
   await updateWordRecord(words[currentIndex], isCorrect);
+  // End mic access explicitly after submission.
+  if (micStream) {
+    micStream.getTracks().forEach(track => track.stop());
+    micStream = null;
+    console.log("Mic tracks stopped after submit.");
+  }
+  if (audioContext && audioContext.state !== "closed") {
+    audioContext.close().then(() => console.log("AudioContext closed after submit")).catch(e => console.error("AudioContext close error:", e));
+  }
   createNextButton();
 }
 
@@ -482,7 +490,7 @@ function saveQuizResult() {
   console.log("Quiz results saved:", localStorage.getItem("quizResults"));
 }
 
-/* Initialize quiz: request mic access and load quiz words. */
+/* Initialize quiz: request mic access and load words. */
 document.addEventListener("DOMContentLoaded", () => {
   navigator.mediaDevices.getUserMedia({ audio: true })
     .then(stream => {
@@ -496,9 +504,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadQuizWords();
 });
 
-/* Start Recording button event.
-   For each click, always request a fresh microphone stream.
-*/
+/* Start Recording button event: always request a fresh mic stream. */
 startRecordingBtn.addEventListener("click", () => {
   navigator.mediaDevices.getUserMedia({ audio: true })
     .then(stream => {
