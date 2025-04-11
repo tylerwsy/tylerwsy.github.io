@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Select Your Test</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Include Chart.js library for drawing the result chart -->
+  <!-- Include Chart.js library and Data Labels plugin -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <script src="testResults.js" defer></script>
   <style>
     .flex-container {
@@ -113,9 +114,8 @@
       function updateResultChart() {
         const selectedTest = document.getElementById("testSelect").value;
         const ctx = document.getElementById("resultChart").getContext("2d");
-        // Clear previous chart.
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        if (!selectedTest) return; // nothing selected
+        if (!selectedTest) return;
 
         let mode = "";
         if (selectedTest === "Chinese - Pronunciation Test") {
@@ -128,7 +128,6 @@
         const allLogs = JSON.parse(localStorage.getItem("quizResults") || "[]");
         const results = allLogs.filter(r => r.mode === mode);
         if (!results.length) {
-          // Display "There is no result" message.
           ctx.font = "18px Arial";
           ctx.textAlign = "center";
           ctx.fillText("There is no result", ctx.canvas.width / 2, ctx.canvas.height / 2);
@@ -136,7 +135,10 @@
         }
         results.sort((a, b) => new Date(a.date) - new Date(b.date));
         let displayResults = showAll ? results : results.slice(-5);
-        const labels = displayResults.map(r => `${new Date(r.date).toLocaleString()} (Correct: ${r.correct}/${r.total})`);
+        const labels = displayResults.map(r => {
+          const ts = new Date(r.date).toLocaleString();
+          return `${ts} (Correct: ${r.correct}/${r.total})`;
+        });
         const percentages = displayResults.map(r => Math.round((r.correct / r.total) * 100));
         if (window.quizChart) { window.quizChart.destroy(); }
         window.quizChart = new Chart(ctx, {
@@ -151,12 +153,25 @@
               tension: 0.1
             }]
           },
-          options: { scales: { y: { beginAtZero: true, max: 100 } } }
+          options: {
+            plugins: {
+              datalabels: {
+                anchor: 'end',
+                align: 'end',
+                formatter: (value) => value + '%',
+                color: 'black'
+              }
+            },
+            scales: {
+              y: { beginAtZero: true, max: 100 }
+            }
+          },
+          plugins: [ChartDataLabels]
         });
       }
       window.addEventListener("load", updateResultChart);
 
-      // Reset Test Results: Remove only logs corresponding to the selected test mode.
+      // Reset Test Results function.
       function resetTestResults() {
         const selectedTest = document.getElementById("testSelect").value;
         if (!selectedTest) return;
@@ -174,7 +189,7 @@
         updateResultChart();
       }
       
-      // Create extra buttons below chart.
+      // Create extra buttons below the chart.
       function updateExtraButtons() {
         const extraDiv = document.getElementById("chartExtraButtons");
         extraDiv.innerHTML = "";
@@ -198,7 +213,6 @@
         }
       }
 
-      // When test selection changes, update the extra buttons and the chart.
       const testSelect = document.getElementById("testSelect");
       const testOptionsContainer = document.getElementById("testOptionsContainer");
       const dictionaryBtn = document.getElementById("dictionaryBtn");

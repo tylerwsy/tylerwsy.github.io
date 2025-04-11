@@ -3,7 +3,7 @@
 // Update the known prompt.
 const KNOWN_PROMPT = "答案是";
 
-// Helper function: Convert digits (0-9) to Chinese characters.
+// Helper: Convert digits to Chinese characters.
 function convertDigitsToChinese(str) {
   const digitMap = {
     "0": "零", "1": "一", "2": "二", "3": "三", "4": "四",
@@ -18,7 +18,7 @@ let currentIndex = 0;
 let correctCount = 0;
 let wrongCount = 0;
 
-// Recording and recognition variables.
+// Recording & recognition.
 let isRecording = false;
 let mediaRecorder;
 let micStream = null;
@@ -77,7 +77,7 @@ function openDB() {
     const request = indexedDB.open(DB_NAME, 1);
     request.onerror = () => reject(request.error);
     request.onsuccess = () => resolve(request.result);
-    request.onupgradeneeded = (e) => {
+    request.onupgradeneeded = e => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: "english_chinese", autoIncrement: false });
@@ -86,7 +86,7 @@ function openDB() {
   });
 }
 
-// Load quiz words based on the stored "wordCount".
+// Load quiz words using stored wordCount.
 async function loadQuizWords() {
   try {
     const db = await openDB();
@@ -114,7 +114,7 @@ async function loadQuizWords() {
   }
 }
 
-/* Update dictionary record: increment attempt count; if correct, increment correct count. */
+/* Update dictionary record: increment attempts and correct count if applicable. */
 async function updateWordRecord(word, isCorrect) {
   try {
     const db = await openDB();
@@ -144,7 +144,7 @@ async function updateWordRecord(word, isCorrect) {
   }
 }
 
-/* Display the current quiz word, hints, and question counter (centered). */
+/* Display the current quiz word, hints, and question counter. */
 function showWord() {
   if (questionCountElem) {
     questionCountElem.textContent = `Question ${currentIndex + 1} of ${words.length}`;
@@ -167,7 +167,6 @@ function showWord() {
         </div>
       </div>
     `;
-    // Updated English hint behavior: first click reveals, later clicks speak.
     document.getElementById("pinyinHintBtn").addEventListener("click", () => {
       document.getElementById("pinyinHint").style.display = "inline";
     });
@@ -178,13 +177,13 @@ function showWord() {
       } else {
         let utterance = new SpeechSynthesisUtterance(englishHintElem.textContent);
         utterance.lang = "en-US";
+        window.speechSynthesis.resume();
         window.speechSynthesis.speak(utterance);
       }
     });
     recordingResult.textContent = "";
     controlsContainer.innerHTML = "";
     buttonGroup = null;
-    // Remove any lingering "Play Correct Word" buttons.
     document.querySelectorAll(".correct-btn").forEach(btn => btn.remove());
   }
 }
@@ -303,14 +302,13 @@ function stopRecording(recognitionInstance) {
     startRecordingBtn.textContent = "Retry";
     countdownDisplay.textContent = "";
     console.log("[recording] Stopped");
-    // Check conditions before creating the Submit button.
+    // Check extra conditions before creating the Submit button.
     setTimeout(checkAndCreateSubmitButton, 200);
   }
 }
 
 function checkAndCreateSubmitButton() {
-  // Convert the recorded transcript to pinyin and check conditions.
-  // Conditions: At least 4 tokens, and first three tokens match the known prompt's pinyin.
+  // Convert transcript to pinyin.
   const convertedTranscript = convertDigitsToChinese(recordedTranscript);
   const recordedPinyinFull = window.pinyinPro.pinyin(convertedTranscript, { toneType: "symbol", segment: true });
   const tokens = recordedPinyinFull.split(" ");
@@ -385,6 +383,7 @@ function createCorrectPlaybackButton() {
     correctBtn.style.display = "block";
     recordingResult.parentNode.insertBefore(correctBtn, recordingResult.nextSibling);
     correctBtn.addEventListener("click", () => {
+      window.speechSynthesis.resume();
       let utterance = new SpeechSynthesisUtterance(quizWord.textContent);
       utterance.lang = "zh-CN";
       window.speechSynthesis.speak(utterance);
@@ -393,9 +392,8 @@ function createCorrectPlaybackButton() {
 }
 
 function createNextButton() {
-  // Remove any existing next button, then create a new one.
   const existingNext = document.querySelector("#controlsContainer button.next-btn");
-  if (existingNext) existingNext.remove();
+  if (existingNext) { existingNext.remove(); }
   nextBtn = document.createElement("button");
   nextBtn.textContent = "Next";
   nextBtn.classList.add("interactive-btn", "next-btn");
@@ -466,7 +464,7 @@ function saveQuizResult() {
   console.log("Quiz results saved:", localStorage.getItem("quizResults"));
 }
 
-/* Initialize quiz: request mic access and load words. */
+/* Initialization: request mic access and load quiz words. */
 document.addEventListener("DOMContentLoaded", () => {
   navigator.mediaDevices.getUserMedia({ audio: true })
     .then(stream => {
