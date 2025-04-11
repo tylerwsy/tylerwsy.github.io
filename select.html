@@ -5,12 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Select Your Test</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Include Chart.js (optional, if you display result charts) -->
+  <!-- Include Chart.js library for drawing the result chart -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- If using a testResults module, include it here as needed -->
   <script src="testResults.js" defer></script>
   <style>
-    /* Basic inline styling for layout */
     .flex-container {
       display: flex;
       flex-wrap: wrap;
@@ -46,6 +44,20 @@
       align-items: center;
       justify-content: center;
     }
+    .chart-container {
+      padding: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background: #fff;
+    }
+    .chart-container canvas {
+      width: 100%;
+      height: 300px;
+    }
+    .chart-extra {
+      margin-top: 1rem;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -54,7 +66,7 @@
       <h1>Select Your Test</h1>
     </header>
     <div class="flex-container">
-      <!-- Left Column: Test selection, word count, and test buttons -->
+      <!-- Left Column: Test selection and settings -->
       <div class="left-column">
         <div class="select-container">
           <p>Please select the test you want to take:</p>
@@ -79,17 +91,114 @@
           <button class="interactive-btn" onclick="window.history.back()">Back</button>
         </div>
       </div>
-      <!-- Right Column: (Optional) Chart container if needed -->
+      <!-- Right Column: Chart and extra buttons below the chart -->
       <div class="right-column">
         <div class="chart-container">
           <canvas id="resultChart"></canvas>
         </div>
+        <div class="chart-extra" id="chartExtraButtons"></div>
       </div>
     </div>
     <footer>
       <p>© 2025 Learning App. All rights reserved.</p>
     </footer>
     <script>
+      // Reset the test dropdown on page load.
+      window.addEventListener("load", () => {
+        document.getElementById("testSelect").selectedIndex = 0;
+      });
+
+      // Build a line chart from quizResults stored in localStorage.
+      let showAll = false;
+      function updateResultChart() {
+        const selectedTest = document.getElementById("testSelect").value;
+        const ctx = document.getElementById("resultChart").getContext("2d");
+        // Clear previous chart.
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        if (!selectedTest) return; // nothing selected
+
+        let mode = "";
+        if (selectedTest === "Chinese - Pronunciation Test") {
+          mode = "chinese";
+        } else if (selectedTest === "English - Pronunciation Test") {
+          mode = "english_pronunciation";
+        } else if (selectedTest === "English - Singular vs Plural") {
+          mode = "english_plural";
+        }
+        const allLogs = JSON.parse(localStorage.getItem("quizResults") || "[]");
+        const results = allLogs.filter(r => r.mode === mode);
+        if (!results.length) {
+          // Display "There is no result" message.
+          ctx.font = "18px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText("There is no result", ctx.canvas.width / 2, ctx.canvas.height / 2);
+          return;
+        }
+        results.sort((a, b) => new Date(a.date) - new Date(b.date));
+        let displayResults = showAll ? results : results.slice(-5);
+        const labels = displayResults.map(r => new Date(r.date).toLocaleString());
+        const percentages = displayResults.map(r => Math.round((r.correct / r.total) * 100));
+        if (window.quizChart) { window.quizChart.destroy(); }
+        window.quizChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Quiz Percentage',
+              data: percentages,
+              borderColor: 'rgb(75, 192, 192)',
+              fill: false,
+              tension: 0.1
+            }]
+          },
+          options: { scales: { y: { beginAtZero: true, max: 100 } } }
+        });
+      }
+      window.addEventListener("load", updateResultChart);
+
+      // Reset Test Results: Remove only logs corresponding to the selected test mode.
+      function resetTestResults() {
+        const selectedTest = document.getElementById("testSelect").value;
+        if (!selectedTest) return;
+        let mode = "";
+        if (selectedTest === "Chinese - Pronunciation Test") {
+          mode = "chinese";
+        } else if (selectedTest === "English - Pronunciation Test") {
+          mode = "english_pronunciation";
+        } else if (selectedTest === "English - Singular vs Plural") {
+          mode = "english_plural";
+        }
+        let allLogs = JSON.parse(localStorage.getItem("quizResults") || "[]");
+        allLogs = allLogs.filter(r => r.mode !== mode);
+        localStorage.setItem("quizResults", JSON.stringify(allLogs));
+        updateResultChart();
+      }
+      
+      // Create extra buttons below chart.
+      function updateExtraButtons() {
+        const extraDiv = document.getElementById("chartExtraButtons");
+        extraDiv.innerHTML = "";
+        if (document.getElementById("testSelect").value) {
+          const toggleBtn = document.createElement("button");
+          toggleBtn.id = "toggleResultsBtn";
+          toggleBtn.textContent = "Show All Results";
+          toggleBtn.classList.add("interactive-btn");
+          toggleBtn.addEventListener("click", () => {
+            showAll = !showAll;
+            toggleBtn.textContent = showAll ? "Show Last 5 Results" : "Show All Results";
+            updateResultChart();
+          });
+          extraDiv.appendChild(toggleBtn);
+
+          const resetBtn = document.createElement("button");
+          resetBtn.textContent = "Reset Test Results";
+          resetBtn.classList.add("interactive-btn");
+          resetBtn.addEventListener("click", resetTestResults);
+          extraDiv.appendChild(resetBtn);
+        }
+      }
+
+      // When test selection changes, update the extra buttons and the chart.
       const testSelect = document.getElementById("testSelect");
       const testOptionsContainer = document.getElementById("testOptionsContainer");
       const dictionaryBtn = document.getElementById("dictionaryBtn");
@@ -98,15 +207,16 @@
       const wordCountInput = document.getElementById("wordCountInput");
 
       testSelect.addEventListener("change", () => {
-        const selected = testSelect.value;
         testOptionsContainer.style.display = "flex";
-        if (selected === "Chinese - Pronunciation Test" || selected === "English - Pronunciation Test") {
+        if (testSelect.value === "Chinese - Pronunciation Test" || testSelect.value === "English - Pronunciation Test") {
           dictionaryBtn.style.display = "inline-block";
           startTestRow.style.display = "flex";
         } else {
           dictionaryBtn.style.display = "none";
           startTestRow.style.display = "flex";
         }
+        updateExtraButtons();
+        updateResultChart();
       });
 
       goTestBtn.onclick = () => {

@@ -3,7 +3,7 @@
 // Update the known prompt.
 const KNOWN_PROMPT = "答案是";
 
-// Helper function to convert digits (0-9) into Chinese characters.
+// Helper: Convert digits to Chinese characters.
 function convertDigitsToChinese(str) {
   const digitMap = {
     "0": "零", "1": "一", "2": "二", "3": "三", "4": "四",
@@ -12,13 +12,13 @@ function convertDigitsToChinese(str) {
   return str.replace(/\d/g, match => digitMap[match]);
 }
 
-// Global quiz variables.
-let words = []; // Selected quiz words loaded from the dictionary.
+// Global variables.
+let words = [];
 let currentIndex = 0;
 let correctCount = 0;
 let wrongCount = 0;
 
-// Recording and Speech Recognition variables.
+// Recording & recognition variables.
 let isRecording = false;
 let mediaRecorder;
 let micStream = null;
@@ -72,7 +72,6 @@ let playbackBtn = null;
 const DB_NAME = "SpellingAppDB";
 const STORE_NAME = "words";
 
-// Open the IndexedDB.
 function openDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 1);
@@ -87,7 +86,7 @@ function openDB() {
   });
 }
 
-// Load quiz words from the dictionary. Use the "wordCount" from localStorage.
+// Load quiz words based on stored wordCount.
 async function loadQuizWords() {
   try {
     const db = await openDB();
@@ -115,33 +114,35 @@ async function loadQuizWords() {
   }
 }
 
-/* Update the dictionary record (attempts and correct count) for the current word. */
+/* Update the dictionary record for the current word. */
 async function updateWordRecord(word, isCorrect) {
   try {
     const db = await openDB();
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.get(word.english_chinese);
-    request.onsuccess = () => {
-      let record = request.result;
-      if (!record) {
-        console.error("Word record not found:", word);
-        return;
-      }
-      if (record.attempts_chinese === undefined) record.attempts_chinese = 0;
-      if (record.correct_chinese === undefined) record.correct_chinese = 0;
-      record.attempts_chinese++;
-      if (isCorrect) record.correct_chinese++;
-      store.put(record);
-    };
-    request.onerror = (e) => console.error("Error updating word record:", e);
-    await tx.complete;
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      const store = tx.objectStore(STORE_NAME);
+      const key = word.english_chinese || (word.english + "_" + word.chinese);
+      const getRequest = store.get(key);
+      getRequest.onsuccess = () => {
+        let record = getRequest.result;
+        if (record) {
+          record.attempts_chinese = (record.attempts_chinese || 0) + 1;
+          if (isCorrect) record.correct_chinese = (record.correct_chinese || 0) + 1;
+          const putRequest = store.put(record);
+          putRequest.onsuccess = () => resolve();
+          putRequest.onerror = () => reject(putRequest.error);
+        } else {
+          resolve();
+        }
+      };
+      getRequest.onerror = () => reject(getRequest.error);
+    });
   } catch (e) {
     console.error("updateWordRecord error:", e);
   }
 }
 
-/* Display the current quiz word, center it with hints, and show question number. */
+/* Display the current quiz word, hints, and question counter (centered). */
 function showWord() {
   if (questionCountElem) {
     questionCountElem.textContent = `Question ${currentIndex + 1} of ${words.length}`;
@@ -178,7 +179,7 @@ function showWord() {
   }
 }
 
-/* Compute the Levenshtein distance for fuzzy matching. */
+/* Compute Levenshtein distance for fuzzy matching. */
 function levenshteinDistance(a, b) {
   const matrix = [];
   if (a.length === 0) return b.length;
@@ -290,10 +291,24 @@ function stopRecording(recognitionInstance) {
     if (mediaRecorder && mediaRecorder.state === "recording") { mediaRecorder.stop(); }
     isRecording = false;
     startRecordingBtn.textContent = "Retry";
-    // Do not disable Retry here; it will be disabled after Submit is clicked.
     countdownDisplay.textContent = "";
     console.log("[recording] Stopped");
-    setTimeout(() => { createSubmitButton(); }, 200);
+    // Instead of immediately creating the submit button, check the conditions.
+    setTimeout(checkAndCreateSubmitButton, 200);
+  }
+}
+
+function checkAndCreateSubmitButton() {
+  // Check if the recorded transcript (after conversion to pinyin) meets our conditions.
+  const convertedTranscript = convertDigitsToChinese(recordedTranscript);
+  const recordedPinyinFull = window.pinyinPro.pinyin(convertedTranscript, { toneType: "symbol", segment: true });
+  const tokens = recordedPinyinFull.split(" ");
+  const expectedPromptPinyin = window.pinyinPro.pinyin(KNOWN_PROMPT, { toneType: "symbol", segment: true });
+  if (tokens.length >= 4 && tokens.slice(0, 3).join(" ").trim() === expectedPromptPinyin.trim()) {
+    createSubmitButton();
+  } else {
+    // Conditions not met; do not show submit button.
+    recordingResult.textContent += "\nRecording did not capture the full prompt correctly. Please click Retry.";
   }
 }
 
@@ -367,19 +382,18 @@ function createCorrectPlaybackButton() {
 }
 
 function createNextButton() {
-  if (!nextBtn) {
-    nextBtn = document.createElement("button");
-    nextBtn.textContent = "Next";
-    nextBtn.classList.add("interactive-btn");
-    ensureButtonGroup().row2.appendChild(nextBtn);
-    nextBtn.addEventListener("click", nextWord);
-  } else {
-    nextBtn.disabled = false;
-  }
+  // Remove any existing next button.
+  const existingNext = document.querySelector("#controlsContainer button.next-btn");
+  if (existingNext) existingNext.remove();
+  nextBtn = document.createElement("button");
+  nextBtn.textContent = "Next";
+  nextBtn.classList.add("interactive-btn", "next-btn");
+  ensureButtonGroup().row2.appendChild(nextBtn);
+  nextBtn.addEventListener("click", nextWord);
 }
 
 function nextWord() {
-  // Remove any lingering Play Correct Word buttons.
+  // Remove lingering correct word buttons.
   document.querySelectorAll(".correct-btn").forEach(btn => btn.remove());
   currentIndex++;
   if (submitBtn && submitBtn.parentNode) { submitBtn.parentNode.removeChild(submitBtn); submitBtn = null; }
@@ -392,6 +406,7 @@ function nextWord() {
   controlsContainer.innerHTML = "";
   buttonGroup = null;
   playbackBtn = null;
+  
   if (currentIndex < words.length) {
     showWord();
   } else {
@@ -438,6 +453,7 @@ function saveQuizResult() {
     wrong: wrongCount
   });
   localStorage.setItem("quizResults", JSON.stringify(logs));
+  console.log("Quiz results saved:", localStorage.getItem("quizResults"));
 }
 
 /* Initialize quiz: request mic access and load words. */
