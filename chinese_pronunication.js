@@ -319,12 +319,12 @@ function beginRecording() {
   recordingResult.textContent = "🎙️ Speak now...";
   countdownDisplay.textContent = "⏺️ Recording (6 sec)...";
   startRecordingBtn.textContent = "Recording...";
-  mediaRecorder.start();
   isRecording = true;
-  setTimeout(() => {
-    console.log("[speech] recognition start triggered");
-    recognition.start();
-  }, 1000);
+recognition.start();
+recognition.onend = () => {
+  console.log("[speech] onend triggered");
+  mediaRecorder.start();
+};
   console.log("[recording] Started");
   setTimeout(() => {
     stopRecording(recognition);
