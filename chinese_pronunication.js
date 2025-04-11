@@ -3,7 +3,7 @@
 // Update the known prompt.
 const KNOWN_PROMPT = "答案是";
 
-// Helper: Convert digits to Chinese characters.
+// Helper function: Convert digits (0-9) to Chinese characters.
 function convertDigitsToChinese(str) {
   const digitMap = {
     "0": "零", "1": "一", "2": "二", "3": "三", "4": "四",
@@ -18,7 +18,7 @@ let currentIndex = 0;
 let correctCount = 0;
 let wrongCount = 0;
 
-// Recording & recognition variables.
+// Recording and recognition variables.
 let isRecording = false;
 let mediaRecorder;
 let micStream = null;
@@ -77,7 +77,7 @@ function openDB() {
     const request = indexedDB.open(DB_NAME, 1);
     request.onerror = () => reject(request.error);
     request.onsuccess = () => resolve(request.result);
-    request.onupgradeneeded = e => {
+    request.onupgradeneeded = (e) => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: "english_chinese", autoIncrement: false });
@@ -86,7 +86,7 @@ function openDB() {
   });
 }
 
-// Load quiz words based on stored wordCount.
+// Load quiz words based on the stored "wordCount".
 async function loadQuizWords() {
   try {
     const db = await openDB();
@@ -114,7 +114,7 @@ async function loadQuizWords() {
   }
 }
 
-/* Update the dictionary record for the current word. */
+/* Update dictionary record: increment attempt count; if correct, increment correct count. */
 async function updateWordRecord(word, isCorrect) {
   try {
     const db = await openDB();
@@ -127,7 +127,9 @@ async function updateWordRecord(word, isCorrect) {
         let record = getRequest.result;
         if (record) {
           record.attempts_chinese = (record.attempts_chinese || 0) + 1;
-          if (isCorrect) record.correct_chinese = (record.correct_chinese || 0) + 1;
+          if (isCorrect) {
+            record.correct_chinese = (record.correct_chinese || 0) + 1;
+          }
           const putRequest = store.put(record);
           putRequest.onsuccess = () => resolve();
           putRequest.onerror = () => reject(putRequest.error);
@@ -165,16 +167,24 @@ function showWord() {
         </div>
       </div>
     `;
+    // Updated English hint behavior: first click reveals, later clicks speak.
     document.getElementById("pinyinHintBtn").addEventListener("click", () => {
       document.getElementById("pinyinHint").style.display = "inline";
     });
     document.getElementById("englishHintBtn").addEventListener("click", () => {
-      document.getElementById("englishHint").style.display = "inline";
+      const englishHintElem = document.getElementById("englishHint");
+      if (!englishHintElem.style.display || englishHintElem.style.display === "none") {
+        englishHintElem.style.display = "inline";
+      } else {
+        let utterance = new SpeechSynthesisUtterance(englishHintElem.textContent);
+        utterance.lang = "en-US";
+        window.speechSynthesis.speak(utterance);
+      }
     });
     recordingResult.textContent = "";
     controlsContainer.innerHTML = "";
     buttonGroup = null;
-    // Remove any lingering Play Correct Word buttons.
+    // Remove any lingering "Play Correct Word" buttons.
     document.querySelectorAll(".correct-btn").forEach(btn => btn.remove());
   }
 }
@@ -293,21 +303,22 @@ function stopRecording(recognitionInstance) {
     startRecordingBtn.textContent = "Retry";
     countdownDisplay.textContent = "";
     console.log("[recording] Stopped");
-    // Instead of immediately creating the submit button, check the conditions.
+    // Check conditions before creating the Submit button.
     setTimeout(checkAndCreateSubmitButton, 200);
   }
 }
 
 function checkAndCreateSubmitButton() {
-  // Check if the recorded transcript (after conversion to pinyin) meets our conditions.
+  // Convert the recorded transcript to pinyin and check conditions.
+  // Conditions: At least 4 tokens, and first three tokens match the known prompt's pinyin.
   const convertedTranscript = convertDigitsToChinese(recordedTranscript);
   const recordedPinyinFull = window.pinyinPro.pinyin(convertedTranscript, { toneType: "symbol", segment: true });
   const tokens = recordedPinyinFull.split(" ");
-  const expectedPromptPinyin = window.pinyinPro.pinyin(KNOWN_PROMPT, { toneType: "symbol", segment: true });
-  if (tokens.length >= 4 && tokens.slice(0, 3).join(" ").trim() === expectedPromptPinyin.trim()) {
+  const expectedPromptPinyin = window.pinyinPro.pinyin(KNOWN_PROMPT, { toneType: "symbol", segment: true }).trim();
+  const promptTokens = expectedPromptPinyin.split(" ");
+  if (tokens.length >= 4 && tokens.slice(0, 3).join(" ").trim() === promptTokens.join(" ").trim()) {
     createSubmitButton();
   } else {
-    // Conditions not met; do not show submit button.
     recordingResult.textContent += "\nRecording did not capture the full prompt correctly. Please click Retry.";
   }
 }
@@ -382,7 +393,7 @@ function createCorrectPlaybackButton() {
 }
 
 function createNextButton() {
-  // Remove any existing next button.
+  // Remove any existing next button, then create a new one.
   const existingNext = document.querySelector("#controlsContainer button.next-btn");
   if (existingNext) existingNext.remove();
   nextBtn = document.createElement("button");
@@ -393,7 +404,6 @@ function createNextButton() {
 }
 
 function nextWord() {
-  // Remove lingering correct word buttons.
   document.querySelectorAll(".correct-btn").forEach(btn => btn.remove());
   currentIndex++;
   if (submitBtn && submitBtn.parentNode) { submitBtn.parentNode.removeChild(submitBtn); submitBtn = null; }
