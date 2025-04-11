@@ -15,7 +15,7 @@ html, body {
   display: flex;
   flex-direction: column;
   /* align-items: center; */
-  justify-content: flex-start; 
+  justify-content: flex-start;
   padding: 1rem;
   padding-top: 1rem;
 }
@@ -48,10 +48,52 @@ footer p {
   margin-top: 0.5rem;
 }
 
+/* Dictionary Table Styles */
 .dictionary-table {
   max-height: 500px;   /* Set this value as needed */
   overflow-y: auto;    /* Vertical scrolling */
   margin: 1.5rem 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 0.8rem;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+th {
+  background-color: #ff7f50;
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+td {
+  background-color: #fff;
+  font-size: 1rem;
+}
+
+/* Action buttons in table */
+table button {
+  background-color: #ff7f50;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  margin: 0.2rem;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+table button:hover,
+table button:focus {
+  background-color: #ff6347;
+  transform: scale(1.05);
 }
 
 /* Interactive Buttons */
@@ -71,6 +113,14 @@ footer p {
 .interactive-btn:focus {
   background-color: #ff6347;
   transform: scale(1.05);
+}
+
+/* Correct and Incorrect Answer Highlighting */
+.correct {
+  background-color: green !important;
+}
+.incorrect {
+  background-color: red !important;
 }
 
 /* Form Elements */
@@ -138,53 +188,6 @@ select {
   padding: 0.8rem;
   font-size: 1.2rem;
   text-align: center;
-}
-
-/* Dictionary Table Styles */
-.dictionary-table {
-  overflow-x: auto;
-  margin: 1.5rem 0;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th, td {
-  padding: 0.8rem;
-  text-align: center;
-  border: 1px solid #ddd;
-}
-
-th {
-  background-color: #ff7f50;
-  color: #fff;
-  font-size: 1.1rem;
-}
-
-td {
-  background-color: #fff;
-  font-size: 1rem;
-}
-
-/* Action buttons in table */
-table button {
-  background-color: #ff7f50;
-  border: none;
-  border-radius: 5px;
-  color: white;
-  font-size: 0.9rem;
-  padding: 0.4rem 0.8rem;
-  cursor: pointer;
-  margin: 0.2rem;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-}
-
-table button:hover,
-table button:focus {
-  background-color: #ff6347;
-  transform: scale(1.05);
 }
 
 /* Responsive Adjustments */

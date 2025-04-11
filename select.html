@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Select Your Test</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Include Chart.js library for drawing the result chart -->
+  <!-- Include Chart.js and the Data Labels plugin -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Include the Chart.js Data Labels plugin -->
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <script src="testResults.js" defer></script>
   <style>
@@ -45,6 +44,14 @@
       gap: 0.5rem;
       align-items: center;
       justify-content: center;
+      width: 100%;
+      max-width: 350px;
+    }
+    .start-test-row input[type="number"] {
+      width: 100px;
+      padding: 0.8rem;
+      font-size: 1.2rem;
+      text-align: center;
     }
     .chart-container {
       padding: 1rem;
@@ -68,14 +75,14 @@
       <h1>Select Your Test</h1>
     </header>
     <div class="flex-container">
-      <!-- Left Column: Test selection and settings -->
+      <!-- Left Column: Test selection -->
       <div class="left-column">
         <div class="select-container">
           <p>Please select the test you want to take:</p>
           <select id="testSelect">
             <option value="" disabled selected>Select a test...</option>
             <option value="Chinese - Pronunciation Test">Chinese - Pronunciation Test</option>
-            <option value="English - Pronunciation Test">English - Pronunciation Test</option>
+            <!-- <option value="English - Pronunciation Test">English - Pronunciation Test</option> -->
             <option value="English - Singular vs Plural">English - Singular vs Plural</option>
           </select>
           <div>
@@ -83,6 +90,7 @@
             <input id="wordCountInput" type="number" value="10" min="1">
           </div>
           <div class="button-container" id="testOptionsContainer" style="display: none;">
+            <!-- Show dictionary button for pronunciation tests -->
             <button id="dictionaryBtn" class="interactive-btn" style="display: none;">Go to Word Dictionary</button>
             <div class="start-test-row" id="startTestRow" style="display: none;">
               <button id="goTestBtn" class="interactive-btn">Start Test</button>
@@ -93,7 +101,7 @@
           <button class="interactive-btn" onclick="window.history.back()">Back</button>
         </div>
       </div>
-      <!-- Right Column: Chart and extra buttons below the chart -->
+      <!-- Right Column: Chart and extra buttons -->
       <div class="right-column">
         <div class="chart-container">
           <canvas id="resultChart"></canvas>
@@ -102,10 +110,10 @@
       </div>
     </div>
     <footer>
-      <p>© 2025 Learning App. All rights reserved.</p>
+      <p>© 2025 Learning App. All rights reserved. v1.0</p>
     </footer>
     <script>
-      // On load, reset test dropdown.
+      // Reset test dropdown on load.
       window.addEventListener("load", () => {
         document.getElementById("testSelect").selectedIndex = 0;
       });
@@ -176,7 +184,7 @@
       }
       window.addEventListener("load", updateResultChart);
 
-      // Reset Test Results function: clear logs for selected test and update the chart.
+      // Reset test results for the selected mode.
       function resetTestResults() {
         const selectedTest = document.getElementById("testSelect").value;
         if (!selectedTest) return;
@@ -227,7 +235,7 @@
 
       testSelect.addEventListener("change", () => {
         testOptionsContainer.style.display = "flex";
-        if (testSelect.value === "Chinese - Pronunciation Test" || testSelect.value === "English - Pronunciation Test") {
+        if (testSelect.value === "Chinese - Pronunciation Test") {
           dictionaryBtn.style.display = "inline-block";
           startTestRow.style.display = "flex";
         } else {
@@ -244,8 +252,6 @@
         const selected = testSelect.value;
         if (selected === "Chinese - Pronunciation Test") {
           window.location.href = "chinese_pronunication.html";
-        } else if (selected === "English - Pronunciation Test") {
-          window.location.href = "english_pronunciation.html";
         } else if (selected === "English - Singular vs Plural") {
           window.location.href = "english_plural.html";
         }
