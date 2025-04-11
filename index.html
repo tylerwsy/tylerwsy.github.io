@@ -106,6 +106,7 @@
         (selectedProfile === "boy" && entered === boyPassword) ||
         (selectedProfile === "girl" && entered === girlPassword)
       ) {
+        localStorage.setItem("selectedProfile", selectedProfile);
         window.location.href = "select.html";
       } else {
         alert("Incorrect password. Please try again.");
