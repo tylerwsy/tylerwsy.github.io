@@ -86,7 +86,7 @@ function openDB() {
   });
 }
 
-// Load quiz words based on stored wordCount.
+// Load quiz words based on stored "wordCount".
 async function loadQuizWords() {
   try {
     const db = await openDB();
@@ -230,7 +230,9 @@ function createRecognitionInstance() {
 function setupMediaRecorder(stream) {
   mediaRecorder = new MediaRecorder(stream);
   mediaRecorder.ondataavailable = event => {
-    if (event.data && event.data.size > 0) { recordedChunks.push(event.data); }
+    if (event.data && event.data.size > 0) {
+      recordedChunks.push(event.data);
+    }
   };
   mediaRecorder.onstop = () => {
     latestRecordingBlob = new Blob(recordedChunks, { type: "audio/webm" });
@@ -312,13 +314,13 @@ function stopRecording(recognitionInstance) {
     startRecordingBtn.textContent = "Retry";
     countdownDisplay.textContent = "";
     console.log("[recording] Stopped");
-    // Release mic tracks (if any) and close audio context.
+    // Release mic tracks and close audio context.
     if (micStream) {
       micStream.getTracks().forEach(track => track.stop());
       micStream = null;
     }
     if (audioContext && audioContext.state !== "closed") {
-      audioContext.close().catch(e => console.error("AudioContext close error:", e));
+      audioContext.close().then(() => console.log("AudioContext closed")).catch(e => console.error("AudioContext close error:", e));
     }
     setTimeout(() => { checkAndCreateSubmitButton(); }, 200);
   }
@@ -480,7 +482,7 @@ function saveQuizResult() {
   console.log("Quiz results saved:", localStorage.getItem("quizResults"));
 }
 
-/* Initialize quiz: request mic access and load words. */
+/* Initialize quiz: request mic access and load quiz words. */
 document.addEventListener("DOMContentLoaded", () => {
   navigator.mediaDevices.getUserMedia({ audio: true })
     .then(stream => {
@@ -494,24 +496,18 @@ document.addEventListener("DOMContentLoaded", () => {
   loadQuizWords();
 });
 
-/* Start Recording button event. */
+/* Start Recording button event.
+   For each click, always request a fresh microphone stream.
+*/
 startRecordingBtn.addEventListener("click", () => {
-  if (!isRecording) {
-    if (!micStream) {
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-          micStream = stream;
-          setupMicStream(stream);
-          beginRecording();
-        })
-        .catch(err => {
-          console.warn("[mic] Permission denied or unavailable", err);
-          recordingResult.textContent = "⚠️ Microphone access denied";
-        });
-    } else {
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      micStream = stream;
+      setupMicStream(stream);
       beginRecording();
-    }
-  } else {
-    console.log("[recording] Already recording.");
-  }
+    })
+    .catch(err => {
+      console.warn("[mic] Permission denied or unavailable", err);
+      recordingResult.textContent = "⚠️ Microphone access denied";
+    });
 });
