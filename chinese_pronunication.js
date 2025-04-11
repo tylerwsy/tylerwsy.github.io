@@ -119,7 +119,7 @@ async function loadQuizWords() {
   }
 }
 
-/* Update dictionary record: increment attempts; if correct, increment correct count. */
+/* Update dictionary record: increment attempts and if correct, increment correct count. */
 async function updateWordRecord(word, isCorrect) {
   try {
     const db = await openDB();
@@ -220,7 +220,7 @@ function createRecognitionInstance() {
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recog = new Recognition();
   recog.lang = "zh-CN";
-  recog.continuous = false;
+  recog.continuous = true; // Keep recognition active throughout the recording period.
   recog.interimResults = false;
   recog.onresult = event => {
     recordedTranscript = event.results[0][0].transcript.trim();
@@ -318,9 +318,7 @@ function beginRecording() {
 function stopRecording(recognitionInstance) {
   if (isRecording) {
     recognitionInstance.stop();
-    if (mediaRecorder && mediaRecorder.state === "recording") {
-      mediaRecorder.stop();
-    }
+    if (mediaRecorder && mediaRecorder.state === "recording") { mediaRecorder.stop(); }
     isRecording = false;
     startRecordingBtn.textContent = "Retry";
     countdownDisplay.textContent = "";
@@ -520,7 +518,9 @@ document.addEventListener("DOMContentLoaded", () => {
   loadQuizWords();
 });
 
-/* Start Recording button event: always request a fresh mic stream. */
+/* Start Recording button event.
+   Always request a fresh mic stream.
+*/
 startRecordingBtn.addEventListener("click", () => {
   navigator.mediaDevices.getUserMedia({ audio: true })
     .then(stream => {
