@@ -32,17 +32,21 @@
   
   <script>
     document.getElementById('finishTestBtn').addEventListener('click', () => {
-      // Dummy result for demonstration
+      // Generate a random test result for demonstration.
+      const totalAttempts = 10;
+      const correctCount = Math.floor(Math.random() * (totalAttempts + 1)); // Random number from 0 to 10
+
       const result = {
         user: localStorage.getItem("selectedProfile"),
         testType: "Chinese - Pronunciation Test",
-        totalAttempts: 10,
-        correctCount: 8,
+        totalAttempts: totalAttempts,
+        correctCount: correctCount,
         date: new Date().toISOString()
       };
+      
       testResultsDB.addTestResult(result)
         .then(id => {
-          alert("Test result saved with id " + id);
+          alert("Test result saved with id " + id + " (" + correctCount + "/" + totalAttempts + ")");
           window.location.href = "select.html";
         })
         .catch(err => {
