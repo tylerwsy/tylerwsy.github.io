@@ -3,9 +3,9 @@
 // Update the known prompt.
 const KNOWN_PROMPT = "答案是";
 
-// Azure Speech Service credentials – replace with your own.
+// Azure Speech Service credentials – replace with your actual key.
 const azureSubscriptionKey = "YOUR_AZURE_SUBSCRIPTION_KEY";
-const azureServiceRegion = "southeastasia"; // e.g. "southeastasia"
+const azureServiceRegion = "southeastasia"; // Default region
 
 // Helper function: Convert digits (0-9) to Chinese characters.
 function convertDigitsToChinese(str) {
@@ -222,12 +222,12 @@ function levenshteinDistance(a, b) {
 /* --- Azure Speech and Recording Functions --- */
 /* This function calls Azure Speech Services to recognize speech.
    A callback function is executed after recognition completes. */
-function azureSpeechRecognize(callback) {
+function azureSpeechRecognize(subscriptionKey = azureSubscriptionKey, serviceRegion = azureServiceRegion, callback) {
   if (typeof SpeechSDK === "undefined") {
     console.error("Azure Speech SDK not found. Please include the SDK script in your HTML.");
     return;
   }
-  const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(azureSubscriptionKey, azureServiceRegion);
+  const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
   speechConfig.speechRecognitionLanguage = "zh-CN";
   const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
   const recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
@@ -253,9 +253,9 @@ function showTranslateNowButton() {
   translateBtn.classList.add("interactive-btn");
   translateBtn.addEventListener("click", () => {
     translateBtn.disabled = true;
-    azureSpeechRecognize(() => {
+    azureSpeechRecognize(undefined, undefined, () => {
       // After translation completes, enable the Submit button.
-      checkAndCreateSubmitButton();
+      createSubmitButton();
     });
   });
   ensureButtonGroup().row1.appendChild(translateBtn);
@@ -324,7 +324,7 @@ function beginRecording() {
   startRecordingBtn.disabled = false;
   startRecordingBtn.style.backgroundColor = "";
   setupMediaRecorder(micStream);
-  // Note: Do NOT call azureSpeechRecognize() now.
+  // Do NOT call azureSpeechRecognize() now. Instead, we wait for user action.
   recordingResult.textContent = "🎙️ Speak now...";
   countdownDisplay.textContent = "⏺️ Recording (6 sec)...";
   startRecordingBtn.textContent = "Recording...";
@@ -355,24 +355,8 @@ function stopRecording() {
   if (audioContext && audioContext.state !== "closed") {
     audioContext.close().then(() => console.log("AudioContext closed")).catch(e => console.error("AudioContext close error:", e));
   }
-  // Instead of immediately checking the transcript, create a "Translate Now" button.
+  // Instead of verifying the transcript, immediately show the Translate Now button.
   setTimeout(() => { showTranslateNowButton(); }, 200);
-}
-
-function checkAndCreateSubmitButton() {
-  let convertedTranscript = convertDigitsToChinese(recordedTranscript);
-  convertedTranscript = convertedTranscript.replace(/[^\w\s\u4e00-\u9fa5]/g, "").trim();
-  const recordedPinyinFull = window.pinyinPro.pinyin(convertedTranscript, { toneType: "symbol", segment: true });
-  console.log("Cleaned Recorded Pinyin:", recordedPinyinFull);
-  console.log("Translated recorded speech:", recordedPinyinFull);
-  const tokens = recordedPinyinFull.split(" ");
-  const expectedPromptPinyin = window.pinyinPro.pinyin(KNOWN_PROMPT, { toneType: "symbol", segment: true }).trim();
-  const promptTokens = expectedPromptPinyin.split(" ");
-  if (tokens.length >= 4 && tokens.slice(0, 3).join(" ").trim() === promptTokens.join(" ").trim()) {
-    createSubmitButton();
-  } else {
-    recordingResult.textContent += "\nRecording did not capture the full prompt correctly. Please click Retry.";
-  }
 }
 
 function createSubmitButton() {
@@ -393,6 +377,7 @@ async function handleSubmit() {
     recordingResult.textContent += "\nNo speech detected. Please record again.";
     return;
   }
+  // Prepend prompt if missing.
   if (!recordedTranscript.startsWith(KNOWN_PROMPT)) {
     recordedTranscript = KNOWN_PROMPT + recordedTranscript;
   }
@@ -425,6 +410,7 @@ async function handleSubmit() {
   startRecordingBtn.disabled = true;
   startRecordingBtn.style.backgroundColor = "grey";
   await updateWordRecord(words[currentIndex], isCorrect);
+  // End mic access after submission.
   if (micStream) {
     micStream.getTracks().forEach(track => track.stop());
     micStream = null;
