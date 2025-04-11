@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Select Your Test</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Include Chart.js library for drawing the result chart -->
+  <!-- Include Chart.js (optional, if you display result charts) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Include the testResults.js module -->
+  <!-- If using a testResults module, include it here as needed -->
   <script src="testResults.js" defer></script>
   <style>
-    /* Inline styles specific to select page */
+    /* Basic inline styling for layout */
     .flex-container {
       display: flex;
       flex-wrap: wrap;
@@ -26,16 +26,13 @@
       margin: 2rem auto;
       text-align: center;
     }
-    select {
+    select, input[type="number"] {
       padding: 0.8rem;
       font-size: 1.2rem;
       border: 1px solid #ccc;
       border-radius: 5px;
-      width: 80%;
-      max-width: 400px;
       margin-bottom: 1rem;
     }
-    /* Container for grouping test options */
     .button-container {
       display: flex;
       flex-direction: column;
@@ -43,27 +40,11 @@
       align-items: center;
       margin-top: 1.5rem;
     }
-    /* Row for numeric input and Start Test button */
     .start-test-row {
       display: flex;
       gap: 0.5rem;
       align-items: center;
       justify-content: center;
-      width: 100%;
-      max-width: 350px;
-    }
-    .start-test-row input[type="number"] {
-      width: 100px;
-      padding: 0.8rem;
-      font-size: 1.2rem;
-      text-align: center;
-    }
-    /* Chart container styling */
-    .chart-container {
-      padding: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      background: #fff;
     }
   </style>
 </head>
@@ -72,9 +53,8 @@
     <header>
       <h1>Select Your Test</h1>
     </header>
-    
     <div class="flex-container">
-      <!-- Left Column: Test selection and options -->
+      <!-- Left Column: Test selection, word count, and test buttons -->
       <div class="left-column">
         <div class="select-container">
           <p>Please select the test you want to take:</p>
@@ -84,144 +64,68 @@
             <option value="English - Pronunciation Test">English - Pronunciation Test</option>
             <option value="English - Singular vs Plural">English - Singular vs Plural</option>
           </select>
-          
-          <!-- Container for both the Dictionary button and Start Test row -->
+          <div>
+            <label for="wordCountInput">Number of Words:</label>
+            <input id="wordCountInput" type="number" value="10" min="1">
+          </div>
           <div class="button-container" id="testOptionsContainer" style="display: none;">
-            <!-- Dictionary button (shown only for pronunciation tests) -->
             <button id="dictionaryBtn" class="interactive-btn" style="display: none;">Go to Word Dictionary</button>
-            <!-- Start test row: Numeric input (for word count) on left and Start Test button on right -->
             <div class="start-test-row" id="startTestRow" style="display: none;">
-              <input type="number" id="wordCountInput" min="1" value="10" />
               <button id="goTestBtn" class="interactive-btn">Start Test</button>
             </div>
           </div>
         </div>
-        
-        <!-- Back Button -->
-        <div style="margin-top: 2rem; text-align:center;">
+        <div style="margin-top:2rem; text-align:center;">
           <button class="interactive-btn" onclick="window.history.back()">Back</button>
         </div>
       </div>
-      
-      <!-- Right Column: Result Line Chart -->
+      <!-- Right Column: (Optional) Chart container if needed -->
       <div class="right-column">
         <div class="chart-container">
           <canvas id="resultChart"></canvas>
         </div>
       </div>
     </div>
-    
     <footer>
       <p>© 2025 Learning App. All rights reserved.</p>
     </footer>
-  </div>
-  
-  <script>
-    const testSelect = document.getElementById("testSelect");
-    const testOptionsContainer = document.getElementById("testOptionsContainer");
-    const dictionaryBtn = document.getElementById("dictionaryBtn");
-    const startTestRow = document.getElementById("startTestRow");
-    const goTestBtn = document.getElementById("goTestBtn");
-    const wordCountInput = document.getElementById("wordCountInput");
-    let chart; // Global variable to hold the chart instance
+    <script>
+      const testSelect = document.getElementById("testSelect");
+      const testOptionsContainer = document.getElementById("testOptionsContainer");
+      const dictionaryBtn = document.getElementById("dictionaryBtn");
+      const startTestRow = document.getElementById("startTestRow");
+      const goTestBtn = document.getElementById("goTestBtn");
+      const wordCountInput = document.getElementById("wordCountInput");
 
-    // Function to update the result line chart based on test selection.
-    function updateChart() {
-      const selected = testSelect.value;
-      const user = localStorage.getItem("selectedProfile");
-      if (!selected || !user) {
-        if (chart) { chart.destroy(); }
-        return;
-      }
-      // Fetch test results for current user and selected test type.
-      testResultsDB.getTestResults({ user: user, testType: selected })
-        .then(results => {
-          // Sort results by date
-          results.sort((a, b) => new Date(a.date) - new Date(b.date));
-          // Prepare labels (dates) and percentage data
-          const labels = results.map(result => new Date(result.date).toLocaleDateString());
-          const data = results.map(result => {
-            return result.totalAttempts > 0 ? (result.correctCount / result.totalAttempts * 100).toFixed(1) : 0;
-          });
-          // Destroy any existing chart instance
-          if (chart) { chart.destroy(); }
-          const ctx = document.getElementById("resultChart").getContext("2d");
-          chart = new Chart(ctx, {
-            type: "line",
-            data: {
-              labels: labels,
-              datasets: [{
-                label: "Test Performance (%)",
-                data: data,
-                fill: false,
-                borderColor: "rgb(75, 192, 192)",
-                tension: 0.1
-              }]
-            },
-            options: {
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  max: 100,
-                  title: { display: true, text: "Percentage (%)" }
-                },
-                x: {
-                  title: { display: true, text: "Date" }
-                }
-              }
-            }
-          });
-        })
-        .catch(err => {
-          console.error(err);
-        });
-    }
-    
-    testSelect.addEventListener("change", () => {
-      const selected = testSelect.value;
-      console.log("Selected test:", selected);
-      
-      // Show the container for test options
-      testOptionsContainer.style.display = "flex";
-      
-      // For Pronunciation Tests, show dictionary button and the start test row.
-      if (selected === "Chinese - Pronunciation Test" || selected === "English - Pronunciation Test") {
-        dictionaryBtn.style.display = "inline-block";
-        startTestRow.style.display = "flex";
-      } else {
-        // For other tests, hide dictionary button but still show start test row.
-        dictionaryBtn.style.display = "none";
-        startTestRow.style.display = "flex";
-      }
-      
-      // Set the action for Start Test button.
+      testSelect.addEventListener("change", () => {
+        const selected = testSelect.value;
+        testOptionsContainer.style.display = "flex";
+        if (selected === "Chinese - Pronunciation Test" || selected === "English - Pronunciation Test") {
+          dictionaryBtn.style.display = "inline-block";
+          startTestRow.style.display = "flex";
+        } else {
+          dictionaryBtn.style.display = "none";
+          startTestRow.style.display = "flex";
+        }
+      });
+
       goTestBtn.onclick = () => {
-        const wordCount = parseInt(wordCountInput.value, 10);
-        console.log("Word Count:", wordCount);
-        // Optionally, store or pass wordCount to quiz pages.
+        const count = parseInt(wordCountInput.value, 10);
+        localStorage.setItem("wordCount", count);
+        const selected = testSelect.value;
         if (selected === "Chinese - Pronunciation Test") {
-          window.location.href = "chinese_pronunciation.html";
+          window.location.href = "chinese_pronunication.html";
         } else if (selected === "English - Pronunciation Test") {
           window.location.href = "english_pronunciation.html";
         } else if (selected === "English - Singular vs Plural") {
           window.location.href = "english_plural.html";
         }
       };
-      
+
       dictionaryBtn.onclick = () => {
         window.location.href = "dictionary.html";
       };
-      
-      // Update the result chart with the latest test results.
-      updateChart();
-    });
-    
-    // Optional: If a test is already selected when the page loads, update the chart.
-    window.addEventListener("DOMContentLoaded", () => {
-      if(testSelect.value){
-        updateChart();
-      }
-    });
-  </script>
+    </script>
+  </div>
 </body>
 </html>
