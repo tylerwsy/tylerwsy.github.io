@@ -7,21 +7,45 @@
 
 html, body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  /* Single continuous gradient background */
   background: linear-gradient(135deg, #fceabb, #f8b500);
+  background-attachment: fixed;
+  background-size: cover;
   color: #333;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; */
+  justify-content: flex-start; 
+  padding: 1rem;
+  padding-top: 1rem;
+}
+
+/* Universal Container */
+.container {
+  /* Remove the strict max-width so more horizontal space is used in landscape */
+  width: 95%;
+  /* No white background here so the gradient shows through */
+  /* If you want a semi-transparent overlay instead of a white box, uncomment the next line: */
+  /* background: rgba(255, 255, 255, 0.9); */
+  /* To use the full gradient background across pages, you can remove any container background */
+  /*border-radius: 10px; */
+  /*box-shadow: 0 4px 8px rgba(0,0,0,0.15); */
+  align-items: center;
+  padding: 2rem;
+  text-align: center;
 }
 
 /* Header & Footer */
-header {
-  text-align: center;
-  padding: 1rem;
-}
 header h1 {
   font-size: 2rem;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: black;
+}
+
+header p,
+footer p {
+  font-size: 1.2rem;
+  margin-top: 0.5rem;
 }
 
 /* Interactive Buttons */
@@ -44,41 +68,129 @@ header h1 {
 }
 
 /* Form Elements */
-select,
 input[type="text"],
-input[type="password"] {
+input[type="password"],
+select {
   padding: 0.8rem;
   font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 5px;
-  margin-top: 0.5rem;
   width: 100%;
   max-width: 400px;
+  margin-top: 0.5rem;
 }
 
-/* Footer */
-footer {
+/* Profile Selector / Landing Page */
+.profile-selector {
+  margin: 1.5rem 0;
   text-align: center;
-  margin: 2rem 0;
-}
-footer p {
-  font-size: 1rem;
-  color: #333;
 }
 
-/* Additional spacing or containers can be added as needed. */
+/* Password Section (for landing page) */
+.password-section {
+  margin: 1.5rem 0;
+  text-align: center;
+}
 
-/* Example: style .select-container */
+.password-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Utility hidden class */
+.hidden {
+  display: none;
+}
+
+/* Select Page Specific */
 .select-container {
-  max-width: 600px;
   margin: 2rem auto;
   text-align: center;
 }
 
-/* .button-container is already handled inline or in separate styling, but can also be placed here */
 .button-container {
   display: inline-flex;
   gap: 1rem;
   justify-content: center;
   margin-top: 1rem;
+}
+
+/* Start Test Row: horizontal grouping of numeric input and button */
+.start-test-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 350px;
+}
+
+.start-test-row input[type="number"] {
+  width: 100px;
+  padding: 0.8rem;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+/* Dictionary Table Styles */
+.dictionary-table {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 0.8rem;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+th {
+  background-color: #ff7f50;
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+td {
+  font-size: 1rem;
+}
+
+/* Action buttons in table */
+table button {
+  background-color: #ff7f50;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  margin: 0.2rem;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+table button:hover,
+table button:focus {
+  background-color: #ff6347;
+  transform: scale(1.05);
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 768px) {
+  .container {
+    max-width: 95%;
+    padding: 1rem;
+  }
+  header h1 {
+    font-size: 1.8rem;
+  }
+  th, td {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+  }
 }

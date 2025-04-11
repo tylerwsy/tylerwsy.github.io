@@ -6,7 +6,7 @@
   <title>Select Your Test</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Inline styles for the select page */
+    /* Inline styles specific to select page */
     .select-container {
       margin: 2rem auto;
       text-align: center;
@@ -20,65 +20,60 @@
       max-width: 400px;
       margin-bottom: 1rem;
     }
-    
-    /* The main container for the dictionary and start test row */
+    /* Container for grouping test options */
     .button-container {
       display: flex;
-      flex-direction: column; /* Stack items vertically */
-      align-items: center;
+      flex-direction: column;
       gap: 1rem;
-      justify-content: center;
+      align-items: center;
       margin-top: 1.5rem;
     }
-
-    /* The row that holds the numeric input and Start Test button side-by-side */
+    /* Row for numeric input and Start Test button */
     .start-test-row {
       display: flex;
       gap: 0.5rem;
       align-items: center;
       justify-content: center;
       width: 100%;
-      max-width: 350px; /* Optional to keep them centered neatly */
+      max-width: 350px;
     }
     .start-test-row input[type="number"] {
-      /* Adjust width or other styling as desired */
+      width: 100px;
       padding: 0.8rem;
       font-size: 1.2rem;
-      width: 100px;
       text-align: center;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Select Your Test</h1>
-  </header>
-  
-  <div class="select-container">
-    <p>Please select the test you want to take:</p>
-    <select id="testSelect">
-      <option value="" disabled selected>Select a test...</option>
-      <option value="Chinese - Pronunciation Test">Chinese - Pronunciation Test</option>
-      <option value="English - Pronunciation Test">English - Pronunciation Test</option>
-      <option value="English - Singular vs Plural">English - Singular vs Plural</option>
-    </select>
-    
-    <!-- Single container to hold both dictionary button and start test row -->
-    <div class="button-container" id="testOptionsContainer" style="display: none;">
-      <!-- Dictionary button (top) -->
-      <button id="dictionaryBtn" class="interactive-btn" style="display: none;">Go to Word Dictionary</button>
-      <!-- Start test row (bottom), includes numeric input to left of Start button -->
-      <div class="start-test-row" id="startTestRow" style="display: none;">
-        <p>Select number of questions:</p>
-        <input type="number" id="wordCountInput" min="10" value="50" />
-        <button id="goTestBtn" class="interactive-btn">Start Test</button>
+  <div class="container">
+    <header>
+      <h1>Select Your Test</h1>
+    </header>
+    <div class="select-container">
+      <p>Please select the test you want to take:</p>
+      <select id="testSelect">
+        <option value="" disabled selected>Select a test...</option>
+        <option value="Chinese - Pronunciation Test">Chinese - Pronunciation Test</option>
+        <option value="English - Pronunciation Test">English - Pronunciation Test</option>
+        <option value="English - Singular vs Plural">English - Singular vs Plural</option>
+      </select>
+      
+      <!-- Container for both the Dictionary button and Start Test row -->
+      <div class="button-container" id="testOptionsContainer" style="display: none;">
+        <!-- Dictionary button (shown only for pronunciation tests) -->
+        <button id="dictionaryBtn" class="interactive-btn" style="display: none;">Go to Word Dictionary</button>
+        <!-- Start test row: Numeric input (for word count) on left and Start Test button on right -->
+        <div class="start-test-row" id="startTestRow" style="display: none;">
+          <input type="number" id="wordCountInput" min="1" value="10" />
+          <button id="goTestBtn" class="interactive-btn">Start Test</button>
+        </div>
       </div>
     </div>
+    <footer>
+      <p>© 2025 Learning App. All rights reserved.</p>
+    </footer>
   </div>
-  
-  <footer>
-    <p>© 2025 Learning App. All rights reserved.</p>
-  </footer>
   
   <script>
     const testSelect = document.getElementById("testSelect");
@@ -92,50 +87,36 @@
       const selected = testSelect.value;
       console.log("Selected test:", selected);
       
-      // Show the container that holds both dictionary button and start test row
+      // Show the container for test options
       testOptionsContainer.style.display = "flex";
       
+      // For Pronunciation Tests, show dictionary button and the start test row.
       if (selected === "Chinese - Pronunciation Test" || selected === "English - Pronunciation Test") {
-        // Show dictionary button
         dictionaryBtn.style.display = "inline-block";
-        // Show start test row, which includes numeric input
         startTestRow.style.display = "flex";
       } else {
-        // Hide dictionary button if user picks "English - Singular vs Plural"
+        // For other tests, hide dictionary button but still show start test row (if desired).
         dictionaryBtn.style.display = "none";
-        // Optionally hide the numeric input row or keep it:
-        // If you want it hidden for "Singular vs Plural," do:
-        // startTestRow.style.display = "none";
-        // but if you'd prefer to still allow a numeric input, leave it visible:
         startTestRow.style.display = "flex";
       }
-    });
-    
-    // Dictionary button redirect
-    dictionaryBtn.addEventListener("click", () => {
-      window.location.href = "dictionary.html";
-    });
-    
-    // Start test button logic
-    goTestBtn.addEventListener("click", () => {
-      const selected = testSelect.value;
-      const wordCount = parseInt(wordCountInput.value, 10);
-      console.log("Word count input:", wordCount); // for debugging
       
-      // You can pass this wordCount to your quiz page via query param or localStorage
-      // For demonstration, we do a simple redirect:
-      if (selected === "Chinese - Pronunciation Test") {
-        // e.g. you might do something like:
-        // localStorage.setItem('pronTestWordCount', wordCount);
-        // then redirect:
-        window.location.href = "chinese_quiz.html";
-      } else if (selected === "English - Pronunciation Test") {
-        // localStorage.setItem('pronTestWordCount', wordCount);
-        window.location.href = "english_quiz.html";
-      } else if (selected === "English - Singular vs Plural") {
-        // Possibly do something different
-        window.location.href = "english_plural.html";
-      }
+      // Set the action for Start Test button.
+      goTestBtn.onclick = () => {
+        const wordCount = parseInt(wordCountInput.value, 10);
+        console.log("Word Count:", wordCount);
+        // Optionally store or pass wordCount to quiz pages via query parameters or localStorage.
+        if (selected === "Chinese - Pronunciation Test") {
+          window.location.href = "chinese_quiz.html";
+        } else if (selected === "English - Pronunciation Test") {
+          window.location.href = "english_quiz.html";
+        } else if (selected === "English - Singular vs Plural") {
+          window.location.href = "english_plural.html";
+        }
+      };
+      
+      dictionaryBtn.onclick = () => {
+        window.location.href = "dictionary.html";
+      };
     });
   </script>
 </body>
