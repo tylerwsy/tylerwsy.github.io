@@ -13,9 +13,7 @@ function convertDigitsToChinese(str) {
 }
 
 // Helper: Clean the transcript by removing punctuation and extra spaces.
-// Keeps word characters, whitespace, and Chinese characters.
 function cleanTranscript(str) {
-  // Remove punctuation (anything that is not a word character, whitespace, or Chinese characters)
   return str.replace(/[^\w\s\u4e00-\u9fa5]/g, "").replace(/\s+/g, " ").trim();
 }
 
@@ -121,7 +119,7 @@ async function loadQuizWords() {
   }
 }
 
-/* Update dictionary record: increment attempts and, if correct, increment correct count. */
+/* Update dictionary record: increment attempts; if correct, increment correct count. */
 async function updateWordRecord(word, isCorrect) {
   try {
     const db = await openDB();
@@ -229,7 +227,13 @@ function createRecognitionInstance() {
     console.log("[speech] Transcript:", recordedTranscript);
     recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
   };
-  recog.onerror = e => console.warn("[speech] onerror:", e);
+  recog.onerror = e => {
+    if (e.error === "aborted") {
+      console.log("Speech recognition aborted (this may be harmless).");
+    } else {
+      console.warn("[speech] onerror:", e);
+    }
+  };
   recog.onend = () => console.log("[speech] onend triggered");
   return recog;
 }
@@ -314,7 +318,9 @@ function beginRecording() {
 function stopRecording(recognitionInstance) {
   if (isRecording) {
     recognitionInstance.stop();
-    if (mediaRecorder && mediaRecorder.state === "recording") { mediaRecorder.stop(); }
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.stop();
+    }
     isRecording = false;
     startRecordingBtn.textContent = "Retry";
     countdownDisplay.textContent = "";
@@ -334,7 +340,6 @@ function stopRecording(recognitionInstance) {
 
 function checkAndCreateSubmitButton() {
   let convertedTranscript = convertDigitsToChinese(recordedTranscript);
-  // Remove punctuation that might interfere.
   convertedTranscript = convertedTranscript.replace(/[^\w\s\u4e00-\u9fa5]/g, "").trim();
   const recordedPinyinFull = window.pinyinPro.pinyin(convertedTranscript, { toneType: "symbol", segment: true });
   console.log("Cleaned Recorded Pinyin:", recordedPinyinFull);
@@ -405,7 +410,8 @@ async function handleSubmit() {
     console.log("Mic tracks stopped after submit.");
   }
   if (audioContext && audioContext.state !== "closed") {
-    audioContext.close().then(() => console.log("AudioContext closed after submit")).catch(e => console.error("AudioContext close error:", e));
+    audioContext.close().then(() => console.log("AudioContext closed after submit"))
+      .catch(e => console.error("AudioContext close error:", e));
   }
   createNextButton();
 }
@@ -514,9 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadQuizWords();
 });
 
-/* Start Recording button event.
-   Always request a fresh mic stream.
-*/
+/* Start Recording button event: always request a fresh mic stream. */
 startRecordingBtn.addEventListener("click", () => {
   navigator.mediaDevices.getUserMedia({ audio: true })
     .then(stream => {
