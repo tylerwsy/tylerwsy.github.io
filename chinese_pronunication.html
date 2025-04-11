@@ -3,10 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chinese Pronunciation Test</title>
+  <title>Chinese Pronunciation Test with Azure Speech</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Include pinyin-pro library -->
+  <!-- Include pinyin-pro library for pinyin conversion -->
   <script src="https://cdn.jsdelivr.net/npm/pinyin-pro" defer></script>
+  <!-- Include Azure Speech SDK -->
+  <script src="https://aka.ms/csspeech/jsbrowserpackageraw" defer></script>
+  <!-- Include the updated JS file that utilizes Azure speech recognition -->
+  <script src="chinese_pronunication.js" defer></script>
 </head>
 <body>
   <div class="container">
@@ -42,9 +46,8 @@
       <button class="interactive-btn" onclick="window.history.back()">Back</button>
     </div>
     <footer>
-      <p>© 2025 Learning App. All rights reserved.</p>
+      <p>© 2025 Learning App. All rights reserved. v1.0</p>
     </footer>
-    <script src="chinese_pronunication.js"></script>
   </div>
 </body>
 </html>

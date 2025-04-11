@@ -1,5 +1,11 @@
+/* chinese_proununication.js */
+
 // Update the known prompt.
 const KNOWN_PROMPT = "答案是";
+
+// Azure Speech Service credentials – replace with your own.
+const azureSubscriptionKey = "YOUR_AZURE_SUBSCRIPTION_KEY";
+const azureServiceRegion = "southeastasia"; // e.g. "southeastasia"
 
 // Helper function: Convert digits (0-9) to Chinese characters.
 function convertDigitsToChinese(str) {
@@ -21,10 +27,13 @@ let currentIndex = 0;
 let correctCount = 0;
 let wrongCount = 0;
 
-// Variables for speech recognition.
+// Recording and recognition variables.
 let isRecording = false;
+let mediaRecorder;
 let micStream = null;
 let audioContext, analyser, dataArray;
+let recordedChunks = [];
+let latestRecordingBlob = null;
 let recordedTranscript = "";
 
 // DOM elements.
@@ -66,7 +75,7 @@ function ensureButtonGroup() {
 
 let submitBtn = null;
 let nextBtn = null;
-// Note: Removed any playbackBtn variable and all related recorded audio playback functionality.
+let playbackBtn = null;
 
 // IndexedDB settings.
 const DB_NAME = "SpellingAppDB";
@@ -114,7 +123,7 @@ async function loadQuizWords() {
   }
 }
 
-/* Update dictionary record: increment attempts and, if correct, increment correct count. */
+/* Update dictionary record: increment attempts and if correct, increment correct count. */
 async function updateWordRecord(word, isCorrect) {
   try {
     const db = await openDB();
@@ -184,6 +193,7 @@ function showWord() {
     recordingResult.textContent = "";
     controlsContainer.innerHTML = "";
     buttonGroup = null;
+    document.querySelectorAll(".correct-btn").forEach(btn => btn.remove());
   }
 }
 
@@ -209,27 +219,87 @@ function levenshteinDistance(a, b) {
   return matrix[b.length][a.length];
 }
 
-/* --- Speech and Recognition Functions --- */
-function createRecognitionInstance() {
-  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let recog = new Recognition();
-  recog.lang = "zh-CN";
-  recog.continuous = true; // Keep running for the full recording period.
-  recog.interimResults = false;
-  recog.onresult = event => {
-    recordedTranscript = event.results[0][0].transcript.trim();
-    console.log("[speech] Transcript:", recordedTranscript);
-    recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
-  };
-  recog.onerror = e => {
-    if (e.error === "aborted") {
-      console.log("Speech recognition aborted (this may be harmless).");
-    } else {
-      console.warn("[speech] onerror:", e);
+/* --- Azure Speech and Recording Functions --- */
+/* This function calls Azure Speech Services to recognize speech.
+   A callback function is executed after recognition completes. */
+function azureSpeechRecognize(callback) {
+  if (typeof SpeechSDK === "undefined") {
+    console.error("Azure Speech SDK not found. Please include the SDK script in your HTML.");
+    return;
+  }
+  const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(azureSubscriptionKey, azureServiceRegion);
+  speechConfig.speechRecognitionLanguage = "zh-CN";
+  const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+  const recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+  recognizer.recognizeOnceAsync(
+    result => {
+      recordedTranscript = result.text;
+      console.log("[azure] Recognized text:", recordedTranscript);
+      recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
+      if(callback) callback();
+    },
+    err => {
+      console.error("[azure] Recognition error:", err);
+      recordingResult.textContent += "\n[azure] Recognition error.";
     }
+  );
+}
+
+/* Creates a "Translate Now" button after recording stops.
+   When clicked, it calls Azure Speech Services to translate the recorded speech. */
+function showTranslateNowButton() {
+  let translateBtn = document.createElement("button");
+  translateBtn.textContent = "Translate Now";
+  translateBtn.classList.add("interactive-btn");
+  translateBtn.addEventListener("click", () => {
+    translateBtn.disabled = true;
+    azureSpeechRecognize(() => {
+      // After translation completes, enable the Submit button.
+      checkAndCreateSubmitButton();
+    });
+  });
+  ensureButtonGroup().row1.appendChild(translateBtn);
+}
+
+function setupMediaRecorder(stream) {
+  mediaRecorder = new MediaRecorder(stream);
+  mediaRecorder.ondataavailable = event => {
+    if (event.data && event.data.size > 0) { recordedChunks.push(event.data); }
   };
-  recog.onend = () => console.log("[speech] onend triggered");
-  return recog;
+  mediaRecorder.onstop = () => {
+    latestRecordingBlob = new Blob(recordedChunks, { type: "audio/webm" });
+    console.log("MediaRecorder stopped; blob size:", latestRecordingBlob.size);
+    updatePlaybackButton(latestRecordingBlob);
+    recordedChunks = [];
+  };
+}
+
+function updatePlaybackButton(blob) {
+  const audioUrl = URL.createObjectURL(blob);
+  console.log("Created blob URL:", audioUrl);
+  if (!playbackBtn) {
+    playbackBtn = document.createElement("button");
+    playbackBtn.textContent = "Play Recorded Audio";
+    playbackBtn.classList.add("interactive-btn");
+    playbackBtn.addEventListener("click", () => {
+      try {
+        const audio = new Audio(audioUrl);
+        audio.play().catch(e => console.error("Playback error:", e));
+      } catch (e) {
+        console.error("Error in playback button click:", e);
+      }
+    });
+    ensureButtonGroup().row1.appendChild(playbackBtn);
+  } else {
+    playbackBtn.onclick = () => {
+      try {
+        const audio = new Audio(audioUrl);
+        audio.play().catch(e => console.error("Playback error:", e));
+      } catch (e) {
+        console.error("Error in playback button onclick:", e);
+      }
+    };
+  }
 }
 
 function setupMicStream(stream) {
@@ -242,56 +312,59 @@ function setupMicStream(stream) {
 }
 
 function beginRecording() {
-  // Remove any previous submit or next buttons.
+  recordedChunks = [];
+  latestRecordingBlob = null;
+  recordedTranscript = "";
+  recordingResult.textContent = "";
   if (submitBtn && submitBtn.parentNode) { submitBtn.parentNode.removeChild(submitBtn); submitBtn = null; }
   if (nextBtn && nextBtn.parentNode) { nextBtn.parentNode.removeChild(nextBtn); nextBtn = null; }
+  if (playbackBtn && playbackBtn.parentNode) { playbackBtn.parentNode.removeChild(playbackBtn); playbackBtn = null; }
   controlsContainer.innerHTML = "";
   buttonGroup = null;
   startRecordingBtn.disabled = false;
   startRecordingBtn.style.backgroundColor = "";
-  
-  recordedTranscript = "";
+  setupMediaRecorder(micStream);
+  // Note: Do NOT call azureSpeechRecognize() now.
   recordingResult.textContent = "🎙️ Speak now...";
   countdownDisplay.textContent = "⏺️ Recording (6 sec)...";
   startRecordingBtn.textContent = "Recording...";
-  
-  let recognition = createRecognitionInstance();
+  mediaRecorder.start();
   isRecording = true;
-  recognition.start();
   console.log("[recording] Started");
-  
   setTimeout(() => {
-    stopRecording(recognition);
+    stopRecording();
     console.log("[recording] Auto-stopped after 6 seconds");
   }, 6000);
 }
 
-function stopRecording(recognitionInstance) {
-  if (isRecording) {
-    recognitionInstance.stop();
-    isRecording = false;
-    startRecordingBtn.textContent = "Retry";
-    countdownDisplay.textContent = "";
-    console.log("[recording] Stopped");
-    // Release mic tracks and close audio context.
-    if (micStream) {
-      micStream.getTracks().forEach(track => track.stop());
-      micStream = null;
-      console.log("Mic tracks stopped.");
-    }
-    if (audioContext && audioContext.state !== "closed") {
-      audioContext.close().then(() => console.log("AudioContext closed")).catch(e => console.error("AudioContext close error:", e));
-    }
-    setTimeout(() => { checkAndCreateSubmitButton(); }, 200);
+function stopRecording() {
+  // Stop MediaRecorder if active.
+  if (mediaRecorder && mediaRecorder.state === "recording") {
+    mediaRecorder.stop();
   }
+  isRecording = false;
+  startRecordingBtn.textContent = "Retry";
+  countdownDisplay.textContent = "";
+  console.log("[recording] Stopped");
+  // Release mic tracks and close audio context.
+  if (micStream) {
+    micStream.getTracks().forEach(track => track.stop());
+    micStream = null;
+    console.log("Mic tracks stopped.");
+  }
+  if (audioContext && audioContext.state !== "closed") {
+    audioContext.close().then(() => console.log("AudioContext closed")).catch(e => console.error("AudioContext close error:", e));
+  }
+  // Instead of immediately checking the transcript, create a "Translate Now" button.
+  setTimeout(() => { showTranslateNowButton(); }, 200);
 }
 
 function checkAndCreateSubmitButton() {
   let convertedTranscript = convertDigitsToChinese(recordedTranscript);
-  // Remove punctuation that might interfere.
   convertedTranscript = convertedTranscript.replace(/[^\w\s\u4e00-\u9fa5]/g, "").trim();
   const recordedPinyinFull = window.pinyinPro.pinyin(convertedTranscript, { toneType: "symbol", segment: true });
   console.log("Cleaned Recorded Pinyin:", recordedPinyinFull);
+  console.log("Translated recorded speech:", recordedPinyinFull);
   const tokens = recordedPinyinFull.split(" ");
   const expectedPromptPinyin = window.pinyinPro.pinyin(KNOWN_PROMPT, { toneType: "symbol", segment: true }).trim();
   const promptTokens = expectedPromptPinyin.split(" ");
@@ -345,7 +418,6 @@ async function handleSubmit() {
     recordingResult.textContent += "\nExpected (pinyin): " + expectedPinyin;
     recordingResult.textContent += "\nGot (pinyin): " + recordedPinyin;
     wrongCount++;
-    // Keep the createCorrectPlaybackButton() function to allow the user to hear the correct word.
     createCorrectPlaybackButton();
   }
   submitBtn.disabled = true;
@@ -353,7 +425,6 @@ async function handleSubmit() {
   startRecordingBtn.disabled = true;
   startRecordingBtn.style.backgroundColor = "grey";
   await updateWordRecord(words[currentIndex], isCorrect);
-  // End mic access after submission.
   if (micStream) {
     micStream.getTracks().forEach(track => track.stop());
     micStream = null;
@@ -366,7 +437,6 @@ async function handleSubmit() {
   createNextButton();
 }
 
-/* This function is kept because it is used for playing back the correct word (via speech synthesis) when the answer is wrong. */
 function createCorrectPlaybackButton() {
   if (!document.querySelector(".correct-btn")) {
     let correctBtn = document.createElement("button");
@@ -406,6 +476,7 @@ function nextWord() {
   startRecordingBtn.style.backgroundColor = "";
   controlsContainer.innerHTML = "";
   buttonGroup = null;
+  playbackBtn = null;
   
   if (currentIndex < words.length) {
     showWord();
