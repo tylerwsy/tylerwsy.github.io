@@ -24,7 +24,7 @@
       margin: 2rem auto;
       text-align: center;
     }
-    select, input[type="number"] {
+    select, input[type="number"], input[type="password"] {
       padding: 0.8rem;
       font-size: 1.2rem;
       border: 1px solid #ccc;
@@ -88,7 +88,13 @@
           </select>
           <div>
             <label for="wordCountInput">Number of Words:</label>
-            <input id="wordCountInput" type="number" value="30" min="30">
+            <!-- Set min to 1 so admin override can choose fewer than 30 -->
+            <input id="wordCountInput" type="number" value="30" min="1">
+          </div>
+          <!-- Admin password field; only visible when count is below 30 -->
+          <div id="adminPasswordContainer" style="display: none;">
+            <label for="adminPasswordInput">Admin Password:</label>
+            <input id="adminPasswordInput" type="password" placeholder="Enter admin password">
           </div>
           <div class="button-container" id="testOptionsContainer" style="display: none;">
             <button id="dictionaryBtn" class="interactive-btn" style="display: none;">Go to Word Dictionary</button>
@@ -237,6 +243,8 @@
       const startTestRow = document.getElementById("startTestRow");
       const goTestBtn = document.getElementById("goTestBtn");
       const wordCountInput = document.getElementById("wordCountInput");
+      const adminPasswordContainer = document.getElementById("adminPasswordContainer");
+      const adminPasswordInput = document.getElementById("adminPasswordInput");
 
       testSelect.addEventListener("change", () => {
         testOptionsContainer.style.display = "flex";
@@ -247,12 +255,25 @@
         updateDailyMission();
       });
 
+      // Show admin password input if the word count is below 30.
+      wordCountInput.addEventListener("input", () => {
+        if (parseInt(wordCountInput.value, 10) < 30) {
+          adminPasswordContainer.style.display = "block";
+        } else {
+          adminPasswordContainer.style.display = "none";
+        }
+      });
+
       goTestBtn.onclick = () => {
         let count = parseInt(wordCountInput.value, 10);
         if (count < 30) {
-          alert("Minimum number of questions is 30.");
-          wordCountInput.value = 30;
-          count = 30;
+          const adminPass = adminPasswordInput.value.trim();
+          if (adminPass !== "2104") {
+            alert("Minimum number of questions is 30 unless the admin password is provided.");
+            wordCountInput.value = 30;
+            adminPasswordContainer.style.display = "none";
+            return;
+          }
         }
         localStorage.setItem("wordCount", count);
         const selected = testSelect.value;

@@ -1,5 +1,3 @@
-/* chinese_pronunication.js */
-
 // Update the known prompt.
 const KNOWN_PROMPT = "答案是";
 
@@ -23,13 +21,10 @@ let currentIndex = 0;
 let correctCount = 0;
 let wrongCount = 0;
 
-// Recording and recognition variables.
+// Variables for speech recognition.
 let isRecording = false;
-let mediaRecorder;
 let micStream = null;
 let audioContext, analyser, dataArray;
-let recordedChunks = [];
-let latestRecordingBlob = null;
 let recordedTranscript = "";
 
 // DOM elements.
@@ -71,7 +66,7 @@ function ensureButtonGroup() {
 
 let submitBtn = null;
 let nextBtn = null;
-let playbackBtn = null;
+// Note: Removed any playbackBtn variable and all related recorded audio playback functionality.
 
 // IndexedDB settings.
 const DB_NAME = "SpellingAppDB";
@@ -119,7 +114,7 @@ async function loadQuizWords() {
   }
 }
 
-/* Update dictionary record: increment attempts and if correct, increment correct count. */
+/* Update dictionary record: increment attempts and, if correct, increment correct count. */
 async function updateWordRecord(word, isCorrect) {
   try {
     const db = await openDB();
@@ -189,7 +184,6 @@ function showWord() {
     recordingResult.textContent = "";
     controlsContainer.innerHTML = "";
     buttonGroup = null;
-    document.querySelectorAll(".correct-btn").forEach(btn => btn.remove());
   }
 }
 
@@ -215,21 +209,17 @@ function levenshteinDistance(a, b) {
   return matrix[b.length][a.length];
 }
 
-/* --- Speech and Recording Functions --- */
+/* --- Speech and Recognition Functions --- */
 function createRecognitionInstance() {
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recog = new Recognition();
   recog.lang = "zh-CN";
-  recog.continuous = false;
-  recog.interimResults = true;
+  recog.continuous = true; // Keep running for the full recording period.
+  recog.interimResults = false;
   recog.onresult = event => {
-    if (event.results.length > 0 && event.results[0][0]) {
-      recordedTranscript = event.results[0][0].transcript.trim();
-      console.log("[speech] Transcript:", recordedTranscript);
-      recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
-    } else {
-      console.warn("No speech result found.");
-    }
+    recordedTranscript = event.results[0][0].transcript.trim();
+    console.log("[speech] Transcript:", recordedTranscript);
+    recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
   };
   recog.onerror = e => {
     if (e.error === "aborted") {
@@ -238,59 +228,8 @@ function createRecognitionInstance() {
       console.warn("[speech] onerror:", e);
     }
   };
-  recog.onend = () => {
-    if (!recordedTranscript) {
-      console.log("Retrying recognition due to empty transcript.");
-      recog.start();
-    } else {
-      console.log("[speech] onend triggered");
-    }
-  };
-  recog.onaudiostart = () => console.log("[speech] audio input detected");
-  recog.onspeechstart = () => console.log("[speech] speech started");
-  recog.onspeechend = () => console.log("[speech] speech ended");
+  recog.onend = () => console.log("[speech] onend triggered");
   return recog;
-}
-
-function setupMediaRecorder(stream) {
-  mediaRecorder = new MediaRecorder(stream);
-  mediaRecorder.ondataavailable = event => {
-    if (event.data && event.data.size > 0) { recordedChunks.push(event.data); }
-  };
-  mediaRecorder.onstop = () => {
-    latestRecordingBlob = new Blob(recordedChunks, { type: "audio/webm" });
-    console.log("MediaRecorder stopped; blob size:", latestRecordingBlob.size);
-    updatePlaybackButton(latestRecordingBlob);
-    recordedChunks = [];
-  };
-}
-
-function updatePlaybackButton(blob) {
-  const audioUrl = URL.createObjectURL(blob);
-  console.log("Created blob URL:", audioUrl);
-  if (!playbackBtn) {
-    playbackBtn = document.createElement("button");
-    playbackBtn.textContent = "Play Recorded Audio";
-    playbackBtn.classList.add("interactive-btn");
-    playbackBtn.addEventListener("click", () => {
-      try {
-        const audio = new Audio(audioUrl);
-        audio.play().catch(e => console.error("Playback error:", e));
-      } catch (e) {
-        console.error("Error in playback button click:", e);
-      }
-    });
-    ensureButtonGroup().row1.appendChild(playbackBtn);
-  } else {
-    playbackBtn.onclick = () => {
-      try {
-        const audio = new Audio(audioUrl);
-        audio.play().catch(e => console.error("Playback error:", e));
-      } catch (e) {
-        console.error("Error in playback button onclick:", e);
-      }
-    };
-  }
 }
 
 function setupMicStream(stream) {
@@ -303,36 +242,24 @@ function setupMicStream(stream) {
 }
 
 function beginRecording() {
-  recordedChunks = [];
-  latestRecordingBlob = null;
-  recordedTranscript = "";
-  recordingResult.textContent = "";
+  // Remove any previous submit or next buttons.
   if (submitBtn && submitBtn.parentNode) { submitBtn.parentNode.removeChild(submitBtn); submitBtn = null; }
   if (nextBtn && nextBtn.parentNode) { nextBtn.parentNode.removeChild(nextBtn); nextBtn = null; }
-  if (playbackBtn && playbackBtn.parentNode) { playbackBtn.parentNode.removeChild(playbackBtn); playbackBtn = null; }
   controlsContainer.innerHTML = "";
   buttonGroup = null;
   startRecordingBtn.disabled = false;
   startRecordingBtn.style.backgroundColor = "";
-
-  let recognition = createRecognitionInstance();
+  
+  recordedTranscript = "";
   recordingResult.textContent = "🎙️ Speak now...";
-  countdownDisplay.textContent = "⏺️ Listening...";
+  countdownDisplay.textContent = "⏺️ Recording (6 sec)...";
   startRecordingBtn.textContent = "Recording...";
+  
+  let recognition = createRecognitionInstance();
   isRecording = true;
   recognition.start();
   console.log("[recording] Started");
-
-  recognition.onend = () => {
-    console.log("[speech] onend triggered");
-    setupMediaRecorder(micStream);
-    mediaRecorder.start();
-    setTimeout(() => {
-      stopRecording(recognition);
-      console.log("[recording] Auto-stopped after 6 seconds");
-    }, 6000);
-  };
-  console.log("[recording] Started");
+  
   setTimeout(() => {
     stopRecording(recognition);
     console.log("[recording] Auto-stopped after 6 seconds");
@@ -342,9 +269,6 @@ function beginRecording() {
 function stopRecording(recognitionInstance) {
   if (isRecording) {
     recognitionInstance.stop();
-    if (mediaRecorder && mediaRecorder.state === "recording") {
-      mediaRecorder.stop();
-    }
     isRecording = false;
     startRecordingBtn.textContent = "Retry";
     countdownDisplay.textContent = "";
@@ -368,8 +292,6 @@ function checkAndCreateSubmitButton() {
   convertedTranscript = convertedTranscript.replace(/[^\w\s\u4e00-\u9fa5]/g, "").trim();
   const recordedPinyinFull = window.pinyinPro.pinyin(convertedTranscript, { toneType: "symbol", segment: true });
   console.log("Cleaned Recorded Pinyin:", recordedPinyinFull);
-  // Added log to display the translated speech for checking.
-  console.log("Translated recorded speech:", recordedPinyinFull);
   const tokens = recordedPinyinFull.split(" ");
   const expectedPromptPinyin = window.pinyinPro.pinyin(KNOWN_PROMPT, { toneType: "symbol", segment: true }).trim();
   const promptTokens = expectedPromptPinyin.split(" ");
@@ -423,6 +345,7 @@ async function handleSubmit() {
     recordingResult.textContent += "\nExpected (pinyin): " + expectedPinyin;
     recordingResult.textContent += "\nGot (pinyin): " + recordedPinyin;
     wrongCount++;
+    // Keep the createCorrectPlaybackButton() function to allow the user to hear the correct word.
     createCorrectPlaybackButton();
   }
   submitBtn.disabled = true;
@@ -443,6 +366,7 @@ async function handleSubmit() {
   createNextButton();
 }
 
+/* This function is kept because it is used for playing back the correct word (via speech synthesis) when the answer is wrong. */
 function createCorrectPlaybackButton() {
   if (!document.querySelector(".correct-btn")) {
     let correctBtn = document.createElement("button");
@@ -482,7 +406,6 @@ function nextWord() {
   startRecordingBtn.style.backgroundColor = "";
   controlsContainer.innerHTML = "";
   buttonGroup = null;
-  playbackBtn = null;
   
   if (currentIndex < words.length) {
     showWord();
