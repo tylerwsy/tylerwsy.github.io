@@ -220,7 +220,7 @@ function createRecognitionInstance() {
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recog = new Recognition();
   recog.lang = "zh-CN";
-  recog.continuous = true; // Keep recognition active throughout the recording period.
+  recog.continuous = true; // Keep running for the full recording period.
   recog.interimResults = false;
   recog.onresult = event => {
     recordedTranscript = event.results[0][0].transcript.trim();
@@ -318,7 +318,9 @@ function beginRecording() {
 function stopRecording(recognitionInstance) {
   if (isRecording) {
     recognitionInstance.stop();
-    if (mediaRecorder && mediaRecorder.state === "recording") { mediaRecorder.stop(); }
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.stop();
+    }
     isRecording = false;
     startRecordingBtn.textContent = "Retry";
     countdownDisplay.textContent = "";
@@ -338,9 +340,12 @@ function stopRecording(recognitionInstance) {
 
 function checkAndCreateSubmitButton() {
   let convertedTranscript = convertDigitsToChinese(recordedTranscript);
+  // Remove punctuation that might interfere.
   convertedTranscript = convertedTranscript.replace(/[^\w\s\u4e00-\u9fa5]/g, "").trim();
   const recordedPinyinFull = window.pinyinPro.pinyin(convertedTranscript, { toneType: "symbol", segment: true });
   console.log("Cleaned Recorded Pinyin:", recordedPinyinFull);
+  // Added log to display the translated speech for checking.
+  console.log("Translated recorded speech:", recordedPinyinFull);
   const tokens = recordedPinyinFull.split(" ");
   const expectedPromptPinyin = window.pinyinPro.pinyin(KNOWN_PROMPT, { toneType: "symbol", segment: true }).trim();
   const promptTokens = expectedPromptPinyin.split(" ");
@@ -518,9 +523,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadQuizWords();
 });
 
-/* Start Recording button event.
-   Always request a fresh mic stream.
-*/
+/* Start Recording button event: Always request a fresh mic stream. */
 startRecordingBtn.addEventListener("click", () => {
   navigator.mediaDevices.getUserMedia({ audio: true })
     .then(stream => {
