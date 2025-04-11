@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <!-- For best display on mobile (landscape preferred) -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Word Dictionary</title>
   <link rel="stylesheet" href="style.css" />
@@ -11,8 +12,7 @@
   <script src="dictionary.js" defer></script>
 </head>
 <body>
-  <!-- No additional inline styles; the consistent background from style.css will appear -->
-  <div class="	container">
+  <div class="container">
     <header>
       <h1>Word Dictionary</h1>
     </header>
@@ -33,6 +33,7 @@
       <button id="resetDictionaryBtn" class="interactive-btn">Reset Dictionary</button>
     </section>
     
+    <!-- The dictionary-table section now has a fixed height with vertical scrolling -->
     <section class="dictionary-table">
       <table id="wordTable">
         <thead id="tableHead"></thead>

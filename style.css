@@ -48,6 +48,12 @@ footer p {
   margin-top: 0.5rem;
 }
 
+.dictionary-table {
+  max-height: 500px;   /* Set this value as needed */
+  overflow-y: auto;    /* Vertical scrolling */
+  margin: 1.5rem 0;
+}
+
 /* Interactive Buttons */
 .interactive-btn {
   background-color: #ff7f50;
@@ -158,6 +164,7 @@ th {
 }
 
 td {
+  background-color: #fff;
   font-size: 1rem;
 }
 
