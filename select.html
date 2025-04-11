@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Select Your Test</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Include Chart.js and the Data Labels plugin -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <script src="testResults.js" defer></script>
@@ -71,26 +70,27 @@
 </head>
 <body>
   <div class="container">
+    <div id="dailyMission" style="text-align: center; margin-bottom: 1rem;">
+      <h2>🎯 Daily Missions - Do daily and get more than 80% correct!</h2>
+      <div id="missionStatus" style="font-size: 1.2rem;"></div>
+    </div>
     <header>
       <h1>Select Your Test</h1>
     </header>
     <div class="flex-container">
-      <!-- Left Column: Test selection -->
       <div class="left-column">
         <div class="select-container">
           <p>Please select the test you want to take:</p>
           <select id="testSelect">
             <option value="" disabled selected>Select a test...</option>
             <option value="Chinese - Pronunciation Test">Chinese - Pronunciation Test</option>
-            <!-- <option value="English - Pronunciation Test">English - Pronunciation Test</option> -->
             <option value="English - Singular vs Plural">English - Singular vs Plural</option>
           </select>
           <div>
             <label for="wordCountInput">Number of Words:</label>
-            <input id="wordCountInput" type="number" value="10" min="1">
+            <input id="wordCountInput" type="number" value="30" min="30">
           </div>
           <div class="button-container" id="testOptionsContainer" style="display: none;">
-            <!-- Show dictionary button for pronunciation tests -->
             <button id="dictionaryBtn" class="interactive-btn" style="display: none;">Go to Word Dictionary</button>
             <div class="start-test-row" id="startTestRow" style="display: none;">
               <button id="goTestBtn" class="interactive-btn">Start Test</button>
@@ -101,7 +101,6 @@
           <button class="interactive-btn" onclick="window.history.back()">Back</button>
         </div>
       </div>
-      <!-- Right Column: Chart and extra buttons -->
       <div class="right-column">
         <div class="chart-container">
           <canvas id="resultChart"></canvas>
@@ -113,27 +112,32 @@
       <p>© 2025 Learning App. All rights reserved. v1.0</p>
     </footer>
     <script>
-      // Reset test dropdown on load.
-      window.addEventListener("load", () => {
-        document.getElementById("testSelect").selectedIndex = 0;
-      });
-
-      // Build a line chart from quizResults stored in localStorage.
       let showAll = false;
+
+      function updateDailyMission() {
+        const missionStatus = document.getElementById("missionStatus");
+        const logs = JSON.parse(localStorage.getItem("quizResults") || "[]");
+        const today = new Date().toISOString().split("T")[0];
+
+        const hasChinese = logs.some(r => r.mode === "chinese" && r.date.startsWith(today) && (r.correct / r.total) >= 0.8);
+        const hasPlural = logs.some(r => r.mode === "english_plural" && r.date.startsWith(today) && (r.correct / r.total) >= 0.8);
+
+        missionStatus.innerHTML = `
+          <div>Chinese Pronunciation: ${hasChinese ? "✅" : "⬜"}</div>
+          <div>English Plural: ${hasPlural ? "✅" : "⬜"}</div>
+        `;
+      }
+
       function updateResultChart() {
         const selectedTest = document.getElementById("testSelect").value;
         const ctx = document.getElementById("resultChart").getContext("2d");
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         if (!selectedTest) return;
-        
+
         let mode = "";
-        if (selectedTest === "Chinese - Pronunciation Test") {
-          mode = "chinese";
-        } else if (selectedTest === "English - Pronunciation Test") {
-          mode = "english_pronunciation";
-        } else if (selectedTest === "English - Singular vs Plural") {
-          mode = "english_plural";
-        }
+        if (selectedTest === "Chinese - Pronunciation Test") mode = "chinese";
+        else if (selectedTest === "English - Singular vs Plural") mode = "english_plural";
+
         const allLogs = JSON.parse(localStorage.getItem("quizResults") || "[]");
         const results = allLogs.filter(r => r.mode === mode);
         if (!results.length) {
@@ -142,18 +146,17 @@
           ctx.fillText("There is no result", ctx.canvas.width / 2, ctx.canvas.height / 2);
           return;
         }
+
         results.sort((a, b) => new Date(a.date) - new Date(b.date));
         let displayResults = showAll ? results : results.slice(-5);
-        // Create multiline labels: [Date, Time, Ratio]
+
         const labels = displayResults.map(r => {
           const d = new Date(r.date);
-          const date = d.toLocaleDateString();
-          const time = d.toLocaleTimeString();
-          const ratio = `${r.correct}/${r.total}`;
-          return [date, time, ratio];
+          return [d.toLocaleDateString(), d.toLocaleTimeString(), `${r.correct}/${r.total}`];
         });
         const percentages = displayResults.map(r => Math.round((r.correct / r.total) * 100));
-        if (window.quizChart) { window.quizChart.destroy(); }
+
+        if (window.quizChart) window.quizChart.destroy();
         window.quizChart = new Chart(ctx, {
           type: 'line',
           data: {
@@ -168,6 +171,7 @@
           },
           options: {
             plugins: {
+              legend: { display: false },
               datalabels: {
                 anchor: 'end',
                 align: 'end',
@@ -182,27 +186,22 @@
           plugins: [ChartDataLabels]
         });
       }
-      window.addEventListener("load", updateResultChart);
 
-      // Reset test results for the selected mode.
       function resetTestResults() {
         const selectedTest = document.getElementById("testSelect").value;
         if (!selectedTest) return;
+
         let mode = "";
-        if (selectedTest === "Chinese - Pronunciation Test") {
-          mode = "chinese";
-        } else if (selectedTest === "English - Pronunciation Test") {
-          mode = "english_pronunciation";
-        } else if (selectedTest === "English - Singular vs Plural") {
-          mode = "english_plural";
-        }
+        if (selectedTest === "Chinese - Pronunciation Test") mode = "chinese";
+        else if (selectedTest === "English - Singular vs Plural") mode = "english_plural";
+
         let allLogs = JSON.parse(localStorage.getItem("quizResults") || "[]");
         allLogs = allLogs.filter(r => r.mode !== mode);
         localStorage.setItem("quizResults", JSON.stringify(allLogs));
         updateResultChart();
+        updateDailyMission();
       }
-      
-      // Extra buttons below the chart.
+
       function updateExtraButtons() {
         const extraDiv = document.getElementById("chartExtraButtons");
         extraDiv.innerHTML = "";
@@ -226,6 +225,12 @@
         }
       }
 
+      window.addEventListener("load", () => {
+        document.getElementById("testSelect").selectedIndex = 0;
+        updateResultChart();
+        updateDailyMission();
+      });
+
       const testSelect = document.getElementById("testSelect");
       const testOptionsContainer = document.getElementById("testOptionsContainer");
       const dictionaryBtn = document.getElementById("dictionaryBtn");
@@ -235,19 +240,20 @@
 
       testSelect.addEventListener("change", () => {
         testOptionsContainer.style.display = "flex";
-        if (testSelect.value === "Chinese - Pronunciation Test") {
-          dictionaryBtn.style.display = "inline-block";
-          startTestRow.style.display = "flex";
-        } else {
-          dictionaryBtn.style.display = "none";
-          startTestRow.style.display = "flex";
-        }
+        dictionaryBtn.style.display = testSelect.value === "Chinese - Pronunciation Test" ? "inline-block" : "none";
+        startTestRow.style.display = "flex";
         updateExtraButtons();
         updateResultChart();
+        updateDailyMission();
       });
 
       goTestBtn.onclick = () => {
-        const count = parseInt(wordCountInput.value, 10);
+        let count = parseInt(wordCountInput.value, 10);
+        if (count < 30) {
+          alert("Minimum number of questions is 30.");
+          wordCountInput.value = 30;
+          count = 30;
+        }
         localStorage.setItem("wordCount", count);
         const selected = testSelect.value;
         if (selected === "Chinese - Pronunciation Test") {
