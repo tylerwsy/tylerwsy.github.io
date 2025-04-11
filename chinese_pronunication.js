@@ -246,6 +246,9 @@ function createRecognitionInstance() {
       console.log("[speech] onend triggered");
     }
   };
+  recog.onaudiostart = () => console.log("[speech] audio input detected");
+  recog.onspeechstart = () => console.log("[speech] speech started");
+  recog.onspeechend = () => console.log("[speech] speech ended");
   return recog;
 }
 
