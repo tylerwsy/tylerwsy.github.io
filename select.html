@@ -70,6 +70,12 @@
         </div>
       </div>
     </div>
+    
+    <!-- Back Button -->
+    <div style="margin-top: 2rem;">
+      <button class="interactive-btn" onclick="window.history.back()">Back</button>
+    </div>
+    
     <footer>
       <p>© 2025 Learning App. All rights reserved.</p>
     </footer>
@@ -106,9 +112,9 @@
         console.log("Word Count:", wordCount);
         // Optionally store or pass wordCount to quiz pages via query parameters or localStorage.
         if (selected === "Chinese - Pronunciation Test") {
-          window.location.href = "chinese_quiz.html";
+          window.location.href = "chinese_pronunciation.html";
         } else if (selected === "English - Pronunciation Test") {
-          window.location.href = "english_quiz.html";
+          window.location.href = "english_pronunciation.html";
         } else if (selected === "English - Singular vs Plural") {
           window.location.href = "english_plural.html";
         }

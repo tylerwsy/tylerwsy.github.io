@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>English - Pronunciation Test</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="testResults.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>English - Pronunciation Test</h1>
+    </header>
+    <section id="quizContent">
+      <p>This is a demo quiz. Answer the following questions:</p>
+      <!-- Simulated question content -->
+      <p>Question 1: [Your question here]</p>
+      <p>Question 2: [Your question here]</p>
+      <!-- Button to finish and record the test -->
+      <button id="finishTestBtn" class="interactive-btn">Finish Test</button>
+    </section>
+    
+    <!-- Back Button -->
+    <div style="margin-top: 2rem;">
+      <button class="interactive-btn" onclick="window.history.back()">Back</button>
+    </div>
+    
+    <footer>
+      <p>© 2025 Learning App. All rights reserved.</p>
+    </footer>
+  </div>
+  
+  <script>
+    document.getElementById('finishTestBtn').addEventListener('click', () => {
+      // Dummy result for demonstration
+      const result = {
+        user: localStorage.getItem("selectedProfile"),
+        testType: "English - Pronunciation Test",
+        totalAttempts: 10,   // e.g., total questions
+        correctCount: 7,     // e.g., correct answers
+        date: new Date().toISOString()
+      };
+      // Save the test result using the testResultsDB module
+      testResultsDB.addTestResult(result)
+        .then(id => {
+          alert("Test result saved with id " + id);
+          // Navigate back to test selection or show further feedback
+          window.location.href = "select.html";
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Error saving test result.");
+        });
+    });
+  </script>
+</body>
+</html>
