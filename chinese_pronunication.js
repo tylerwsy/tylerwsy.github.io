@@ -77,7 +77,7 @@ function openDB() {
     const request = indexedDB.open(DB_NAME, 1);
     request.onerror = () => reject(request.error);
     request.onsuccess = () => resolve(request.result);
-    request.onupgradeneeded = e => {
+    request.onupgradeneeded = (e) => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: "english_chinese", autoIncrement: false });
@@ -114,7 +114,7 @@ async function loadQuizWords() {
   }
 }
 
-/* Update dictionary record: increment attempts, and if correct, increment correct count. */
+/* Update dictionary record: increment attempt count; if correct, increment correct count. */
 async function updateWordRecord(word, isCorrect) {
   try {
     const db = await openDB();
@@ -144,7 +144,7 @@ async function updateWordRecord(word, isCorrect) {
   }
 }
 
-/* Display the current quiz word, hints, and question number (centered). */
+/* Display the current quiz word, hints, and question counter (centered). */
 function showWord() {
   if (questionCountElem) {
     questionCountElem.textContent = `Question ${currentIndex + 1} of ${words.length}`;
@@ -247,13 +247,13 @@ function updatePlaybackButton(blob) {
     playbackBtn.classList.add("interactive-btn");
     playbackBtn.addEventListener("click", () => {
       const audio = new Audio(audioUrl);
-      audio.play();
+      audio.play().catch(e => console.error("Playback error:", e));
     });
     ensureButtonGroup().row1.appendChild(playbackBtn);
   } else {
     playbackBtn.onclick = () => {
       const audio = new Audio(audioUrl);
-      audio.play();
+      audio.play().catch(e => console.error("Playback error:", e));
     };
   }
 }
@@ -302,7 +302,7 @@ function stopRecording(recognitionInstance) {
     startRecordingBtn.textContent = "Retry";
     countdownDisplay.textContent = "";
     console.log("[recording] Stopped");
-    // Release microphone tracks to unblock playback.
+    // Release microphone tracks to unblock playback on mobile.
     if (micStream) {
       micStream.getTracks().forEach(track => track.stop());
       micStream = null;
@@ -389,7 +389,7 @@ function createCorrectPlaybackButton() {
       window.speechSynthesis.resume();
       let utterance = new SpeechSynthesisUtterance(quizWord.textContent);
       utterance.lang = "zh-CN";
-      window.speechSynthesis.speak(utterance);
+      window.speechSynthesis.speak(utterance).catch(e => console.error("Speech synthesis error:", e));
     });
   }
 }
