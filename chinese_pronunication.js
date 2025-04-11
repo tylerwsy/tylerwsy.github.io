@@ -220,12 +220,16 @@ function createRecognitionInstance() {
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recog = new Recognition();
   recog.lang = "zh-CN";
-  recog.continuous = true; // Keep running for the full recording period.
-  recog.interimResults = false;
+  recog.continuous = false;
+  recog.interimResults = true;
   recog.onresult = event => {
-    recordedTranscript = event.results[0][0].transcript.trim();
-    console.log("[speech] Transcript:", recordedTranscript);
-    recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
+    if (event.results.length > 0 && event.results[0][0]) {
+      recordedTranscript = event.results[0][0].transcript.trim();
+      console.log("[speech] Transcript:", recordedTranscript);
+      recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
+    } else {
+      console.warn("No speech result found.");
+    }
   };
   recog.onerror = e => {
     if (e.error === "aborted") {
@@ -234,7 +238,14 @@ function createRecognitionInstance() {
       console.warn("[speech] onerror:", e);
     }
   };
-  recog.onend = () => console.log("[speech] onend triggered");
+  recog.onend = () => {
+    if (!recordedTranscript) {
+      console.log("Retrying recognition due to empty transcript.");
+      recog.start();
+    } else {
+      console.log("[speech] onend triggered");
+    }
+  };
   return recog;
 }
 
