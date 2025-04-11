@@ -33,6 +33,16 @@ function loadQuestion() {
   }
 }
 
+// Shuffle options array
+function shuffleArray(array) {
+  const newArray = array.slice();
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
+
 // Display current question
 function showQuestion() {
   const currentQuestion = shuffledQuizData[currentIndex];
@@ -40,7 +50,9 @@ function showQuestion() {
   questionElem.textContent = `${currentQuestion.noun.charAt(0).toUpperCase() + currentQuestion.noun.slice(1)}`;
 
   optionsContainer.innerHTML = "";
-  currentQuestion.options.forEach(option => {
+  const randomizedOptions = shuffleArray(currentQuestion.options);
+
+  randomizedOptions.forEach(option => {
     const btn = document.createElement("button");
     btn.classList.add("interactive-btn");
     btn.textContent = option.charAt(0).toUpperCase() + option.slice(1);
