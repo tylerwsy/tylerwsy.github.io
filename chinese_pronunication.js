@@ -318,7 +318,10 @@ function beginRecording() {
   startRecordingBtn.textContent = "Recording...";
   mediaRecorder.start();
   isRecording = true;
-  recognition.start();
+  setTimeout(() => {
+    console.log("[speech] recognition start triggered");
+    recognition.start();
+  }, 1000);
   console.log("[recording] Started");
   setTimeout(() => {
     stopRecording(recognition);
