@@ -110,7 +110,7 @@
         document.getElementById("testSelect").selectedIndex = 0;
       });
 
-      // Build a line chart using quizResults from localStorage.
+      // Build a line chart from quizResults stored in localStorage.
       let showAll = false;
       function updateResultChart() {
         const selectedTest = document.getElementById("testSelect").value;
@@ -176,7 +176,7 @@
       }
       window.addEventListener("load", updateResultChart);
 
-      // Reset test results for the selected mode, then update the chart.
+      // Reset Test Results function: clear logs for selected test and update the chart.
       function resetTestResults() {
         const selectedTest = document.getElementById("testSelect").value;
         if (!selectedTest) return;
@@ -193,8 +193,8 @@
         localStorage.setItem("quizResults", JSON.stringify(allLogs));
         updateResultChart();
       }
-
-      // Update extra buttons (toggle and reset) below the chart.
+      
+      // Extra buttons below the chart.
       function updateExtraButtons() {
         const extraDiv = document.getElementById("chartExtraButtons");
         extraDiv.innerHTML = "";

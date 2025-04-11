@@ -3,7 +3,7 @@
 // Update the known prompt.
 const KNOWN_PROMPT = "答案是";
 
-// Helper: Convert digits to Chinese characters.
+// Helper function: Convert digits (0-9) to Chinese characters.
 function convertDigitsToChinese(str) {
   const digitMap = {
     "0": "零", "1": "一", "2": "二", "3": "三", "4": "四",
@@ -18,7 +18,7 @@ let currentIndex = 0;
 let correctCount = 0;
 let wrongCount = 0;
 
-// Recording & recognition.
+// Recording and recognition variables.
 let isRecording = false;
 let mediaRecorder;
 let micStream = null;
@@ -86,7 +86,7 @@ function openDB() {
   });
 }
 
-// Load quiz words using stored wordCount.
+// Load quiz words based on stored "wordCount".
 async function loadQuizWords() {
   try {
     const db = await openDB();
@@ -114,7 +114,7 @@ async function loadQuizWords() {
   }
 }
 
-/* Update dictionary record: increment attempts and correct count if applicable. */
+/* Update dictionary record: increment attempts, and if correct, increment correct count. */
 async function updateWordRecord(word, isCorrect) {
   try {
     const db = await openDB();
@@ -144,7 +144,7 @@ async function updateWordRecord(word, isCorrect) {
   }
 }
 
-/* Display the current quiz word, hints, and question counter. */
+/* Display the current quiz word, hints, and question number (centered). */
 function showWord() {
   if (questionCountElem) {
     questionCountElem.textContent = `Question ${currentIndex + 1} of ${words.length}`;
@@ -302,13 +302,16 @@ function stopRecording(recognitionInstance) {
     startRecordingBtn.textContent = "Retry";
     countdownDisplay.textContent = "";
     console.log("[recording] Stopped");
-    // Check extra conditions before creating the Submit button.
-    setTimeout(checkAndCreateSubmitButton, 200);
+    // Release microphone tracks to unblock playback.
+    if (micStream) {
+      micStream.getTracks().forEach(track => track.stop());
+      micStream = null;
+    }
+    setTimeout(() => { checkAndCreateSubmitButton(); }, 200);
   }
 }
 
 function checkAndCreateSubmitButton() {
-  // Convert transcript to pinyin.
   const convertedTranscript = convertDigitsToChinese(recordedTranscript);
   const recordedPinyinFull = window.pinyinPro.pinyin(convertedTranscript, { toneType: "symbol", segment: true });
   const tokens = recordedPinyinFull.split(" ");
@@ -464,7 +467,7 @@ function saveQuizResult() {
   console.log("Quiz results saved:", localStorage.getItem("quizResults"));
 }
 
-/* Initialization: request mic access and load quiz words. */
+/* Initialize quiz: request mic access and load words. */
 document.addEventListener("DOMContentLoaded", () => {
   navigator.mediaDevices.getUserMedia({ audio: true })
     .then(stream => {
