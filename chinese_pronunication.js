@@ -314,17 +314,24 @@ function beginRecording() {
   buttonGroup = null;
   startRecordingBtn.disabled = false;
   startRecordingBtn.style.backgroundColor = "";
-  setupMediaRecorder(micStream);
+
   let recognition = createRecognitionInstance();
   recordingResult.textContent = "🎙️ Speak now...";
-  countdownDisplay.textContent = "⏺️ Recording (6 sec)...";
+  countdownDisplay.textContent = "⏺️ Listening...";
   startRecordingBtn.textContent = "Recording...";
   isRecording = true;
-recognition.start();
-recognition.onend = () => {
-  console.log("[speech] onend triggered");
-  mediaRecorder.start();
-};
+  recognition.start();
+  console.log("[recording] Started");
+
+  recognition.onend = () => {
+    console.log("[speech] onend triggered");
+    setupMediaRecorder(micStream);
+    mediaRecorder.start();
+    setTimeout(() => {
+      stopRecording(recognition);
+      console.log("[recording] Auto-stopped after 6 seconds");
+    }, 6000);
+  };
   console.log("[recording] Started");
   setTimeout(() => {
     stopRecording(recognition);
