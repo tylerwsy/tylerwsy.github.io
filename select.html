@@ -136,7 +136,7 @@
         }
         results.sort((a, b) => new Date(a.date) - new Date(b.date));
         let displayResults = showAll ? results : results.slice(-5);
-        const labels = displayResults.map(r => new Date(r.date).toLocaleString());
+        const labels = displayResults.map(r => `${new Date(r.date).toLocaleString()} (Correct: ${r.correct}/${r.total})`);
         const percentages = displayResults.map(r => Math.round((r.correct / r.total) * 100));
         if (window.quizChart) { window.quizChart.destroy(); }
         window.quizChart = new Chart(ctx, {
