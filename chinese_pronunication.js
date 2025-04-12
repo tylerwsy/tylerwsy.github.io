@@ -1,9 +1,9 @@
 /* chinese_proununication.js */
 
-// (The known prompt is no longer used, so it’s kept here for reference only.)
+// (The known prompt is no longer used.)
 const KNOWN_PROMPT = "答案是";
 
-// Helper: Convert digits (0-9) to Chinese characters.
+// Helper function: Convert digits (0-9) to Chinese characters.
 function convertDigitsToChinese(str) {
   const digitMap = {
     "0": "零", "1": "一", "2": "二", "3": "三", "4": "四",
@@ -13,14 +13,13 @@ function convertDigitsToChinese(str) {
 }
 
 /**
- * Remove trailing punctuation if it exists.
- * For example, if the last character is a full stop (。), remove it.
- * @param {string} str - The string to fix.
- * @returns {string} - The fixed string.
+ * Remove trailing punctuation from a string.
+ * In particular, if the last character is a full stop (。), exclamation (！), or question mark (？), remove it.
+ * @param {string} str - The string to process.
+ * @returns {string} - The processed string.
  */
 function removeTrailingPunctuation(str) {
   str = str.trim();
-  // Check for common Chinese punctuation such as "。"
   if (str.length > 0 && "。！？".includes(str.slice(-1))) {
     return str.slice(0, -1);
   }
@@ -77,19 +76,48 @@ let submitBtn = null;
 let nextBtn = null;
 
 // =====================
-// Azure Live Recognition
+// Azure Configuration
 // =====================
 // Azure Speech Service credentials – replace with your valid key.
 const azureSubscriptionKey = "8Yj0oh8v4Pyg4YFzcpWJgK1SILr4ysJ4I1ACHhl1jUqcIyBI4tgRJQQJ99BDACqBBLyXJ3w3AAAYACOGk2lo";
 const azureServiceRegion = "southeastasia";
 
 /**
- * Calls Azure Speech Services to perform live speech recognition.
- * It requests a fresh microphone stream and uses it for recognition.
+ * Uses Azure Speech SDK to perform text-to-speech synthesis.
+ * @param {string} text - The text to be spoken.
+ * @param {function} [callback] - Optional callback to run after synthesis.
+ */
+function azureTextToSpeech(text, callback) {
+  if (typeof SpeechSDK === "undefined") {
+    console.error("Azure Speech SDK not found.");
+    return;
+  }
+  const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(azureSubscriptionKey, azureServiceRegion);
+  // Set the voice name appropriate for Chinese TTS.
+  speechConfig.speechSynthesisVoiceName = "zh-CN-XiaoxiaoNeural"; // Modify if desired.
+  const audioConfig = SpeechSDK.AudioConfig.fromDefaultSpeakerOutput();
+  const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, audioConfig);
+  synthesizer.speakTextAsync(text,
+    result => {
+      console.log("Azure TTS succeeded:", result);
+      synthesizer.close();
+      if(callback) callback();
+    },
+    error => {
+      console.error("Azure TTS error:", error);
+      synthesizer.close();
+      if(callback) callback(error);
+    }
+  );
+}
+
+/**
+ * Uses Azure Speech SDK for live speech recognition.
+ * Requests a fresh microphone stream, invokes recognition, and then stops the stream.
  *
  * @param {string} [subscriptionKey=azureSubscriptionKey] - Your subscription key.
  * @param {string} [serviceRegion=azureServiceRegion] - Your service region.
- * @param {function} [callback] - Function to execute after recognition completes.
+ * @param {function} [callback] - Called after recognition completes.
  */
 function azureSpeechRecognize(subscriptionKey = azureSubscriptionKey, serviceRegion = azureServiceRegion, callback) {
   if (typeof SpeechSDK === "undefined") {
@@ -104,7 +132,6 @@ function azureSpeechRecognize(subscriptionKey = azureSubscriptionKey, serviceReg
       const recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
       recognizer.recognizeOnceAsync(
         result => {
-          // Remove trailing punctuation from the recognized text.
           recordedTranscript = removeTrailingPunctuation(result.text);
           console.log("[azure] Recognized text:", recordedTranscript);
           recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
@@ -125,20 +152,19 @@ function azureSpeechRecognize(subscriptionKey = azureSubscriptionKey, serviceReg
 }
 
 /**
- * Initiates live recognition.
- * Updates the UI with a 4‑second countdown and calls azureSpeechRecognize.
+ * Begins live recognition using Azure STT.
+ * Sets a 4-second window and updates UI accordingly.
  */
 function beginLiveRecognition() {
   recordingResult.textContent = "🎙️ Speak now...";
   countdownDisplay.textContent = "⏺️ Recording (4 sec)...";
   startRecordingBtn.textContent = "Recording...";
-  // Call Azure Speech recognition directly.
   azureSpeechRecognize(undefined, undefined, () => {
     createSubmitButton();
     startRecordingBtn.textContent = "Retry";
     countdownDisplay.textContent = "";
   });
-  // Fallback timeout in case no transcript is returned.
+  // Fallback in case no transcript is returned.
   setTimeout(() => {
     if (!recordedTranscript) {
       startRecordingBtn.textContent = "Retry";
@@ -224,7 +250,7 @@ async function updateWordRecord(word, isCorrect) {
   }
 }
 
-/* Display the current quiz word and hints. */
+/* --- Display Quiz Word and Hints --- */
 function showWord() {
   if (questionCountElem) {
     questionCountElem.textContent = `Question ${currentIndex + 1} of ${words.length}`;
@@ -293,14 +319,14 @@ function levenshteinDistance(a, b) {
 
 /* --- Live Recognition and Submission --- */
 /**
- * Begins live recognition using Azure Speech Services.
+ * Begins live recognition using Azure Speech-to-Text.
  * Sets a 4-second recording window.
  */
 function beginLiveRecognition() {
   recordingResult.textContent = "🎙️ Speak now...";
   countdownDisplay.textContent = "⏺️ Recording (4 sec)...";
   startRecordingBtn.textContent = "Recording...";
-  // Call Azure Speech Services directly.
+  // Call Azure STT directly.
   azureSpeechRecognize(undefined, undefined, () => {
     createSubmitButton();
     startRecordingBtn.textContent = "Retry";
@@ -316,7 +342,9 @@ function beginLiveRecognition() {
   }, 4000);
 }
 
-/* Creates the Submit button after recognition completes. */
+/**
+ * Creates a Submit button.
+ */
 function createSubmitButton() {
   if (!submitBtn) {
     submitBtn = document.createElement("button");
@@ -329,16 +357,16 @@ function createSubmitButton() {
   }
 }
 
-/* Handles answer submission by fuzzy-comparing pinyin of the quiz word and recognized speech.
-   Before conversion, the recognized transcript is assumed to have its trailing punctuation removed in azureSpeechRecognize.
-*/
+/**
+ * Handles submission by comparing the pinyin of the quiz word and recognized speech.
+ */
 async function handleSubmit() {
   console.log("handleSubmit triggered.");
   if (!recordedTranscript) {
     recordingResult.textContent += "\nNo speech detected. Please try again.";
     return;
   }
-  // Convert texts to pinyin and remove any extra punctuation.
+  // For comparison, convert both texts to pinyin and remove trailing punctuation.
   const expectedPinyin = removeTrailingPunctuation(window.pinyinPro.pinyin(quizWord.textContent, { toneType: "symbol", segment: true }));
   const recognizedPinyin = removeTrailingPunctuation(window.pinyinPro.pinyin(recordedTranscript, { toneType: "symbol", segment: true }));
   console.log("Quiz word pinyin:", expectedPinyin);
@@ -365,9 +393,9 @@ async function handleSubmit() {
   createNextButton();
 }
 
-/* Provides an option to play the correct word using speech synthesis.
-   Uses a try-catch block as speechSynthesis.speak() does not return a promise.
-*/
+/**
+ * Uses Azure Text-to-Speech to speak the correct word.
+ */
 function createCorrectPlaybackButton() {
   if (!document.querySelector(".correct-btn") && quizWord.textContent.trim().length > 0) {
     let correctBtn = document.createElement("button");
@@ -377,19 +405,14 @@ function createCorrectPlaybackButton() {
     correctBtn.style.display = "block";
     recordingResult.parentNode.insertBefore(correctBtn, recordingResult.nextSibling);
     correctBtn.addEventListener("click", () => {
-      window.speechSynthesis.resume();
-      let utterance = new SpeechSynthesisUtterance(quizWord.textContent);
-      utterance.lang = "zh-CN";
-      try {
-        window.speechSynthesis.speak(utterance);
-      } catch (e) {
-        console.error("Speech synthesis error:", e);
-      }
+      azureTextToSpeech(quizWord.textContent);
     });
   }
 }
 
-/* Creates the Next button to proceed to the following word. */
+/**
+ * Creates the Next button to proceed to the following quiz word.
+ */
 function createNextButton() {
   const existingNext = document.querySelector("#controlsContainer button.next-btn");
   if (existingNext) { existingNext.remove(); }
@@ -400,7 +423,9 @@ function createNextButton() {
   nextBtn.addEventListener("click", nextWord);
 }
 
-/* Proceeds to the next quiz word or shows the final result. */
+/**
+ * Proceeds to the next word or shows the final result.
+ */
 function nextWord() {
   document.querySelectorAll(".correct-btn").forEach(btn => btn.remove());
   currentIndex++;
@@ -420,7 +445,9 @@ function nextWord() {
   }
 }
 
-/* Displays the final test results. */
+/**
+ * Displays the final test results.
+ */
 function testCompleted() {
   saveQuizResult();
   quizBox.style.display = "none";
@@ -450,7 +477,9 @@ function testCompleted() {
   controlsContainer.appendChild(testAgainBtn);
 }
 
-/* Saves the quiz result to localStorage. */
+/**
+ * Saves the quiz result in localStorage.
+ */
 function saveQuizResult() {
   const logs = JSON.parse(localStorage.getItem("quizResults") || "[]");
   logs.push({
@@ -464,6 +493,35 @@ function saveQuizResult() {
   console.log("Quiz results saved:", localStorage.getItem("quizResults"));
 }
 
+/**
+ * Uses Azure Text-to-Speech to synthesize speech for the provided text.
+ * @param {string} text - The text to synthesize.
+ * @param {function} [callback] - Optional callback after synthesis.
+ */
+function azureTextToSpeech(text, callback) {
+  if (typeof SpeechSDK === "undefined") {
+    console.error("Azure Speech SDK not found.");
+    return;
+  }
+  const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(azureSubscriptionKey, azureServiceRegion);
+  // Set voice for Chinese (adjust if needed)
+  speechConfig.speechSynthesisVoiceName = "zh-CN-XiaoxiaoNeural";
+  const audioConfig = SpeechSDK.AudioConfig.fromDefaultSpeakerOutput();
+  const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, audioConfig);
+  synthesizer.speakTextAsync(text,
+    result => {
+      console.log("Azure TTS succeeded:", result);
+      synthesizer.close();
+      if (callback) callback();
+    },
+    error => {
+      console.error("Azure TTS error:", error);
+      synthesizer.close();
+      if (callback) callback(error);
+    }
+  );
+}
+
 /* --- Initialization --- */
 document.addEventListener("DOMContentLoaded", () => {
   loadQuizWords();
@@ -471,7 +529,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* When the Start Recording button is clicked, begin live recognition. */
 startRecordingBtn.addEventListener("click", () => {
-  // Reset the recorded transcript for a new attempt.
+  // Reset recordedTranscript for a fresh attempt.
   recordedTranscript = "";
   beginLiveRecognition();
 });
