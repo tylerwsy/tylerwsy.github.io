@@ -13,6 +13,16 @@ function convertDigitsToChinese(str) {
   return str.replace(/\d/g, match => digitMap[match]);
 }
 
+/**
+ * Remove common punctuation characters (both Chinese and English)
+ * from a string.
+ * @param {string} str - The input string.
+ * @returns {string} - The cleaned string.
+ */
+function removePunctuation(str) {
+  return str.replace(/[。，、！？,.!?]/g, "").trim();
+}
+
 // Global variables.
 let words = [];
 let currentIndex = 0;
@@ -34,7 +44,7 @@ const scoreText = document.getElementById("scoreText");
 const controlsContainer = document.getElementById("controlsContainer");
 const questionCountElem = document.getElementById("questionCount");
 
-// Unified button grouping.
+// Unified button grouping for dynamic controls.
 let buttonGroup = null;
 function ensureButtonGroup() {
   if (!buttonGroup) {
@@ -62,14 +72,14 @@ function ensureButtonGroup() {
 let submitBtn = null;
 let nextBtn = null;
 
-/* --- Live Azure Speech Recognition --- */
+/* --- Azure Live Speech Recognition --- */
 /**
- * Calls Azure Speech Services using a fresh microphone stream.
- * When recognition completes, the callback is executed.
+ * Calls Azure Speech Services to perform live speech recognition.
+ * A fresh microphone stream is requested.
  *
- * @param {string} [subscriptionKey=azureSubscriptionKey] - Your subscription key.
- * @param {string} [serviceRegion=azureServiceRegion] - Your service region.
- * @param {function} [callback] - Function to execute after recognition.
+ * @param {string} [subscriptionKey=azureSubscriptionKey] - The subscription key.
+ * @param {string} [serviceRegion=azureServiceRegion] - The service region.
+ * @param {function} [callback] - Function to execute after recognition completes.
  */
 function azureSpeechRecognize(subscriptionKey = azureSubscriptionKey, serviceRegion = azureServiceRegion, callback) {
   if (typeof SpeechSDK === "undefined") {
@@ -99,34 +109,36 @@ function azureSpeechRecognize(subscriptionKey = azureSubscriptionKey, serviceReg
     })
     .catch(err => {
       console.error("Error obtaining microphone stream for Azure recognition:", err);
-      recordingResult.textContent += "\nFailed to get microphone stream for translation.";
+      recordingResult.textContent += "\nFailed to get microphone stream.";
     });
 }
 
-/* --- Quiz Word and Comparison Functions --- */
-/* Compute Levenshtein distance for fuzzy matching. */
-function levenshteinDistance(a, b) {
-  const matrix = [];
-  if (a.length === 0) return b.length;
-  if (b.length === 0) return a.length;
-  for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
-  for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      if (b.charAt(i - 1) === a.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1,
-          Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
-        );
-      }
+/* --- Begin Live Recognition --- */
+/**
+ * Initiates live recognition using Azure STT.
+ * Updates the UI with a 4-second countdown.
+ */
+function beginLiveRecognition() {
+  recordingResult.textContent = "🎙️ Speak now...";
+  countdownDisplay.textContent = "⏺️ Recording (4 sec)...";
+  startRecordingBtn.textContent = "Recording...";
+  // Immediately call Azure STT.
+  azureSpeechRecognize(undefined, undefined, () => {
+    createSubmitButton();
+    startRecordingBtn.textContent = "Retry";
+    countdownDisplay.textContent = "";
+  });
+  // In case no transcript is returned within 4 sec (timeout fallback):
+  setTimeout(() => {
+    if (!recordedTranscript) {
+      startRecordingBtn.textContent = "Retry";
+      countdownDisplay.textContent = "";
+      recordingResult.textContent += "\nRecognition timed out. Please try again.";
     }
-  }
-  return matrix[b.length][a.length];
+  }, 4000);
 }
 
-/* --- IndexedDB and Quiz Word Loading --- */
+/* --- Quiz Word Loading and IndexedDB Functions --- */
 const DB_NAME = "SpellingAppDB";
 const STORE_NAME = "words";
 
@@ -160,7 +172,7 @@ async function loadQuizWords() {
       correctCount = 0;
       wrongCount = 0;
       if (words.length === 0) {
-        quizBox.innerHTML = "<p>No Chinese words available in the dictionary. Please add words via the dictionary page.</p>";
+        quizBox.innerHTML = "<p>No Chinese words available. Please add words via the dictionary page.</p>";
       } else {
         showWord();
       }
@@ -200,7 +212,7 @@ async function updateWordRecord(word, isCorrect) {
   }
 }
 
-/* Display the current quiz word and related hints. */
+/* --- Display Quiz Word and Hints --- */
 function showWord() {
   if (questionCountElem) {
     questionCountElem.textContent = `Question ${currentIndex + 1} of ${words.length}`;
@@ -243,27 +255,55 @@ function showWord() {
   }
 }
 
-/* --- Live Recognition and Submission --- */
-/* Instead of recording a complete audio clip, we use live recognition.
-   When the user clicks "Start Recording"/"Retry", a fresh microphone stream
-   is used immediately with Azure Speech Services, and the transcript is stored.
-   The known prompt is removed, and the transcript is later compared via pinyin-fuzzy logic. */
-function beginLiveRecognition() {
-  recordingResult.textContent = "🎙️ Speak now...";
-  countdownDisplay.textContent = "⏺️ Recognizing (4 sec)...";
-  startRecordingBtn.textContent = "Recording...";
-  navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(stream => {
-      azureSpeechRecognize(undefined, undefined, () => {
-        createSubmitButton();
-      });
-    })
-    .catch(err => {
-      console.error("[mic] Error obtaining microphone stream:", err);
-      recordingResult.textContent = "⚠️ Microphone access denied";
-    });
+/* --- Fuzzy Comparison Helper --- */
+function levenshteinDistance(a, b) {
+  const matrix = [];
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+  for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
+        );
+      }
+    }
+  }
+  return matrix[b.length][a.length];
 }
 
+/* --- Live Recognition and Submission --- */
+/**
+ * Initiates live recognition using Azure Speech-to-Text.
+ * The UI is updated with a 4-second countdown, and after recognition completes,
+ * the Submit button is created.
+ */
+function beginLiveRecognition() {
+  recordingResult.textContent = "🎙️ Speak now...";
+  countdownDisplay.textContent = "⏺️ Recording (4 sec)...";
+  startRecordingBtn.textContent = "Recording...";
+  azureSpeechRecognize(undefined, undefined, () => {
+    createSubmitButton();
+    startRecordingBtn.textContent = "Retry";
+    countdownDisplay.textContent = "";
+  });
+  setTimeout(() => {
+    if (!recordedTranscript) {
+      startRecordingBtn.textContent = "Retry";
+      countdownDisplay.textContent = "";
+      recordingResult.textContent += "\nRecognition timed out. Please try again.";
+    }
+  }, 4000);
+}
+
+/* Create a Submit button for the user to submit their answer.
+   Since we no longer use a known prompt, we directly compare pinyin of the quiz word to that of the recognized text.
+*/
 function createSubmitButton() {
   if (!submitBtn) {
     submitBtn = document.createElement("button");
@@ -276,20 +316,22 @@ function createSubmitButton() {
   }
 }
 
+/* Handles answer submission by comparing the pinyin of the quiz word and recognized speech.
+   Punctuation is removed before comparison.
+*/
 async function handleSubmit() {
   console.log("handleSubmit triggered.");
   if (!recordedTranscript) {
     recordingResult.textContent += "\nNo speech detected. Please try again.";
     return;
   }
-  // Convert quiz word and recognized transcript into pinyin.
-  const expectedPinyin = window.pinyinPro.pinyin(quizWord.textContent, { toneType: "symbol", segment: true });
-  const recordedPinyin = window.pinyinPro.pinyin(recordedTranscript, { toneType: "symbol", segment: true });
+  // Convert both texts to pinyin and remove punctuation.
+  const expectedPinyin = removePunctuation(window.pinyinPro.pinyin(quizWord.textContent, { toneType: "symbol", segment: true }));
+  const recognizedPinyin = removePunctuation(window.pinyinPro.pinyin(recordedTranscript, { toneType: "symbol", segment: true }));
   console.log("Quiz word pinyin:", expectedPinyin);
-  console.log("Recognized pinyin:", recordedPinyin);
+  console.log("Recognized pinyin:", recognizedPinyin);
   
-  // Fuzzy comparison.
-  const distance = levenshteinDistance(recordedPinyin, expectedPinyin);
+  const distance = levenshteinDistance(recognizedPinyin, expectedPinyin);
   const threshold = Math.floor(expectedPinyin.length * 0.3);
   let isCorrect = (distance <= threshold);
   if (isCorrect) {
@@ -298,7 +340,7 @@ async function handleSubmit() {
   } else {
     recordingResult.textContent += "\nResult: ❌ Wrong";
     recordingResult.textContent += "\nExpected (pinyin): " + expectedPinyin;
-    recordingResult.textContent += "\nGot (pinyin): " + recordedPinyin;
+    recordingResult.textContent += "\nGot (pinyin): " + recognizedPinyin;
     wrongCount++;
     createCorrectPlaybackButton();
   }
@@ -310,9 +352,11 @@ async function handleSubmit() {
   createNextButton();
 }
 
-/* We keep this function for feedback using speech synthesis for the correct word. */
+/* Provides an option to play the correct word using speech synthesis.
+   Added check to ensure quizWord.textContent is available.
+*/
 function createCorrectPlaybackButton() {
-  if (!document.querySelector(".correct-btn")) {
+  if (!document.querySelector(".correct-btn") && quizWord.textContent.trim().length > 0) {
     let correctBtn = document.createElement("button");
     correctBtn.textContent = "Play Correct Word";
     correctBtn.classList.add("interactive-btn", "correct-btn");
@@ -406,6 +450,5 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 startRecordingBtn.addEventListener("click", () => {
-  // For live recognition, immediately begin recognition without recording a clip.
   beginLiveRecognition();
 });
