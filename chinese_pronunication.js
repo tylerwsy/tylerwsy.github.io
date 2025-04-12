@@ -355,43 +355,36 @@ function levenshteinDistance(a, b) {
 function beginLiveRecognition() {
   // Immediately clear any default text.
   recordingResult.textContent = "";
-
-  // Set a timeout for 1 second. By SY
-  const timeoutHandle_sy = setTimeout(() => {
-    if (!recordedTranscript) {
-      startRecordingBtn.textContent = "Start Recording";
-    }
-  }, 1000);
   
-  // Set a timeout for 6 seconds (i.e. 1 sec delay + 4 sec recording + 1 sec extra).
-  const timeoutHandle = setTimeout(() => {
-    if (!recordedTranscript) {
+  // Wait 1 second before updating the message and starting recognition.
+  setTimeout(() => {
+    recordingResult.textContent = "🎙️ Speak now...";
+    countdownDisplay.textContent = "⏺️ Recording (4 sec)...";
+    startRecordingBtn.textContent = "Recording...";
+    
+    // Set a timeout for 6 seconds (i.e. 1 sec delay + 4 sec recording + 1 sec extra).
+    const timeoutHandle = setTimeout(() => {
+      if (!recordedTranscript) {
+        startRecordingBtn.textContent = "Retry";
+        countdownDisplay.textContent = "";
+        recordingResult.textContent = "Recognition timed out. Please try again.";
+      }
+    }, 6000);
+    
+    // Start continuous recognition.
+    azureSpeechRecognizeContinuous((finalTranscript) => {
+      clearTimeout(timeoutHandle);
+      recordedTranscript = finalTranscript;
+      if (recordedTranscript && recordedTranscript.length > 0) {
+        recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
+      } else {
+        recordingResult.textContent = "No speech detected.";
+      }
+      createSubmitButton();
       startRecordingBtn.textContent = "Retry";
       countdownDisplay.textContent = "";
-      recordingResult.textContent = "Recognition timed out. Please try again.";
-    }
-  }, 6000);
-
-  clearTimeout(timeoutHandle_sy);
-
-  // Start continuous recognition. By SY
-  azureSpeechRecognizeContinuous((finalTranscript) => {
-    clearTimeout(timeoutHandle);
-    recordedTranscript = finalTranscript;
-    if (recordedTranscript && recordedTranscript.length > 0) {
-      recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
-    } else {
-      recordingResult.textContent = "No speech detected.";
-    }
-    createSubmitButton();
-    startRecordingBtn.textContent = "Retry";
-    countdownDisplay.textContent = "";
-  });
-
-  recordingResult.textContent = "🎙️ Speak now...";
-  countdownDisplay.textContent = "⏺️ Recording (4 sec)...";
-  startRecordingBtn.textContent = "Recording...";
-  
+    });
+  }, 1000);
 }
 
 /**
