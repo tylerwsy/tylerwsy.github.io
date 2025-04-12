@@ -346,34 +346,42 @@ function levenshteinDistance(a, b) {
 }
 
 /* --- Live Recognition and Submission --- */
+// Helper to update the recording result message with specific styling.
+function updateMessage(message) {
+  recordingResult.textContent = message;
+  recordingResult.style.fontSize = "1rem";
+  recordingResult.style.backgroundColor = "lightyellow";
+  recordingResult.style.padding = "0.5rem";
+  recordingResult.style.margin = "0 auto";
+}
+
 /**
  * Begins live recognition using continuous Azure Speech-to-Text.
  * Implements the following timing:
  *  - Azure recognition starts immediately.
- *  - The UI update (i.e. showing "Speak now...", "Recording (4 sec)..." and button text change)
- *    is delayed until at least 1 second has passed.
- *  - An overall timeout is set for 6 seconds (to allow 4 sec recording + extra time) before showing timeout.
+ *  - After 1 second, if no speech has been detected, a "Speak now..." message is shown.
+ *  - An overall timeout is set for 6 seconds before showing a timeout message.
  */
 function beginLiveRecognition() {
   recordedTranscript = ""; // Clear previous transcript.
   const startTime = Date.now();
-
+  
   // Show "Speak now..." message after 1 second if nothing has been recorded yet.
   setTimeout(() => {
     if (!recordedTranscript) {
-      recordingResult.textContent = "Speak now...";
+      updateMessage("Speak now...");
     }
   }, 1000);
-
+  
   // Start overall timeout for 6 seconds.
   const timeoutHandle = setTimeout(() => {
     if (!recordedTranscript) {
       startRecordingBtn.textContent = "Retry";
       countdownDisplay.textContent = "";
-      recordingResult.textContent = "Recognition timed out. Please try again.";
+      updateMessage("Recognition timed out. Please try again.");
     }
   }, 6000);
-
+  
   // Start continuous recognition immediately.
   azureSpeechRecognizeContinuous((finalTranscript) => {
     clearTimeout(timeoutHandle);
@@ -383,16 +391,16 @@ function beginLiveRecognition() {
     const delay = Math.max(0, 1000 - elapsed);
     setTimeout(() => {
       if (recordedTranscript && recordedTranscript.length > 0) {
-        recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
+        updateMessage(`🔈 You said: ${recordedTranscript}`);
       } else {
-        recordingResult.textContent = "No speech detected.";
+        updateMessage("No speech detected.");
       }
       createSubmitButton();
       startRecordingBtn.textContent = "Retry";
       countdownDisplay.textContent = "";
     }, delay);
   });
-
+  
   // Immediately clear any UI messages and update button text.
   recordingResult.textContent = "";
   countdownDisplay.textContent = "";
