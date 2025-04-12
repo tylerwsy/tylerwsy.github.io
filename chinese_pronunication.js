@@ -1,6 +1,6 @@
 /* chinese_proununication.js */
 
-// (The known prompt variable is retained here only for historical reference and is not used.)
+// (The known prompt variable is retained only for historical reference.)
 const KNOWN_PROMPT = "答案是";
 
 // Helper function: Convert digits (0-9) to Chinese characters.
@@ -14,7 +14,8 @@ function convertDigitsToChinese(str) {
 
 /**
  * Remove trailing punctuation from a string.
- * Specifically, if the last character is a full stop (。), exclamation (！), or question mark (？), remove it.
+ * For example, if the string ends with full stop (。), exclamation (！), or question mark (？),
+ * remove that character.
  * @param {string} str - The string to process.
  * @returns {string} - The processed string.
  */
@@ -124,7 +125,7 @@ function azureSpeechRecognize(subscriptionKey = azureSubscriptionKey, serviceReg
 
 /**
  * Uses Azure Speech SDK for live recognition with a 4-second window.
- * A flag is used so that timeout message only appears if recognition does not complete.
+ * A flag is used so that the timeout message is only appended if no transcript is returned.
  */
 function beginLiveRecognition() {
   recordingResult.textContent = "🎙️ Speak now...";
@@ -137,7 +138,6 @@ function beginLiveRecognition() {
     startRecordingBtn.textContent = "Retry";
     countdownDisplay.textContent = "";
   });
-  // Only show timeout message if Azure recognition doesn't complete in 4 sec.
   setTimeout(() => {
     if (!recognitionCompleted) {
       startRecordingBtn.textContent = "Retry";
@@ -148,11 +148,11 @@ function beginLiveRecognition() {
 }
 
 /**
- * Uses Azure Speech SDK for text-to-speech synthesis.
- * Logs events to help diagnose issues.
+ * Uses Azure Speech SDK to perform text-to-speech synthesis.
+ * Added event logging to help diagnose issues.
  *
  * @param {string} text - The text to synthesize.
- * @param {function} [callback] - Optional callback after synthesis.
+ * @param {function} [callback] - Optional callback.
  */
 function azureTextToSpeech(text, callback) {
   if (typeof SpeechSDK === "undefined") {
@@ -161,11 +161,10 @@ function azureTextToSpeech(text, callback) {
   }
   console.log("Starting Azure TTS for text:", text);
   const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(azureSubscriptionKey, azureServiceRegion);
-  speechConfig.speechSynthesisVoiceName = "zh-CN-XiaoxiaoNeural"; // Adjust if needed.
+  speechConfig.speechSynthesisVoiceName = "zh-CN-XiaoxiaoNeural"; // Adjust voice if needed.
   const audioConfig = SpeechSDK.AudioConfig.fromDefaultSpeakerOutput();
   const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, audioConfig);
-  
-  // Log TTS events.
+
   synthesizer.synthesisStarted = (s, e) => { console.log("Azure TTS synthesis started."); };
   synthesizer.synthesisCompleted = (s, e) => { console.log("Azure TTS synthesis completed."); };
   synthesizer.synthesisCanceled = (s, e) => { console.warn("Azure TTS synthesis canceled:", e.errorDetails); };
@@ -342,7 +341,7 @@ function beginLiveRecognition() {
     startRecordingBtn.textContent = "Retry";
     countdownDisplay.textContent = "";
   });
-  // Fallback: if no transcript is returned after 4 seconds.
+  // Fallback: if no transcript is returned after 4 sec.
   setTimeout(() => {
     if (!recordedTranscript) {
       startRecordingBtn.textContent = "Retry";
@@ -403,45 +402,11 @@ async function handleSubmit() {
 }
 
 /**
- * Uses Azure Text-to-Speech to synthesize speech for the provided text.
- * Added event logging to help diagnose issues.
- * @param {string} text - The text to synthesize.
- * @param {function} [callback] - Optional callback.
- */
-function azureTextToSpeech(text, callback) {
-  if (typeof SpeechSDK === "undefined") {
-    console.error("Azure Speech SDK not found.");
-    return;
-  }
-  console.log("Starting Azure TTS for text:", text);
-  const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(azureSubscriptionKey, azureServiceRegion);
-  speechConfig.speechSynthesisVoiceName = "zh-CN-XiaoxiaoNeural"; // Adjust if needed.
-  const audioConfig = SpeechSDK.AudioConfig.fromDefaultSpeakerOutput();
-  const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, audioConfig);
-
-  synthesizer.synthesisStarted = (s, e) => { console.log("Azure TTS synthesis started."); };
-  synthesizer.synthesisCompleted = (s, e) => { console.log("Azure TTS synthesis completed."); };
-  synthesizer.synthesisCanceled = (s, e) => { console.warn("Azure TTS synthesis canceled:", e.errorDetails); };
-
-  synthesizer.speakTextAsync(text,
-    result => {
-      console.log("Azure TTS succeeded:", result);
-      synthesizer.close();
-      if (callback) callback();
-    },
-    error => {
-      console.error("Azure TTS error:", error);
-      synthesizer.close();
-      if (callback) callback(error);
-    }
-  );
-}
-
-/**
- * Creates the "Play Correct Word" button which uses Azure TTS.
- * Additional logs are provided for debugging.
+ * Creates the "Play Correct Word" button using Azure TTS.
+ * Extensive logging has been added to help debug the issue.
  */
 function createCorrectPlaybackButton() {
+  console.log("Attempting to create Play Correct Word button. Quiz word:", quizWord.textContent);
   if (!document.querySelector(".correct-btn") && quizWord.textContent.trim().length > 0) {
     let correctBtn = document.createElement("button");
     correctBtn.textContent = "Play Correct Word";
@@ -449,6 +414,7 @@ function createCorrectPlaybackButton() {
     correctBtn.style.marginLeft = "auto";
     correctBtn.style.display = "block";
     recordingResult.parentNode.insertBefore(correctBtn, recordingResult.nextSibling);
+    console.log("Play Correct Word button created.");
     correctBtn.addEventListener("click", () => {
       console.log("Play Correct Word button clicked.");
       azureTextToSpeech(quizWord.textContent, (error) => {
@@ -459,6 +425,8 @@ function createCorrectPlaybackButton() {
         }
       });
     });
+  } else {
+    console.log("Play Correct Word button not created. Either it exists already or quiz word text is empty:", quizWord.textContent);
   }
 }
 
@@ -476,7 +444,7 @@ function createNextButton() {
 }
 
 /**
- * Proceeds to the next word or shows the final test results.
+ * Proceeds to the next quiz word or displays the final test results.
  */
 function nextWord() {
   document.querySelectorAll(".correct-btn").forEach(btn => btn.remove());
@@ -530,7 +498,7 @@ function testCompleted() {
 }
 
 /**
- * Saves quiz results to localStorage.
+ * Saves the quiz result to localStorage.
  */
 function saveQuizResult() {
   const logs = JSON.parse(localStorage.getItem("quizResults") || "[]");
