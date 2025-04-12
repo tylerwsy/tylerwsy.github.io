@@ -202,7 +202,7 @@ select {
   position: fixed;
   top: 10px;
   right: 10px;
-  font-size: 0.8rem;
+  font-size: 0.3rem;
   padding: 0.4rem 0.8rem;
   z-index: 1000;
 }
