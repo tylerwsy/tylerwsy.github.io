@@ -30,7 +30,7 @@ let currentIndex = 0;
 let correctCount = 0;
 let wrongCount = 0;
 
-// This global will store the final transcript returned by recognition.
+// This global will store the final transcript.
 let recordedTranscript = "";
 
 // DOM elements.
@@ -94,9 +94,9 @@ function fetchAzureToken(callback) {
 
 /**
  * Uses Azure Speech SDK to perform continuous speech-to-text recognition.
- * Listens for a fixed period (4 seconds) and then stops.
+ * Listens for a fixed period (4 seconds) then stops.
  * Uses a secure token fetched from Render.
- * @param {function} callback - Called with the final transcript when recognition is stopped.
+ * @param {function} callback - Called with the final transcript.
  */
 function azureSpeechRecognizeContinuous(callback) {
   if (typeof SpeechSDK === "undefined") {
@@ -119,13 +119,13 @@ function azureSpeechRecognizeContinuous(callback) {
         
         let interimTranscript = "";
         
-        // Listen for partial results.
+        // Capture interim results.
         recognizer.recognizing = (s, e) => {
           interimTranscript = removeTrailingPunctuation(e.result.text);
           console.log("[azure] Recognizing (interim):", interimTranscript);
         };
         
-        // When a final result is recognized.
+        // Capture the final recognized text.
         recognizer.recognized = (s, e) => {
           if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
             interimTranscript = removeTrailingPunctuation(e.result.text);
@@ -140,7 +140,7 @@ function azureSpeechRecognizeContinuous(callback) {
         recognizer.sessionStopped = (s, e) => {
           console.log("[azure] Session stopped");
           newStream.getTracks().forEach(track => track.stop());
-          if(callback) callback(interimTranscript);
+          if (callback) callback(interimTranscript);
         };
         
         recognizer.startContinuousRecognitionAsync();
@@ -149,7 +149,7 @@ function azureSpeechRecognizeContinuous(callback) {
         setTimeout(() => {
           recognizer.stopContinuousRecognitionAsync(() => {
             console.log("[azure] Stopped continuous recognition. Final transcript:", interimTranscript);
-            if(callback) callback(interimTranscript);
+            if (callback) callback(interimTranscript);
           });
         }, 4000);
       });
@@ -346,36 +346,45 @@ function levenshteinDistance(a, b) {
 
 /* --- Live Recognition and Submission --- */
 /**
- * Begins live recognition using Azure Speech-to-Text with continuous recognition.
- * Sets a 4-second recording window.
+ * Begins live recognition using continuous Azure Speech-to-Text.
+ * Implements the following timing:
+ *  - Waits 1 second after clicking "Start Recording"/"Retry" before updating to "Speak now..."
+ *  - Then starts a 4-second recording window.
+ *  - If no valid transcript is captured after 6 seconds (1 sec delay + 4 sec recording + extra 1 sec), shows timeout.
  */
 function beginLiveRecognition() {
-  recordingResult.textContent = "🎙️ Speak now...";
-  countdownDisplay.textContent = "⏺️ Recording (4 sec)...";
-  startRecordingBtn.textContent = "Recording...";
+  // Immediately clear any default text.
+  recordingResult.textContent = "";
   
-  // Set a timeout to update the UI if no transcript is returned.
-  const timeoutHandle = setTimeout(() => {
-    if (!recordedTranscript) {
+  // Wait 1 second before updating the message and starting recognition.
+  setTimeout(() => {
+    recordingResult.textContent = "🎙️ Speak now...";
+    countdownDisplay.textContent = "⏺️ Recording (4 sec)...";
+    startRecordingBtn.textContent = "Recording...";
+    
+    // Set a timeout for 6 seconds (i.e. 1 sec delay + 4 sec recording + 1 sec extra).
+    const timeoutHandle = setTimeout(() => {
+      if (!recordedTranscript) {
+        startRecordingBtn.textContent = "Retry";
+        countdownDisplay.textContent = "";
+        recordingResult.textContent = "Recognition timed out. Please try again.";
+      }
+    }, 6000);
+    
+    // Start continuous recognition.
+    azureSpeechRecognizeContinuous((finalTranscript) => {
+      clearTimeout(timeoutHandle);
+      recordedTranscript = finalTranscript;
+      if (recordedTranscript && recordedTranscript.length > 0) {
+        recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
+      } else {
+        recordingResult.textContent = "No speech detected.";
+      }
+      createSubmitButton();
       startRecordingBtn.textContent = "Retry";
       countdownDisplay.textContent = "";
-      recordingResult.textContent = "Recognition timed out. Please try again.";
-    }
-  }, 4000);
-  
-  // Use continuous recognition.
-  azureSpeechRecognizeContinuous((finalTranscript) => {
-    clearTimeout(timeoutHandle);
-    recordedTranscript = finalTranscript;
-    if (recordedTranscript && recordedTranscript.length > 0) {
-      recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
-    } else {
-      recordingResult.textContent = "No speech detected.";
-    }
-    createSubmitButton();
-    startRecordingBtn.textContent = "Retry";
-    countdownDisplay.textContent = "";
-  });
+    });
+  }, 1000);
 }
 
 /**
@@ -544,8 +553,9 @@ document.addEventListener("DOMContentLoaded", () => {
   loadQuizWords();
 });
 
-/* When the Start Recording button is clicked, begin continuous live recognition. */
+/* When the Start Recording button is clicked, clear previous messages and begin continuous recognition after a 1-second delay. */
 startRecordingBtn.addEventListener("click", () => {
   recordedTranscript = "";
+  recordingResult.textContent = ""; // Clear any default text immediately.
   beginLiveRecognition();
 });
