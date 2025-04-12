@@ -1,7 +1,4 @@
-/* chinese_pronunication.js */
-
-// (The known prompt variable is retained for historical reference.)
-const KNOWN_PROMPT = "答案是";
+/* chinese_proununication.js */
 
 // Helper function: Convert digits (0-9) to Chinese characters.
 function convertDigitsToChinese(str) {
@@ -14,12 +11,12 @@ function convertDigitsToChinese(str) {
 
 /**
  * Remove trailing punctuation from a string.
- * For example, if the string ends with full stop (。), exclamation (！), or question mark (？),
- * remove that character.
+ * Returns an empty string if input is undefined.
  * @param {string} str - The string to process.
  * @returns {string} - The processed string.
  */
 function removeTrailingPunctuation(str) {
+  if (!str) return "";
   str = str.trim();
   if (str.length > 0 && "。！？".includes(str.slice(-1))) {
     return str.slice(0, -1);
@@ -79,7 +76,6 @@ let nextBtn = null;
 // =====================
 // Secure Azure Token Functions using Render Backend
 // =====================
-
 function fetchAzureToken(callback) {
   fetch("https://azure-backend-7n4i.onrender.com/api/token", { method: "POST" })
     .then(res => res.json())
@@ -98,7 +94,6 @@ function fetchAzureToken(callback) {
 
 /**
  * Uses Azure Speech SDK to perform live speech-to-text recognition.
- * Requests a fresh microphone stream and then stops it when recognition completes.
  * Uses a secure token fetched from Render.
  * @param {function} [callback] - Called after recognition completes.
  */
@@ -328,24 +323,25 @@ function levenshteinDistance(a, b) {
 /* --- Live Recognition and Submission --- */
 /**
  * Begins live recognition using Azure Speech-to-Text.
- * Sets a 4-second recording window.
+ * Sets a 3-second recording window.
  */
 function beginLiveRecognition() {
   recordingResult.textContent = "🎙️ Speak now...";
-  countdownDisplay.textContent = "⏺️ Recording (4 sec)...";
+  countdownDisplay.textContent = "⏺️ Recording (3 sec)...";
   startRecordingBtn.textContent = "Recording...";
   azureSpeechRecognize(() => {
     createSubmitButton();
     startRecordingBtn.textContent = "Retry";
     countdownDisplay.textContent = "";
   });
+  // Reduced timeout to 3000 ms (3 seconds)
   setTimeout(() => {
     if (!recordedTranscript) {
       startRecordingBtn.textContent = "Retry";
       countdownDisplay.textContent = "";
       recordingResult.textContent += "\nRecognition timed out. Please try again.";
     }
-  }, 4000);
+  }, 3000);
 }
 
 /**
