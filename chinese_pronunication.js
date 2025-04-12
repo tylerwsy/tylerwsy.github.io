@@ -1,9 +1,6 @@
 /* chinese_proununication.js */
 
-// Update the known prompt.
-const KNOWN_PROMPT = "答案是";
-
-// Azure Speech Service credentials – replace with your actual key.
+// Azure Speech Service credentials – replace with your valid key.
 const azureSubscriptionKey = "8Yj0oh8v4Pyg4YFzcpWJgK1SILr4ysJ4I1ACHhl1jUqcIyBI4tgRJQQJ99BDACqBBLyXJ3w3AAAYACOGk2lo";
 const azureServiceRegion = "southeastasia"; // Default region
 
@@ -16,24 +13,13 @@ function convertDigitsToChinese(str) {
   return str.replace(/\d/g, match => digitMap[match]);
 }
 
-// Helper: Clean the transcript by removing punctuation and extra spaces.
-function cleanTranscript(str) {
-  return str.replace(/[^\w\s\u4e00-\u9fa5]/g, "").replace(/\s+/g, " ").trim();
-}
-
 // Global variables.
 let words = [];
 let currentIndex = 0;
 let correctCount = 0;
 let wrongCount = 0;
 
-// Recording and recognition variables.
-let isRecording = false;
-let mediaRecorder;
-let micStream = null;
-let audioContext, analyser, dataArray;
-let recordedChunks = [];
-let latestRecordingBlob = null;
+// Recognition variable.
 let recordedTranscript = "";
 
 // DOM elements.
@@ -75,9 +61,72 @@ function ensureButtonGroup() {
 
 let submitBtn = null;
 let nextBtn = null;
-let playbackBtn = null;
 
-// IndexedDB settings.
+/* --- Live Azure Speech Recognition --- */
+/**
+ * Calls Azure Speech Services using a fresh microphone stream.
+ * When recognition completes, the callback is executed.
+ *
+ * @param {string} [subscriptionKey=azureSubscriptionKey] - Your subscription key.
+ * @param {string} [serviceRegion=azureServiceRegion] - Your service region.
+ * @param {function} [callback] - Function to execute after recognition.
+ */
+function azureSpeechRecognize(subscriptionKey = azureSubscriptionKey, serviceRegion = azureServiceRegion, callback) {
+  if (typeof SpeechSDK === "undefined") {
+    console.error("Azure Speech SDK not found. Please include the SDK script in your HTML.");
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(newStream => {
+      const audioConfig = SpeechSDK.AudioConfig.fromStreamInput(newStream);
+      const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+      speechConfig.speechRecognitionLanguage = "zh-CN";
+      const recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+      recognizer.recognizeOnceAsync(
+        result => {
+          recordedTranscript = result.text;
+          console.log("[azure] Recognized text:", recordedTranscript);
+          recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
+          if (callback) callback();
+          newStream.getTracks().forEach(track => track.stop());
+        },
+        err => {
+          console.error("[azure] Recognition error:", err);
+          recordingResult.textContent += "\n[azure] Recognition error.";
+          newStream.getTracks().forEach(track => track.stop());
+        }
+      );
+    })
+    .catch(err => {
+      console.error("Error obtaining microphone stream for Azure recognition:", err);
+      recordingResult.textContent += "\nFailed to get microphone stream for translation.";
+    });
+}
+
+/* --- Quiz Word and Comparison Functions --- */
+/* Compute Levenshtein distance for fuzzy matching. */
+function levenshteinDistance(a, b) {
+  const matrix = [];
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+  for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
+        );
+      }
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
+/* --- IndexedDB and Quiz Word Loading --- */
 const DB_NAME = "SpellingAppDB";
 const STORE_NAME = "words";
 
@@ -95,7 +144,6 @@ function openDB() {
   });
 }
 
-// Load quiz words based on stored "wordCount".
 async function loadQuizWords() {
   try {
     const db = await openDB();
@@ -123,7 +171,6 @@ async function loadQuizWords() {
   }
 }
 
-/* Update dictionary record: increment attempts and if correct, increment correct count. */
 async function updateWordRecord(word, isCorrect) {
   try {
     const db = await openDB();
@@ -153,7 +200,7 @@ async function updateWordRecord(word, isCorrect) {
   }
 }
 
-/* Display the current quiz word, hints, and question counter (centered). */
+/* Display the current quiz word and related hints. */
 function showWord() {
   if (questionCountElem) {
     questionCountElem.textContent = `Question ${currentIndex + 1} of ${words.length}`;
@@ -193,169 +240,28 @@ function showWord() {
     recordingResult.textContent = "";
     controlsContainer.innerHTML = "";
     buttonGroup = null;
-    document.querySelectorAll(".correct-btn").forEach(btn => btn.remove());
   }
 }
 
-/* Compute Levenshtein distance for fuzzy matching. */
-function levenshteinDistance(a, b) {
-  const matrix = [];
-  if (a.length === 0) return b.length;
-  if (b.length === 0) return a.length;
-  for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
-  for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      if (b.charAt(i - 1) === a.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1,
-          Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
-        );
-      }
-    }
-  }
-  return matrix[b.length][a.length];
-}
-
-/* --- Azure Speech and Recording Functions --- */
-/* This function calls Azure Speech Services to recognize speech.
-   It re-requests a fresh microphone stream for live translation.
-   The translation is invoked immediately after recording stops.
-*/
-function azureSpeechRecognize(subscriptionKey = azureSubscriptionKey, serviceRegion = azureServiceRegion, callback) {
-  if (typeof SpeechSDK === "undefined") {
-    console.error("Azure Speech SDK not found. Please include the SDK script in your HTML.");
-    return;
-  }
+/* --- Live Recognition and Submission --- */
+/* Instead of recording a complete audio clip, we use live recognition.
+   When the user clicks "Start Recording"/"Retry", a fresh microphone stream
+   is used immediately with Azure Speech Services, and the transcript is stored.
+   The known prompt is removed, and the transcript is later compared via pinyin-fuzzy logic. */
+function beginLiveRecognition() {
+  recordingResult.textContent = "🎙️ Speak now...";
+  countdownDisplay.textContent = "⏺️ Recognizing (4 sec)...";
+  startRecordingBtn.textContent = "Recording...";
   navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(newStream => {
-      const audioConfig = SpeechSDK.AudioConfig.fromStreamInput(newStream);
-      const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
-      speechConfig.speechRecognitionLanguage = "zh-CN";
-      const recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
-      recognizer.recognizeOnceAsync(
-        result => {
-          recordedTranscript = result.text;
-          console.log("[azure] Recognized text:", recordedTranscript);
-          recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
-          if (callback) callback();
-          newStream.getTracks().forEach(track => track.stop());
-        },
-        err => {
-          console.error("[azure] Recognition error:", err);
-          recordingResult.textContent += "\n[azure] Recognition error.";
-          newStream.getTracks().forEach(track => track.stop());
-        }
-      );
+    .then(stream => {
+      azureSpeechRecognize(undefined, undefined, () => {
+        createSubmitButton();
+      });
     })
     .catch(err => {
-      console.error("Error obtaining new microphone stream for Azure recognition:", err);
-      recordingResult.textContent += "\nFailed to get microphone stream for translation.";
+      console.error("[mic] Error obtaining microphone stream:", err);
+      recordingResult.textContent = "⚠️ Microphone access denied";
     });
-}
-
-function setupMediaRecorder(stream) {
-  mediaRecorder = new MediaRecorder(stream);
-  mediaRecorder.ondataavailable = event => {
-    if (event.data && event.data.size > 0) { recordedChunks.push(event.data); }
-  };
-  mediaRecorder.onstop = () => {
-    latestRecordingBlob = new Blob(recordedChunks, { type: "audio/webm" });
-    console.log("MediaRecorder stopped; blob size:", latestRecordingBlob.size);
-    updatePlaybackButton(latestRecordingBlob);
-    recordedChunks = [];
-  };
-}
-
-function updatePlaybackButton(blob) {
-  const audioUrl = URL.createObjectURL(blob);
-  console.log("Created blob URL:", audioUrl);
-  if (!playbackBtn) {
-    playbackBtn = document.createElement("button");
-    playbackBtn.textContent = "Play Recorded Audio";
-    playbackBtn.classList.add("interactive-btn");
-    playbackBtn.addEventListener("click", () => {
-      try {
-        const audio = new Audio(audioUrl);
-        audio.play().catch(e => console.error("Playback error:", e));
-      } catch (e) {
-        console.error("Error in playback button click:", e);
-      }
-    });
-    ensureButtonGroup().row1.appendChild(playbackBtn);
-  } else {
-    playbackBtn.onclick = () => {
-      try {
-        const audio = new Audio(audioUrl);
-        audio.play().catch(e => console.error("Playback error:", e));
-      } catch (e) {
-        console.error("Error in playback button onclick:", e);
-      }
-    };
-  }
-}
-
-function setupMicStream(stream) {
-  audioContext = new AudioContext();
-  analyser = audioContext.createAnalyser();
-  const source = audioContext.createMediaStreamSource(stream);
-  source.connect(analyser);
-  analyser.fftSize = 256;
-  dataArray = new Uint8Array(analyser.frequencyBinCount);
-}
-
-function beginRecording() {
-  recordedChunks = [];
-  latestRecordingBlob = null;
-  recordedTranscript = "";
-  recordingResult.textContent = "";
-  if (submitBtn && submitBtn.parentNode) { submitBtn.parentNode.removeChild(submitBtn); submitBtn = null; }
-  if (nextBtn && nextBtn.parentNode) { nextBtn.parentNode.removeChild(nextBtn); nextBtn = null; }
-  if (playbackBtn && playbackBtn.parentNode) { playbackBtn.parentNode.removeChild(playbackBtn); playbackBtn = null; }
-  controlsContainer.innerHTML = "";
-  buttonGroup = null;
-  startRecordingBtn.disabled = false;
-  startRecordingBtn.style.backgroundColor = "";
-  setupMediaRecorder(micStream);
-  // Do not wait for additional user action; live translate immediately after recording stops.
-  recordingResult.textContent = "🎙️ Speak now...";
-  countdownDisplay.textContent = "⏺️ Recording (6 sec)...";
-  startRecordingBtn.textContent = "Recording...";
-  mediaRecorder.start();
-  isRecording = true;
-  console.log("[recording] Started");
-  setTimeout(() => {
-    stopRecording();
-    console.log("[recording] Auto-stopped after 6 seconds");
-  }, 6000);
-}
-
-function stopRecording() {
-  if (mediaRecorder && mediaRecorder.state === "recording") {
-    mediaRecorder.stop();
-  }
-  isRecording = false;
-  startRecordingBtn.textContent = "Retry";
-  countdownDisplay.textContent = "";
-  console.log("[recording] Stopped");
-  if (micStream) {
-    micStream.getTracks().forEach(track => track.stop());
-    micStream = null;
-    console.log("Mic tracks stopped.");
-  }
-  if (audioContext && audioContext.state !== "closed") {
-    audioContext.close().then(() => console.log("AudioContext closed"))
-      .catch(e => console.error("AudioContext close error:", e));
-  }
-  // Immediately call Azure Speech Services for live translation.
-  setTimeout(() => {
-    azureSpeechRecognize(undefined, undefined, () => {
-      // Once translation completes, automatically create the Submit button.
-      createSubmitButton();
-    });
-  }, 200);
 }
 
 function createSubmitButton() {
@@ -373,23 +279,16 @@ function createSubmitButton() {
 async function handleSubmit() {
   console.log("handleSubmit triggered.");
   if (!recordedTranscript) {
-    recordingResult.textContent += "\nNo speech detected. Please record again.";
+    recordingResult.textContent += "\nNo speech detected. Please try again.";
     return;
   }
-  if (!recordedTranscript.startsWith(KNOWN_PROMPT)) {
-    recordedTranscript = KNOWN_PROMPT + recordedTranscript;
-  }
-  const expectedText = KNOWN_PROMPT + quizWord.textContent;
-  const expectedPinyinFull = window.pinyinPro.pinyin(convertDigitsToChinese(expectedText), { toneType: "symbol", segment: true });
-  const recordedPinyinFull = window.pinyinPro.pinyin(convertDigitsToChinese(recordedTranscript), { toneType: "symbol", segment: true });
-  const expectedTokens = expectedPinyinFull.split(" ");
-  const recordedTokens = recordedPinyinFull.split(" ");
-  const expectedPinyin = expectedTokens.length > 3 ? expectedTokens.slice(3).join(" ").trim() : "";
-  const recordedPinyin = recordedTokens.length > 3 ? recordedTokens.slice(3).join(" ").trim() : "";
+  // Convert quiz word and recognized transcript into pinyin.
+  const expectedPinyin = window.pinyinPro.pinyin(quizWord.textContent, { toneType: "symbol", segment: true });
+  const recordedPinyin = window.pinyinPro.pinyin(recordedTranscript, { toneType: "symbol", segment: true });
+  console.log("Quiz word pinyin:", expectedPinyin);
+  console.log("Recognized pinyin:", recordedPinyin);
   
-  console.log("Expected pinyin (excluding prompt):", expectedPinyin);
-  console.log("Recorded pinyin (excluding prompt):", recordedPinyin);
-  
+  // Fuzzy comparison.
   const distance = levenshteinDistance(recordedPinyin, expectedPinyin);
   const threshold = Math.floor(expectedPinyin.length * 0.3);
   let isCorrect = (distance <= threshold);
@@ -408,18 +307,10 @@ async function handleSubmit() {
   startRecordingBtn.disabled = true;
   startRecordingBtn.style.backgroundColor = "grey";
   await updateWordRecord(words[currentIndex], isCorrect);
-  if (micStream) {
-    micStream.getTracks().forEach(track => track.stop());
-    micStream = null;
-    console.log("Mic tracks stopped after submit.");
-  }
-  if (audioContext && audioContext.state !== "closed") {
-    audioContext.close().then(() => console.log("AudioContext closed after submit"))
-      .catch(e => console.error("AudioContext close error:", e));
-  }
   createNextButton();
 }
 
+/* We keep this function for feedback using speech synthesis for the correct word. */
 function createCorrectPlaybackButton() {
   if (!document.querySelector(".correct-btn")) {
     let correctBtn = document.createElement("button");
@@ -459,7 +350,6 @@ function nextWord() {
   startRecordingBtn.style.backgroundColor = "";
   controlsContainer.innerHTML = "";
   buttonGroup = null;
-  playbackBtn = null;
   
   if (currentIndex < words.length) {
     showWord();
@@ -510,30 +400,12 @@ function saveQuizResult() {
   console.log("Quiz results saved:", localStorage.getItem("quizResults"));
 }
 
-/* Initialize quiz: request mic access and load words. */
+/* --- Initialization --- */
 document.addEventListener("DOMContentLoaded", () => {
-  navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(stream => {
-      micStream = stream;
-      setupMicStream(stream);
-    })
-    .catch(err => {
-      console.error("Microphone access denied:", err);
-      recordingResult.textContent = "⚠️ Microphone access denied";
-    });
   loadQuizWords();
 });
 
-/* Start Recording button event: Always request a fresh mic stream. */
 startRecordingBtn.addEventListener("click", () => {
-  navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(stream => {
-      micStream = stream;
-      setupMicStream(stream);
-      beginRecording();
-    })
-    .catch(err => {
-      console.warn("[mic] Permission denied or unavailable", err);
-      recordingResult.textContent = "⚠️ Microphone access denied";
-    });
+  // For live recognition, immediately begin recognition without recording a clip.
+  beginLiveRecognition();
 });
