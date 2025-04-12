@@ -11,7 +11,7 @@ function convertDigitsToChinese(str) {
 
 /**
  * Remove trailing punctuation from a string.
- * Returns an empty string if input is undefined.
+ * Returns an empty string if input is falsy.
  * @param {string} str - The string to process.
  * @returns {string} - The processed string.
  */
@@ -329,19 +329,24 @@ function beginLiveRecognition() {
   recordingResult.textContent = "🎙️ Speak now...";
   countdownDisplay.textContent = "⏺️ Recording (3 sec)...";
   startRecordingBtn.textContent = "Recording...";
-  azureSpeechRecognize(() => {
-    createSubmitButton();
-    startRecordingBtn.textContent = "Retry";
-    countdownDisplay.textContent = "";
-  });
-  // Reduced timeout to 3000 ms (3 seconds)
-  setTimeout(() => {
+  
+  // Start a timeout and save its handle.
+  const timeoutHandle = setTimeout(() => {
     if (!recordedTranscript) {
       startRecordingBtn.textContent = "Retry";
       countdownDisplay.textContent = "";
       recordingResult.textContent += "\nRecognition timed out. Please try again.";
     }
   }, 3000);
+  
+  // Start Azure speech recognition.
+  azureSpeechRecognize(() => {
+    // Clear timeout when result is received.
+    clearTimeout(timeoutHandle);
+    createSubmitButton();
+    startRecordingBtn.textContent = "Retry";
+    countdownDisplay.textContent = "";
+  });
 }
 
 /**
