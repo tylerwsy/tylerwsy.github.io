@@ -1,4 +1,13 @@
-/* chinese_proununication.js */
+/* chinese_pronunication.js */
+
+// ---------------------------
+// Exit Confirmation Function
+// ---------------------------
+function confirmExit() {
+  if (confirm("Are you sure you want to exit the quiz? Your progress will be lost.")) {
+    window.location.href = "select.html";
+  }
+}
 
 // Helper function: Convert digits (0-9) to Chinese characters.
 function convertDigitsToChinese(str) {
