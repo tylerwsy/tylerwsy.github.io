@@ -4,7 +4,7 @@
 const KNOWN_PROMPT = "答案是";
 
 // Azure Speech Service credentials – replace with your actual key.
-const azureSubscriptionKey = "YOUR_AZURE_SUBSCRIPTION_KEY";
+const azureSubscriptionKey = "8Yj0oh8v4Pyg4YFzcpWJgK1SILr4ysJ4I1ACHhl1jUqcIyBI4tgRJQQJ99BDACqBBLyXJ3w3AAAYACOGk2lo";
 const azureServiceRegion = "southeastasia"; // Default region
 
 // Helper function: Convert digits (0-9) to Chinese characters.
