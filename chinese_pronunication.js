@@ -4,7 +4,7 @@
 const KNOWN_PROMPT = "答案是";
 
 // Azure Speech Service credentials – replace with your actual key.
-const azureSubscriptionKey = "8Yj0oh8v4Pyg4YFzcpWJgK1SILr4ysJ4I1ACHhl1jUqcIyBI4tgRJQQJ99BDACqBBLyXJ3w3AAAYACOGk2lo";
+const azureSubscriptionKey = "YOUR_AZURE_SUBSCRIPTION_KEY";
 const azureServiceRegion = "southeastasia"; // Default region
 
 // Helper function: Convert digits (0-9) to Chinese characters.
@@ -221,44 +221,39 @@ function levenshteinDistance(a, b) {
 
 /* --- Azure Speech and Recording Functions --- */
 /* This function calls Azure Speech Services to recognize speech.
-   A callback function is executed after recognition completes. */
+   It re-requests a fresh microphone stream for live translation.
+   The translation is invoked immediately after recording stops.
+*/
 function azureSpeechRecognize(subscriptionKey = azureSubscriptionKey, serviceRegion = azureServiceRegion, callback) {
   if (typeof SpeechSDK === "undefined") {
     console.error("Azure Speech SDK not found. Please include the SDK script in your HTML.");
     return;
   }
-  const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
-  speechConfig.speechRecognitionLanguage = "zh-CN";
-  const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
-  const recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
-  recognizer.recognizeOnceAsync(
-    result => {
-      recordedTranscript = result.text;
-      console.log("[azure] Recognized text:", recordedTranscript);
-      recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
-      if(callback) callback();
-    },
-    err => {
-      console.error("[azure] Recognition error:", err);
-      recordingResult.textContent += "\n[azure] Recognition error.";
-    }
-  );
-}
-
-/* Creates a "Translate Now" button after recording stops.
-   When clicked, it calls Azure Speech Services to translate the recorded speech. */
-function showTranslateNowButton() {
-  let translateBtn = document.createElement("button");
-  translateBtn.textContent = "Translate Now";
-  translateBtn.classList.add("interactive-btn");
-  translateBtn.addEventListener("click", () => {
-    translateBtn.disabled = true;
-    azureSpeechRecognize(undefined, undefined, () => {
-      // After translation completes, enable the Submit button.
-      createSubmitButton();
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(newStream => {
+      const audioConfig = SpeechSDK.AudioConfig.fromStreamInput(newStream);
+      const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+      speechConfig.speechRecognitionLanguage = "zh-CN";
+      const recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+      recognizer.recognizeOnceAsync(
+        result => {
+          recordedTranscript = result.text;
+          console.log("[azure] Recognized text:", recordedTranscript);
+          recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
+          if (callback) callback();
+          newStream.getTracks().forEach(track => track.stop());
+        },
+        err => {
+          console.error("[azure] Recognition error:", err);
+          recordingResult.textContent += "\n[azure] Recognition error.";
+          newStream.getTracks().forEach(track => track.stop());
+        }
+      );
+    })
+    .catch(err => {
+      console.error("Error obtaining new microphone stream for Azure recognition:", err);
+      recordingResult.textContent += "\nFailed to get microphone stream for translation.";
     });
-  });
-  ensureButtonGroup().row1.appendChild(translateBtn);
 }
 
 function setupMediaRecorder(stream) {
@@ -324,7 +319,7 @@ function beginRecording() {
   startRecordingBtn.disabled = false;
   startRecordingBtn.style.backgroundColor = "";
   setupMediaRecorder(micStream);
-  // Do NOT call azureSpeechRecognize() now. Instead, we wait for user action.
+  // Do not wait for additional user action; live translate immediately after recording stops.
   recordingResult.textContent = "🎙️ Speak now...";
   countdownDisplay.textContent = "⏺️ Recording (6 sec)...";
   startRecordingBtn.textContent = "Recording...";
@@ -338,7 +333,6 @@ function beginRecording() {
 }
 
 function stopRecording() {
-  // Stop MediaRecorder if active.
   if (mediaRecorder && mediaRecorder.state === "recording") {
     mediaRecorder.stop();
   }
@@ -346,17 +340,22 @@ function stopRecording() {
   startRecordingBtn.textContent = "Retry";
   countdownDisplay.textContent = "";
   console.log("[recording] Stopped");
-  // Release mic tracks and close audio context.
   if (micStream) {
     micStream.getTracks().forEach(track => track.stop());
     micStream = null;
     console.log("Mic tracks stopped.");
   }
   if (audioContext && audioContext.state !== "closed") {
-    audioContext.close().then(() => console.log("AudioContext closed")).catch(e => console.error("AudioContext close error:", e));
+    audioContext.close().then(() => console.log("AudioContext closed"))
+      .catch(e => console.error("AudioContext close error:", e));
   }
-  // Instead of verifying the transcript, immediately show the Translate Now button.
-  setTimeout(() => { showTranslateNowButton(); }, 200);
+  // Immediately call Azure Speech Services for live translation.
+  setTimeout(() => {
+    azureSpeechRecognize(undefined, undefined, () => {
+      // Once translation completes, automatically create the Submit button.
+      createSubmitButton();
+    });
+  }, 200);
 }
 
 function createSubmitButton() {
@@ -377,7 +376,6 @@ async function handleSubmit() {
     recordingResult.textContent += "\nNo speech detected. Please record again.";
     return;
   }
-  // Prepend prompt if missing.
   if (!recordedTranscript.startsWith(KNOWN_PROMPT)) {
     recordedTranscript = KNOWN_PROMPT + recordedTranscript;
   }
@@ -410,7 +408,6 @@ async function handleSubmit() {
   startRecordingBtn.disabled = true;
   startRecordingBtn.style.backgroundColor = "grey";
   await updateWordRecord(words[currentIndex], isCorrect);
-  // End mic access after submission.
   if (micStream) {
     micStream.getTracks().forEach(track => track.stop());
     micStream = null;
