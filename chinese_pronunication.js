@@ -434,20 +434,27 @@ function createSubmitButton() {
 /**
  * Handles submission by fuzzy-comparing the pinyin of the quiz word and the recognized transcript.
  */
-async function handleSubmit() {
+function handleSubmit() {
   console.log("handleSubmit triggered.");
   if (!recordedTranscript) {
     recordingResult.textContent += "\nNo speech detected. Please try again.";
     return;
   }
-  const expectedPinyin = removeTrailingPunctuation(window.pinyinPro.pinyin(quizWord.textContent, { toneType: "symbol", segment: true }));
-  const recognizedPinyin = removeTrailingPunctuation(window.pinyinPro.pinyin(recordedTranscript, { toneType: "symbol", segment: true }));
+  const expectedPinyin = removeTrailingPunctuation(window.pinyinPro.pinyin(quizWord.textContent, {
+    toneType: "symbol",
+    segment: true
+  }));
+  const recognizedPinyin = removeTrailingPunctuation(window.pinyinPro.pinyin(recordedTranscript, {
+    toneType: "symbol",
+    segment: true
+  }));
   console.log("Quiz word pinyin:", expectedPinyin);
   console.log("Recognized pinyin:", recognizedPinyin);
-  
+
   const distance = levenshteinDistance(recognizedPinyin, expectedPinyin);
   const threshold = Math.floor(expectedPinyin.length * 0.3);
   let isCorrect = (distance <= threshold);
+
   if (isCorrect) {
     recordingResult.textContent += "\nResult: ✅ Correct (fuzzy match)";
     correctCount++;
@@ -458,12 +465,18 @@ async function handleSubmit() {
     wrongCount++;
     createCorrectPlaybackButton();
   }
-  submitBtn.disabled = true;
-  submitBtn.style.backgroundColor = "grey";
+  
+  // Remove the submit button to make it disappear after the user clicks it.
+  submitBtn.remove();
+  
+  // Optionally, disable the start recording button as well.
   startRecordingBtn.disabled = true;
   startRecordingBtn.style.backgroundColor = "grey";
-  await updateWordRecord(words[currentIndex], isCorrect);
-  createNextButton();
+
+  updateWordRecord(words[currentIndex], isCorrect)
+    .then(() => {
+      createNextButton();
+    });
 }
 
 /**
