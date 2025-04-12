@@ -357,7 +357,14 @@ function levenshteinDistance(a, b) {
 function beginLiveRecognition() {
   recordedTranscript = ""; // Clear previous transcript.
   const startTime = Date.now();
-  
+
+  // Show "Speak now..." message after 1 second if nothing has been recorded yet.
+  setTimeout(() => {
+    if (!recordedTranscript) {
+      recordingResult.textContent = "Speak now...";
+    }
+  }, 1000);
+
   // Start overall timeout for 6 seconds.
   const timeoutHandle = setTimeout(() => {
     if (!recordedTranscript) {
@@ -366,7 +373,7 @@ function beginLiveRecognition() {
       recordingResult.textContent = "Recognition timed out. Please try again.";
     }
   }, 6000);
-  
+
   // Start continuous recognition immediately.
   azureSpeechRecognizeContinuous((finalTranscript) => {
     clearTimeout(timeoutHandle);
@@ -385,8 +392,8 @@ function beginLiveRecognition() {
       countdownDisplay.textContent = "";
     }, delay);
   });
-  
-  // Immediately clear any UI messages (do not show "Speak now" here).
+
+  // Immediately clear any UI messages and update button text.
   recordingResult.textContent = "";
   countdownDisplay.textContent = "";
   startRecordingBtn.textContent = "Recording...";
