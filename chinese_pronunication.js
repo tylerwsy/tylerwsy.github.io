@@ -123,6 +123,7 @@ function azureSpeechRecognizeContinuous(callback) {
         }
         const audioConfig = SpeechSDK.AudioConfig.fromStreamInput(newStream);
         const speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(data.token, data.region);
+        // Set the recognition language to Chinese only.
         speechConfig.speechRecognitionLanguage = "zh-CN";
         const recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
         
@@ -434,27 +435,20 @@ function createSubmitButton() {
 /**
  * Handles submission by fuzzy-comparing the pinyin of the quiz word and the recognized transcript.
  */
-function handleSubmit() {
+async function handleSubmit() {
   console.log("handleSubmit triggered.");
   if (!recordedTranscript) {
     recordingResult.textContent += "\nNo speech detected. Please try again.";
     return;
   }
-  const expectedPinyin = removeTrailingPunctuation(window.pinyinPro.pinyin(quizWord.textContent, {
-    toneType: "symbol",
-    segment: true
-  }));
-  const recognizedPinyin = removeTrailingPunctuation(window.pinyinPro.pinyin(recordedTranscript, {
-    toneType: "symbol",
-    segment: true
-  }));
+  const expectedPinyin = removeTrailingPunctuation(window.pinyinPro.pinyin(quizWord.textContent, { toneType: "symbol", segment: true }));
+  const recognizedPinyin = removeTrailingPunctuation(window.pinyinPro.pinyin(recordedTranscript, { toneType: "symbol", segment: true }));
   console.log("Quiz word pinyin:", expectedPinyin);
   console.log("Recognized pinyin:", recognizedPinyin);
-
+  
   const distance = levenshteinDistance(recognizedPinyin, expectedPinyin);
   const threshold = Math.floor(expectedPinyin.length * 0.3);
   let isCorrect = (distance <= threshold);
-
   if (isCorrect) {
     recordingResult.textContent += "\nResult: ✅ Correct (fuzzy match)";
     correctCount++;
@@ -465,18 +459,12 @@ function handleSubmit() {
     wrongCount++;
     createCorrectPlaybackButton();
   }
-  
-  // Remove the submit button to make it disappear after the user clicks it.
+  // Remove the submit button to make it disappear after submission.
   submitBtn.remove();
-  
-  // Optionally, disable the start recording button as well.
   startRecordingBtn.disabled = true;
   startRecordingBtn.style.backgroundColor = "grey";
-
-  updateWordRecord(words[currentIndex], isCorrect)
-    .then(() => {
-      createNextButton();
-    });
+  await updateWordRecord(words[currentIndex], isCorrect);
+  createNextButton();
 }
 
 /**
