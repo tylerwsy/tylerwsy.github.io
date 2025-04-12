@@ -314,6 +314,7 @@ function showWord() {
         window.speechSynthesis.speak(utterance);
       }
     });
+    // Clear any previous messages.
     recordingResult.textContent = "";
     controlsContainer.innerHTML = "";
     buttonGroup = null;
@@ -348,28 +349,16 @@ function levenshteinDistance(a, b) {
 /**
  * Begins live recognition using continuous Azure Speech-to-Text.
  * Implements the following timing:
- *  - Azure recognition is started immediately.
- *  - After 1 second, the UI is updated to show "Speak now...", "Recording (4 sec)..." and "Recording..." on the button.
- *  - An overall timeout is set for 6 seconds (1 sec delay + 4 sec recording + 1 extra sec).
+ *  - Azure recognition starts immediately.
+ *  - The UI update (i.e. showing "Speak now...", "Recording (4 sec)..." and button text change)
+ *    is delayed until at least 1 second has passed.
+ *  - An overall timeout is set for 6 seconds (to allow 4 sec recording + extra time) before showing timeout.
  */
 function beginLiveRecognition() {
-  recordedTranscript = ""; // Clear any previous transcript.
-
-  // Start continuous recognition immediately.
-  azureSpeechRecognizeContinuous((finalTranscript) => {
-    clearTimeout(timeoutHandle);
-    recordedTranscript = finalTranscript;
-    if (recordedTranscript && recordedTranscript.length > 0) {
-      recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
-    } else {
-      recordingResult.textContent = "No speech detected.";
-    }
-    createSubmitButton();
-    startRecordingBtn.textContent = "Retry";
-    countdownDisplay.textContent = "";
-  });
+  recordedTranscript = ""; // Clear previous transcript.
+  const startTime = Date.now();
   
-  // Start the overall timeout; declare timeoutHandle in the scope of this function.
+  // Start overall timeout for 6 seconds.
   const timeoutHandle = setTimeout(() => {
     if (!recordedTranscript) {
       startRecordingBtn.textContent = "Retry";
@@ -378,12 +367,29 @@ function beginLiveRecognition() {
     }
   }, 6000);
   
-  // After 1 second, update UI to show the "Speak now..." message.
-  setTimeout(() => {
-    recordingResult.textContent = "🎙️ Speak now...";
-    countdownDisplay.textContent = "⏺️ Recording (4 sec)...";
-    startRecordingBtn.textContent = "Recording...";
-  }, 1000);
+  // Start continuous recognition immediately.
+  azureSpeechRecognizeContinuous((finalTranscript) => {
+    clearTimeout(timeoutHandle);
+    recordedTranscript = finalTranscript;
+    // Ensure at least 1 second has elapsed before updating UI.
+    const elapsed = Date.now() - startTime;
+    const delay = Math.max(0, 1000 - elapsed);
+    setTimeout(() => {
+      if (recordedTranscript && recordedTranscript.length > 0) {
+        recordingResult.textContent = `🔈 You said: ${recordedTranscript}`;
+      } else {
+        recordingResult.textContent = "No speech detected.";
+      }
+      createSubmitButton();
+      startRecordingBtn.textContent = "Retry";
+      countdownDisplay.textContent = "";
+    }, delay);
+  });
+  
+  // Immediately clear any UI messages (do not show "Speak now" here).
+  recordingResult.textContent = "";
+  countdownDisplay.textContent = "";
+  startRecordingBtn.textContent = "Recording...";
 }
 
 /**
@@ -552,9 +558,9 @@ document.addEventListener("DOMContentLoaded", () => {
   loadQuizWords();
 });
 
-/* When the Start Recording button is clicked, clear previous messages and begin continuous recognition immediately. */
+/* When the Start Recording button is clicked, clear previous messages and begin continuous recognition. */
 startRecordingBtn.addEventListener("click", () => {
   recordedTranscript = "";
-  recordingResult.textContent = ""; // Immediately clear any text.
+  recordingResult.textContent = ""; // Clear immediately.
   beginLiveRecognition();
 });
