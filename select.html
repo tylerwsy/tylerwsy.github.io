@@ -71,7 +71,7 @@
 <body>
   <div class="container">
     <div id="dailyMission" style="text-align: center; margin-bottom: 1rem;">
-      <h2>🎯 Daily Missions - Do daily and get more than 80% correct!</h2>
+      <h2>🎯 Daily Missions - Do daily and get more than 70% correct!</h2>
       <div id="missionStatus" style="font-size: 1.2rem;"></div>
     </div>
     <header>
@@ -123,10 +123,21 @@
       function updateDailyMission() {
         const missionStatus = document.getElementById("missionStatus");
         const logs = JSON.parse(localStorage.getItem("quizResults") || "[]");
-        const today = new Date().toISOString().split("T")[0];
+        // Compute current date in Singapore time (UTC+8)
+        const singaporeTime = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Singapore" }));
+        const today = singaporeTime.toISOString().split("T")[0];
 
-        const hasChinese = logs.some(r => r.mode === "chinese" && r.date.startsWith(today) && (r.correct / r.total) >= 0.8);
-        const hasPlural = logs.some(r => r.mode === "english_plural" && r.date.startsWith(today) && (r.correct / r.total) >= 0.8);
+        // Check if today's quiz results meet or exceed a 70% correct rate
+        const hasChinese = logs.some(r => 
+          r.mode === "chinese" &&
+          r.date.startsWith(today) &&
+          (r.correct / r.total) >= 0.7
+        );
+        const hasPlural = logs.some(r => 
+          r.mode === "english_plural" &&
+          r.date.startsWith(today) &&
+          (r.correct / r.total) >= 0.7
+        );
 
         missionStatus.innerHTML = `
           <div>Chinese Pronunciation: ${hasChinese ? "✅" : "⬜"}</div>
