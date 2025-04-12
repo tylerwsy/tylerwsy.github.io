@@ -459,8 +459,9 @@ async function handleSubmit() {
     wrongCount++;
     createCorrectPlaybackButton();
   }
-  // Remove the submit button to make it disappear after submission.
+  // Remove the submit button and reset the reference so it can be recreated next time.
   submitBtn.remove();
+  submitBtn = null;
   startRecordingBtn.disabled = true;
   startRecordingBtn.style.backgroundColor = "grey";
   await updateWordRecord(words[currentIndex], isCorrect);
