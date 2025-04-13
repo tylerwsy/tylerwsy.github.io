@@ -2,7 +2,891 @@
 
 // Paste your manually provided JSON data here.
 const quizData = [
-  { "noun": "cat", "options": ["cats", "cates", "caties", "catys"], "answer": "cats", "explanation": "Standard rule: simply add 's'." }, { "noun": "dog", "options": ["dogs", "doges", "dogis", "dogys"], "answer": "dogs", "explanation": "Standard rule: simply add 's'." }, { "noun": "church", "options": ["churchs", "churhes", "churhces", "churches"], "answer": "churches", "explanation": "Nouns ending in 'ch' add 'es'." }, { "noun": "dish", "options": ["dishs", "dishe", "dishies", "dishes"], "answer": "dishes", "explanation": "Nouns ending in 'sh' add 'es'." }, { "noun": "box", "options": ["boxs", "boxies", "boxxes", "boxes"], "answer": "boxes", "explanation": "Nouns ending in 'x' add 'es'." }, { "noun": "bus", "options": ["buss", "busis", "busos", "buses"], "answer": "buses", "explanation": "Nouns ending in 's' add 'es'." }, { "noun": "lady", "options": ["ladys", "ladiees", "ladies", "ladiees"], "answer": "ladies", "explanation": "For nouns ending in 'y' preceded by a consonant, replace 'y' with 'ies'." }, { "noun": "boy", "options": ["boyes", "boyys", "boies", "boys"], "answer": "boys", "explanation": "For nouns ending in 'y' preceded by a vowel, simply add 's'." }, { "noun": "leaf", "options": ["leafs", "leafees", "leaves", "leafes"], "answer": "leaves", "explanation": "For nouns ending in 'f', replace 'f' with 'ves'." }, { "noun": "wolf", "options": ["wolfs", "wolfes", "wolfies", "wolves"], "answer": "wolves", "explanation": "For nouns ending in 'f', replace 'f' with 'ves'." }, { "noun": "knife", "options": ["knifes", "knifis", "knivies", "knives"], "answer": "knives", "explanation": "For nouns ending in 'fe', replace 'fe' with 'ves'." }, { "noun": "tomato", "options": ["tomatos", "tomatios", "tomatoes", "tomatues"], "answer": "tomatoes", "explanation": "Nouns ending in 'o' often add 'es'." }, { "noun": "potato", "options": ["potatos", "potatios", "potatoes", "potatues"], "answer": "potatoes", "explanation": "Nouns ending in 'o' often add 'es'." }, { "noun": "hero", "options": ["heros", "heroos", "heroses", "heroes"], "answer": "heroes", "explanation": "Nouns ending in 'o' preceded by a consonant add 'es'." }, { "noun": "echo", "options": ["echos", "echoes", "echoos", "echois"], "answer": "echoes", "explanation": "Nouns ending in 'o' preceded by a consonant add 'es'." }, { "noun": "mosquito", "options": ["mosquitos", "mosquitoes", "mosquitios", "mosquitees"], "answer": "mosquitoes", "explanation": "Nouns ending in 'o' often add 'es'." }, { "noun": "analysis", "options": ["analysises", "analysies", "analysises", "analyses"], "answer": "analyses", "explanation": "Irregular plural: change 'is' to 'es'." }, { "noun": "crisis", "options": ["crisises", "crisisies", "crisisos", "crises"], "answer": "crises", "explanation": "Irregular plural: change 'is' to 'es'." }, { "noun": "thesis", "options": ["thesises", "thesisies", "thesisos", "theses"], "answer": "theses", "explanation": "Irregular plural: change 'is' to 'es'." }, { "noun": "phenomenon", "options": ["phenomenons", "phenomenos", "phenomenies", "phenomena"], "answer": "phenomena", "explanation": "Irregular plural with a vowel change." }, { "noun": "child", "options": ["childs", "childes", "childies", "children"], "answer": "children", "explanation": "Irregular plural form." }, { "noun": "man", "options": ["mans", "manes", "manis", "men"], "answer": "men", "explanation": "Irregular plural form." }, { "noun": "woman", "options": ["womans", "women", "womans", "womien"], "answer": "women", "explanation": "Irregular plural form." }, { "noun": "tooth", "options": ["tooths", "toothees", "toothies", "teeth"], "answer": "teeth", "explanation": "Irregular plural form." }, { "noun": "foot", "options": ["foots", "footes", "footies", "feet"], "answer": "feet", "explanation": "Irregular plural form." }, { "noun": "mouse", "options": ["mouses", "mousees", "mouseis", "mice"], "answer": "mice", "explanation": "Irregular plural form." }, { "noun": "person", "options": ["persons", "peoples", "persones", "people"], "answer": "people", "explanation": "Irregular plural form." }, { "noun": "cactus", "options": ["cactuses", "cactis", "cacties", "cacti"], "answer": "cacti", "explanation": "Latin-derived irregular plural form." }, { "noun": "focus", "options": ["focuses", "focuss", "focusses", "foci"], "answer": "foci", "explanation": "Latin-derived irregular plural form." }, { "noun": "fungus", "options": ["funguses", "fungis", "fungies", "fungi"], "answer": "fungi", "explanation": "Latin-derived irregular plural form." }, { "noun": "nucleus", "options": ["nucleuses", "nucleis", "nucleos", "nuclei"], "answer": "nuclei", "explanation": "Latin-derived irregular plural form." }, { "noun": "syllabus", "options": ["syllabuses", "syllabos", "syllabis", "syllabi"], "answer": "syllabi", "explanation": "Latin-derived irregular plural form." }, { "noun": "alumnus", "options": ["alumnuses", "alumnis", "alumnas", "alumni"], "answer": "alumni", "explanation": "Latin-derived irregular plural form." }, { "noun": "bacterium", "options": ["bacteriums", "bacterias", "bacteries", "bacteria"], "answer": "bacteria", "explanation": "Latin-derived irregular plural form." }, { "noun": "datum", "options": ["datums", "datas", "daties", "data"], "answer": "data", "explanation": "Latin-derived irregular plural form." }, { "noun": "memorandum", "options": ["memorandums", "memorandes", "memorandis", "memoranda"], "answer": "memoranda", "explanation": "Latin-derived irregular plural form." }, { "noun": "ox", "options": ["oxs", "oxes", "oxies", "oxen"], "answer": "oxen", "explanation": "Irregular plural form." }, { "noun": "goose", "options": ["gooses", "goosees", "goosies", "geese"], "answer": "geese", "explanation": "Irregular plural form." }, { "noun": "baby", "options": ["babys", "babiees", "babyes", "babies"], "answer": "babies", "explanation": "For nouns ending in 'y' preceded by a consonant, replace 'y' with 'ies'." }, { "noun": "city", "options": ["citys", "cityes", "cityies", "cities"], "answer": "cities", "explanation": "For nouns ending in 'y' preceded by a consonant, replace 'y' with 'ies'." }, { "noun": "party", "options": ["partys", "partyes", "partiies", "parties"], "answer": "parties", "explanation": "For nouns ending in 'y' preceded by a consonant, replace 'y' with 'ies'." }, { "noun": "story", "options": ["storys", "storios", "storyes", "stories"], "answer": "stories", "explanation": "For nouns ending in 'y' preceded by a consonant, replace 'y' with 'ies'." }, { "noun": "fox", "options": ["foxs", "foxis", "foxos", "foxes"], "answer": "foxes", "explanation": "Nouns ending in 'x' add 'es'." }, { "noun": "quiz", "options": ["quizs", "quizes", "quizies", "quizzes"], "answer": "quizzes", "explanation": "Nouns ending in 'z' add 'zes'." }, { "noun": "glass", "options": ["glasss", "glases", "glassies", "glasses"], "answer": "glasses", "explanation": "Nouns ending in a sibilant sound often add 'es'." }, { "noun": "dress", "options": ["dresss", "dreses", "dressies", "dresses"], "answer": "dresses", "explanation": "Nouns ending in a sibilant sound often add 'es'." }, { "noun": "bush", "options": ["bushs", "bushies", "bushos", "bushes"], "answer": "bushes", "explanation": "Nouns ending in 'sh' add 'es'." }, { "noun": "match", "options": ["matchs", "matchets", "matchies", "matches"], "answer": "matches", "explanation": "Nouns ending in 'ch' add 'es'." }, { "noun": "watch", "options": ["watchs", "watchies", "wachtes", "watches"], "answer": "watches", "explanation": "Nouns ending in 'ch' add 'es'." }, { "noun": "studio", "options": ["studiios", "studioes", "studius", "studios"], "answer": "studios", "explanation": "Nouns ending in 'o' preceded by a vowel simply add 's'." }, { "noun": "piano", "options": ["pianoes", "pianis", "pianoys", "pianos"], "answer": "pianos", "explanation": "Nouns ending in 'o' preceded by a vowel simply add 's'." }, { "noun": "photo", "options": ["photoes", "phootos", "photes", "photos"], "answer": "photos", "explanation": "Nouns ending in 'o' preceded by a vowel simply add 's'." }, { "noun": "radio", "options": ["radioes", "radious", "radiois", "radios"], "answer": "radios", "explanation": "Nouns ending in 'o' preceded by a vowel simply add 's'." }, { "noun": "volcano", "options": ["volcanos", "volcanies", "volcainos", "volcanoes"], "answer": "volcanoes", "explanation": "Nouns ending in 'o' preceded by a consonant often add 'es'." }, { "noun": "buffalo", "options": ["buffalos", "buffaloes", "buffalies", "buffaloes"], "answer": "buffaloes", "explanation": "Nouns ending in 'o' preceded by a consonant add 'es'." }, { "noun": "sandwich", "options": ["sandwichs", "sandwichees", "sandwichies", "sandwiches"], "answer": "sandwiches", "explanation": "Nouns ending in 'ch' add 'es'." }, { "noun": "peach", "options": ["peachs", "peachies", "peachees", "peaches"], "answer": "peaches", "explanation": "Nouns ending in 'ch' add 'es'." }, { "noun": "couch", "options": ["couchs", "couchies", "couchos", "couches"], "answer": "couches", "explanation": "Nouns ending in 'ch' add 'es'." }, { "noun": "bench", "options": ["benchs", "benchies", "benchos", "benches"], "answer": "benches", "explanation": "Nouns ending in 'ch' add 'es'." }, { "noun": "roof", "options": ["roofes", "roofys", "roofis", "roofs"], "answer": "roofs", "explanation": "Exception: despite ending in 'f', simply add 's'." }, { "noun": "half", "options": ["halfs", "halfes", "halvies", "halves"], "answer": "halves", "explanation": "For nouns ending in 'lf', replace 'f' with 'ves'." }, { "noun": "calf", "options": ["calfs", "calfes", "calvies", "calves"], "answer": "calves", "explanation": "For nouns ending in 'lf', replace 'f' with 'ves'." }, { "noun": "elf", "options": ["elfs", "elfies", "elfes", "elves"], "answer": "elves", "explanation": "For nouns ending in 'lf', replace 'f' with 'ves'." }, { "noun": "self", "options": ["selfs", "selfes", "selfies", "selves"], "answer": "selves", "explanation": "Irregular plural: change to 'selves'." }, { "noun": "chief", "options": ["chieves", "chievis", "chiefes", "chiefs"], "answer": "chiefs", "explanation": "Exception: despite ending in 'f', simply add 's'." }, { "noun": "proof", "options": ["proofes", "proofis", "prooffs", "proofs"], "answer": "proofs", "explanation": "Exception: simply add 's'." }, { "noun": "deer", "options": ["deers", "deeres", "deeris", "deer"], "answer": "deer", "explanation": "Irregular plural: remains the same." }, { "noun": "sheep", "options": ["sheeps", "sheepees", "sherimpes", "sheep"], "answer": "sheep", "explanation": "Irregular plural: remains the same." }, { "noun": "species", "options": ["speciess", "specises", "speciis", "species"], "answer": "species", "explanation": "Irregular plural: remains the same." }, { "noun": "series", "options": ["seriess", "seriies", "serieses", "series"], "answer": "series", "explanation": "Irregular plural: remains the same." }, { "noun": "aircraft", "options": ["aircrafts", "aircrafs", "aircrafes", "aircraft"], "answer": "aircraft", "explanation": "Irregular plural: remains the same." }, { "noun": "hovercraft", "options": ["hovercrafts", "hovercrafs", "hovercrafes", "hovercraft"], "answer": "hovercraft", "explanation": "Irregular plural: remains the same." }, { "noun": "scarf", "options": ["scarfs", "scarfes", "scarfis", "scarves"], "answer": "scarves", "explanation": "For some nouns ending in 'f', replace with 'ves'." }, { "noun": "shelf", "options": ["shelfs", "sheleves", "shelvies", "shelves"], "answer": "shelves", "explanation": "For nouns ending in 'lf', replace with 'ves'." }, { "noun": "louse", "options": ["louses", "lousees", "lousies", "lice"], "answer": "lice", "explanation": "Irregular plural form." }, { "noun": "die", "options": ["dies", "diees", "diece", "dice"], "answer": "dice", "explanation": "Irregular plural form for the singular of 'dice'." }, { "noun": "appendix", "options": ["appendixes", "appendicex", "appendicis", "appendices"], "answer": "appendices", "explanation": "Latin-derived irregular plural form." }, { "noun": "matrix", "options": ["matrixes", "matrixis", "matrixos", "matrices"], "answer": "matrices", "explanation": "Latin-derived irregular plural form: change 'x' to 'ces'." }, { "noun": "vertex", "options": ["vertexes", "vertexis", "vertexos", "vertices"], "answer": "vertices", "explanation": "Latin-derived irregular plural form: change ending to 'ices'." }, { "noun": "index", "options": ["indexes", "indexs", "indexies", "indices"], "answer": "indices", "explanation": "Latin-derived irregular plural form." }, { "noun": "basis", "options": ["basises", "basises", "basies", "bases"], "answer": "bases", "explanation": "Irregular plural form." }, { "noun": "axis", "options": ["axises", "axisies", "axos", "axes"], "answer": "axes", "explanation": "Irregular plural form." }, { "noun": "criterion", "options": ["criterion", "criterions", "criterias", "criteria"], "answer": "criteria", "explanation": "Irregular plural form." }, { "noun": "thief", "options": ["thiefs", "thiefes", "thiefis", "thieves"], "answer": "thieves", "explanation": "For nouns ending in 'f', replace with 'ves'." }, { "noun": "cuff", "options": ["cuffes", "cuffis", "cuffies", "cuffs"], "answer": "cuffs", "explanation": "Standard rule: simply add 's'." }, { "noun": "puff", "options": ["puffes", "puffis", "puffies", "puffs"], "answer": "puffs", "explanation": "Standard rule: simply add 's'." }, { "noun": "buff", "options": ["buffes", "buffis", "buffies", "buffs"], "answer": "buffs", "explanation": "Standard rule: simply add 's'." }, { "noun": "jacket", "options": ["jacketes", "jacketis", "jacketos", "jackets"], "answer": "jackets", "explanation": "Standard rule: simply add 's'." }, { "noun": "loaf", "options": ["loafs", "loafes", "loafis", "loaves"], "answer": "loaves", "explanation": "For nouns ending in 'f', replace 'f' with 'ves'." }, { "noun": "belief", "options": ["beliefes", "belifes", "beliefis", "beliefs"], "answer": "beliefs", "explanation": "Exception: despite ending in 'f', simply add 's'." }, { "noun": "penny", "options": ["pennys", "pennyes", "penniees", "pennies"], "answer": "pennies", "explanation": "For nouns ending in 'y' preceded by a consonant, replace 'y' with 'ies'." }, { "noun": "bay", "options": ["bayes", "bayys", "bayies", "bays"], "answer": "bays", "explanation": "For nouns ending in 'y' preceded by a vowel, simply add 's'." }, { "noun": "alga", "options": ["algas", "algaes", "algais", "algae"], "answer": "algae", "explanation": "Irregular plural form." }, { "noun": "bison", "options": ["bisons", "bisones", "bisonis", "bison"], "answer": "bison", "explanation": "Irregular plural: remains the same." }, { "noun": "shrimp", "options": ["shrimps", "shrimpees", "shrimpes", "shrimp"], "answer": "shrimp", "explanation": "Irregular plural: remains the same." }, { "noun": "cod", "options": ["cods", "code", "codies", "cod"], "answer": "cod", "explanation": "Irregular plural: remains the same." }, { "noun": "graffito", "options": ["graffitos", "graffitie", "graffitis", "graffiti"], "answer": "graffiti", "explanation": "Irregular plural form from Italian." }, { "noun": "spectrum", "options": ["spectrumes", "spectrums", "spectries", "spectra"], "answer": "spectra", "explanation": "Irregular plural form from Latin." }, { "noun": "stadium", "options": ["stadiums", "stadies", "stadios", "stadia"], "answer": "stadia", "explanation": "Irregular plural form from Latin." }, { "noun": "crucifix", "options": ["crucifixes", "crucifixs", "crucifixies", "crucifixes"], "answer": "crucifixes", "explanation": "Nouns ending in 'x' add 'es' with modification." }
+  [
+  {
+    "noun": "cat",
+    "options": ["cats", "cates", "caties", "catys"],
+    "answer": "cats",
+    "explanation": "We add an 's' at the end to show more than one cat."
+  },
+  {
+    "noun": "dog",
+    "options": ["dogs", "doges", "dogies", "dogys"],
+    "answer": "dogs",
+    "explanation": "Just put an 's' on the end to show there are many dogs."
+  },
+  {
+    "noun": "fish",
+    "options": ["fish", "fishes", "fishies", "fishos"],
+    "answer": "fish",
+    "explanation": "For fish, the word stays the same when there is more than one."
+  },
+  {
+    "noun": "bird",
+    "options": ["birds", "birdes", "birdis", "birdys"],
+    "answer": "birds",
+    "explanation": "We add an 's' to tell us there are many birds."
+  },
+  {
+    "noun": "apple",
+    "options": ["apples", "applas", "applese", "appals"],
+    "answer": "apples",
+    "explanation": "Simply add an 's' when you have more than one apple."
+  },
+  {
+    "noun": "box",
+    "options": ["boxs", "boxes", "boxies", "boxos"],
+    "answer": "boxes",
+    "explanation": "When a word ends with x, we add 'es' to make it more than one."
+  },
+  {
+    "noun": "bus",
+    "options": ["busses", "busis", "busos", "buses"],
+    "answer": "buses",
+    "explanation": "For the bus, we add 'es' because it ends in s."
+  },
+  {
+    "noun": "baby",
+    "options": ["babys", "babies", "babyes", "babiees"],
+    "answer": "babies",
+    "explanation": "Change the 'y' to 'ies' when there are more than one baby."
+  },
+  {
+    "noun": "city",
+    "options": ["citys", "cities", "cityes", "cityies"],
+    "answer": "cities",
+    "explanation": "We change 'y' to 'ies' because city ends with 'y' after a consonant."
+  },
+  {
+    "noun": "monkey",
+    "options": ["monkeys", "monkiees", "monkies", "monkys"],
+    "answer": "monkeys",
+    "explanation": "Here we simply add an 's' since 'monkey' ends in a vowel and then y."
+  },
+  {
+    "noun": "chair",
+    "options": ["chairs", "chairies", "chairas", "chaires"],
+    "answer": "chairs",
+    "explanation": "Add an 's' to show there are more chairs."
+  },
+  {
+    "noun": "table",
+    "options": ["tables", "tablues", "tablis", "tablos"],
+    "answer": "tables",
+    "explanation": "Just add an 's' at the end to make it plural."
+  },
+  {
+    "noun": "toy",
+    "options": ["toys", "toyies", "toyos", "toies"],
+    "answer": "toys",
+    "explanation": "Since toy ends with 'y' after a vowel, we just add 's'."
+  },
+  {
+    "noun": "story",
+    "options": ["storys", "storis", "storyies", "stories"],
+    "answer": "stories",
+    "explanation": "For story, change 'y' to 'ies' to show more than one."
+  },
+  {
+    "noun": "bush",
+    "options": ["bushs", "bushes", "bushies", "bushos"],
+    "answer": "bushes",
+    "explanation": "When a word ends with sh, we add 'es' for the plural."
+  },
+  {
+    "noun": "sandwich",
+    "options": ["sandwichs", "sandwiches", "sandwichees", "sandwitches"],
+    "answer": "sandwiches",
+    "explanation": "We add 'es' because sandwich ends with ch."
+  },
+  {
+    "noun": "brush",
+    "options": ["brushs", "brushes", "brushies", "brushos"],
+    "answer": "brushes",
+    "explanation": "Add 'es' for words that end in sh."
+  },
+  {
+    "noun": "dish",
+    "options": ["dishs", "dishes", "dishies", "dishos"],
+    "answer": "dishes",
+    "explanation": "When a word ends in sh, we add 'es' to the end."
+  },
+  {
+    "noun": "fox",
+    "options": ["foxs", "foxes", "foxies", "foxos"],
+    "answer": "foxes",
+    "explanation": "The word fox becomes foxes by adding 'es'."
+  },
+  {
+    "noun": "quiz",
+    "options": ["quizs", "quizes", "quizies", "quizzes"],
+    "answer": "quizzes",
+    "explanation": "We add 'zes' because quiz ends with a z sound."
+  },
+  {
+    "noun": "potato",
+    "options": ["potatos", "potatoes", "potatoes", "potatios"],
+    "answer": "potatoes",
+    "explanation": "For potato, we add 'es' to make it plural."
+  },
+  {
+    "noun": "tomato",
+    "options": ["tomatos", "tomatoes", "tomatios", "tomatoes"],
+    "answer": "tomatoes",
+    "explanation": "We add 'es' because tomato ends with o."
+  },
+  {
+    "noun": "hero",
+    "options": ["heros", "heroes", "herois", "heroos"],
+    "answer": "heroes",
+    "explanation": "Since hero ends with o after a consonant, we add 'es'."
+  },
+  {
+    "noun": "echo",
+    "options": ["echos", "echoes", "echois", "echoos"],
+    "answer": "echoes",
+    "explanation": "Add 'es' because echo ends in o after a consonant sound."
+  },
+  {
+    "noun": "mosquito",
+    "options": ["mosquitos", "mosquitoes", "mosquitios", "mosquitees"],
+    "answer": "mosquitoes",
+    "explanation": "We add 'es' to mosquito to show there are many."
+  },
+  {
+    "noun": "child",
+    "options": ["childs", "childes", "childies", "children"],
+    "answer": "children",
+    "explanation": "Child changes to 'children' when there is more than one."
+  },
+  {
+    "noun": "man",
+    "options": ["mans", "manes", "manis", "men"],
+    "answer": "men",
+    "explanation": "Man becomes 'men' to show many grown-up boys."
+  },
+  {
+    "noun": "woman",
+    "options": ["womans", "women", "womans", "womien"],
+    "answer": "women",
+    "explanation": "Woman changes to 'women' when there is more than one."
+  },
+  {
+    "noun": "tooth",
+    "options": ["tooths", "toothees", "toothies", "teeth"],
+    "answer": "teeth",
+    "explanation": "Tooth becomes 'teeth' because it’s a special change."
+  },
+  {
+    "noun": "foot",
+    "options": ["foots", "footes", "footies", "feet"],
+    "answer": "feet",
+    "explanation": "Foot changes to 'feet' when there are many."
+  },
+  {
+    "noun": "mouse",
+    "options": ["mouses", "mousees", "mouseis", "mice"],
+    "answer": "mice",
+    "explanation": "Mouse becomes 'mice' in a funny, special way."
+  },
+  {
+    "noun": "deer",
+    "options": ["deers", "deeres", "deeris", "deer"],
+    "answer": "deer",
+    "explanation": "Deer stays the same when there is more than one."
+  },
+  {
+    "noun": "sheep",
+    "options": ["sheeps", "sheepees", "sheepies", "sheep"],
+    "answer": "sheep",
+    "explanation": "Sheep stays as 'sheep' even when there are many."
+  },
+  {
+    "noun": "crab",
+    "options": ["crabs", "crabes", "crabies", "crabos"],
+    "answer": "crabs",
+    "explanation": "Just add an 's' to show there are lots of crabs."
+  },
+  {
+    "noun": "snail",
+    "options": ["snails", "snalees", "snailis", "snailos"],
+    "answer": "snails",
+    "explanation": "We add 's' because there is more than one snail."
+  },
+  {
+    "noun": "frog",
+    "options": ["frogs", "froggies", "frogis", "frogos"],
+    "answer": "frogs",
+    "explanation": "Add an 's' when you have lots of frogs."
+  },
+  {
+    "noun": "bug",
+    "options": ["bugs", "bugies", "bugis", "bugos"],
+    "answer": "bugs",
+    "explanation": "Just add 's' to show there are many bugs."
+  },
+  {
+    "noun": "tree",
+    "options": ["trees", "treees", "treis", "treeos"],
+    "answer": "trees",
+    "explanation": "We add an 's' because there are many trees."
+  },
+  {
+    "noun": "flower",
+    "options": ["flowers", "flowres", "floweries", "flouers"],
+    "answer": "flowers",
+    "explanation": "Just add 's' to make more than one flower."
+  },
+  {
+    "noun": "cloud",
+    "options": ["clouds", "cloudes", "cloudies", "cloudoes"],
+    "answer": "clouds",
+    "explanation": "We add an 's' at the end to show many clouds."
+  },
+  {
+    "noun": "star",
+    "options": ["stars", "stares", "staries", "staros"],
+    "answer": "stars",
+    "explanation": "Add an 's' to show a bunch of stars."
+  },
+  {
+    "noun": "sun",
+    "options": ["suns", "sunes", "sunies", "sunos"],
+    "answer": "suns",
+    "explanation": "Even though there is one sun for us, in other cases we add 's'."
+  },
+  {
+    "noun": "moon",
+    "options": ["moons", "moones", "moonies", "moonos"],
+    "answer": "moons",
+    "explanation": "We add 's' because there can be many moons in stories."
+  },
+  {
+    "noun": "car",
+    "options": ["cars", "caris", "carees", "caros"],
+    "answer": "cars",
+    "explanation": "Add an 's' when you have more than one car."
+  },
+  {
+    "noun": "train",
+    "options": ["trains", "traines", "trainies", "trainos"],
+    "answer": "trains",
+    "explanation": "We add an 's' to show there are many trains."
+  },
+  {
+    "noun": "plane",
+    "options": ["planes", "planees", "planis", "planos"],
+    "answer": "planes",
+    "explanation": "Just add an 's' to make the word plural."
+  },
+  {
+    "noun": "boat",
+    "options": ["boats", "boates", "boatis", "boatos"],
+    "answer": "boats",
+    "explanation": "Add an 's' at the end because there are many boats."
+  },
+  {
+    "noun": "ship",
+    "options": ["ships", "shipes", "shipis", "shipos"],
+    "answer": "ships",
+    "explanation": "We add an 's' since more than one ship is sailing."
+  },
+  {
+    "noun": "house",
+    "options": ["houses", "housees", "houseis", "houseos"],
+    "answer": "houses",
+    "explanation": "Simply add an 's' to show more than one house."
+  },
+  {
+    "noun": "window",
+    "options": ["windows", "windowes", "windowis", "windowos"],
+    "answer": "windows",
+    "explanation": "Add an 's' because there are many windows."
+  },
+  {
+    "noun": "door",
+    "options": ["doors", "doores", "dooris", "dooros"],
+    "answer": "doors",
+    "explanation": "Just put an 's' at the end for more than one door."
+  },
+  {
+    "noun": "ball",
+    "options": ["balls", "balles", "ballis", "ballos"],
+    "answer": "balls",
+    "explanation": "We add 's' to show that there are many balls."
+  },
+  {
+    "noun": "doll",
+    "options": ["dolls", "dolles", "dollis", "dollos"],
+    "answer": "dolls",
+    "explanation": "Just add an 's' to make it plural."
+  },
+  {
+    "noun": "pen",
+    "options": ["pens", "penes", "penis", "penos"],
+    "answer": "pens",
+    "explanation": "Add an 's' because there are many pens."
+  },
+  {
+    "noun": "pencil",
+    "options": ["pencils", "penciles", "pencils", "pencelos"],
+    "answer": "pencils",
+    "explanation": "Simply add an 's' to show more than one pencil."
+  },
+  {
+    "noun": "book",
+    "options": ["books", "bookes", "bookis", "bookos"],
+    "answer": "books",
+    "explanation": "We add 's' to show there are many books to read."
+  },
+  {
+    "noun": "paper",
+    "options": ["papers", "papres", "paperis", "paperos"],
+    "answer": "papers",
+    "explanation": "Just add an 's' at the end for more than one paper."
+  },
+  {
+    "noun": "computer",
+    "options": ["computers", "computeres", "computeris", "computeros"],
+    "answer": "computers",
+    "explanation": "We add an 's' to show there are many computers."
+  },
+  {
+    "noun": "phone",
+    "options": ["phones", "phonees", "phoneis", "phoneos"],
+    "answer": "phones",
+    "explanation": "Simply add 's' when there is more than one phone."
+  },
+  {
+    "noun": "video",
+    "options": ["videos", "videoes", "videois", "videoos"],
+    "answer": "videos",
+    "explanation": "Add an 's' to show that there are many videos."
+  },
+  {
+    "noun": "camera",
+    "options": ["cameras", "cameraes", "camerais", "cameraos"],
+    "answer": "cameras",
+    "explanation": "We add 's' because there are many cameras."
+  },
+  {
+    "noun": "robot",
+    "options": ["robots", "robotes", "robotis", "robotos"],
+    "answer": "robots",
+    "explanation": "Just add an 's' when you have more than one robot."
+  },
+  {
+    "noun": "cake",
+    "options": ["cakes", "cakees", "cakeis", "cakeos"],
+    "answer": "cakes",
+    "explanation": "Add an 's' to make it plural because there are many cakes."
+  },
+  {
+    "noun": "pie",
+    "options": ["pies", "piees", "pieis", "pieos"],
+    "answer": "pies",
+    "explanation": "We add an 's' since more than one pie is yummy."
+  },
+  {
+    "noun": "cookie",
+    "options": ["cookies", "cookiees", "cookieis", "cookieos"],
+    "answer": "cookies",
+    "explanation": "Just add an 's' because cookies are for sharing."
+  },
+  {
+    "noun": "egg",
+    "options": ["eggs", "eggies", "egges", "eggos"],
+    "answer": "eggs",
+    "explanation": "Add an 's' to show there are many eggs."
+  },
+  {
+    "noun": "orange",
+    "options": ["oranges", "orangees", "orangeis", "orangeos"],
+    "answer": "oranges",
+    "explanation": "Simply add an 's' to show more than one orange."
+  },
+  {
+    "noun": "banana",
+    "options": ["bananas", "bananaes", "bananais", "bananaos"],
+    "answer": "bananas",
+    "explanation": "We add an 's' to show there are many bananas."
+  },
+  {
+    "noun": "grape",
+    "options": ["grapes", "grapees", "grapeis", "grapeos"],
+    "answer": "grapes",
+    "explanation": "Add an 's' because there are lots of grapes."
+  },
+  {
+    "noun": "strawberry",
+    "options": ["strawberrys", "strawberries", "strawberries", "strawbery"],
+    "answer": "strawberries",
+    "explanation": "Change 'y' to 'ies' to make more than one strawberry."
+  },
+  {
+    "noun": "carrot",
+    "options": ["carrots", "carrotes", "carrotis", "carrotos"],
+    "answer": "carrots",
+    "explanation": "Simply add an 's' to show there are many carrots."
+  },
+  {
+    "noun": "cupcake",
+    "options": ["cupcakes", "cupcakees", "cupcakeis", "cupcakeos"],
+    "answer": "cupcakes",
+    "explanation": "We add an 's' because cupcakes are yummy and more than one."
+  },
+  {
+    "noun": "candy",
+    "options": ["candys", "candies", "candyes", "candiis"],
+    "answer": "candies",
+    "explanation": "Change 'y' to 'ies' when there is more than one candy."
+  },
+  {
+    "noun": "game",
+    "options": ["games", "gamees", "gameis", "gameos"],
+    "answer": "games",
+    "explanation": "Add an 's' to show that there are many games to play."
+  },
+  {
+    "noun": "puzzle",
+    "options": ["puzzles", "puzzlees", "puzzleis", "puzzlos"],
+    "answer": "puzzles",
+    "explanation": "We add an 's' because puzzles come in many pieces."
+  },
+  {
+    "noun": "bike",
+    "options": ["bikes", "bikees", "bikeis", "bikeos"],
+    "answer": "bikes",
+    "explanation": "Simply add an 's' when there is more than one bike."
+  },
+  {
+    "noun": "scooter",
+    "options": ["scooters", "scooteres", "scooteris", "scooteros"],
+    "answer": "scooters",
+    "explanation": "Add an 's' to show there are many scooters."
+  },
+  {
+    "noun": "skateboard",
+    "options": ["skateboards", "skateboardes", "skateboardis", "skateboardos"],
+    "answer": "skateboards",
+    "explanation": "We add an 's' to make it plural when there are many skateboards."
+  },
+  {
+    "noun": "drum",
+    "options": ["drums", "drumes", "drumis", "drumos"],
+    "answer": "drums",
+    "explanation": "Add an 's' because there are many drums to beat."
+  },
+  {
+    "noun": "guitar",
+    "options": ["guitars", "guitaros", "guitaries", "guitaris"],
+    "answer": "guitars",
+    "explanation": "Simply add an 's' to show there are more than one guitar."
+  },
+  {
+    "noun": "piano",
+    "options": ["pianos", "pianoes", "pianois", "pianoos"],
+    "answer": "pianos",
+    "explanation": "We add an 's' because pianos are musical and more than one."
+  },
+  {
+    "noun": "violin",
+    "options": ["violins", "violinis", "violines", "violinos"],
+    "answer": "violins",
+    "explanation": "Just add an 's' to show there are many violins."
+  },
+  {
+    "noun": "lesson",
+    "options": ["lessons", "lessonies", "lessones", "lessonis"],
+    "answer": "lessons",
+    "explanation": "Add an 's' because there are many lessons to learn."
+  },
+  {
+    "noun": "class",
+    "options": ["classs", "classes", "classies", "clasis"],
+    "answer": "classes",
+    "explanation": "Since class ends with ss, we add 'es' to show there are many."
+  },
+  {
+    "noun": "friend",
+    "options": ["friends", "friendes", "friendis", "friendos"],
+    "answer": "friends",
+    "explanation": "Simply add an 's' for more than one friend."
+  },
+  {
+    "noun": "picture",
+    "options": ["pictures", "picturees", "pictureis", "pictureos"],
+    "answer": "pictures",
+    "explanation": "Add an 's' to show there are many pictures to look at."
+  },
+  {
+    "noun": "movie",
+    "options": ["movies", "moviees", "movieis", "movieos"],
+    "answer": "movies",
+    "explanation": "We add an 's' because there are many movies to watch."
+  },
+  {
+    "noun": "song",
+    "options": ["songs", "songes", "songis", "songos"],
+    "answer": "songs",
+    "explanation": "Just add an 's' when you have more than one song."
+  },
+  {
+    "noun": "dance",
+    "options": ["dances", "dancees", "danceis", "danceos"],
+    "answer": "dances",
+    "explanation": "Add an 's' because dances are fun when there are many."
+  },
+  {
+    "noun": "party",
+    "options": ["partys", "parties", "partyies", "partyos"],
+    "answer": "parties",
+    "explanation": "Change 'y' to 'ies' because party ends in y after a consonant."
+  },
+  {
+    "noun": "gift",
+    "options": ["gifts", "giftes", "giftis", "giftos"],
+    "answer": "gifts",
+    "explanation": "Simply add an 's' to show there are many gifts."
+  },
+  {
+    "noun": "balloon",
+    "options": ["balloons", "ballonns", "balloonies", "balloonss"],
+    "answer": "balloons",
+    "explanation": "Add an 's' to show that there are many balloons to play with."
+  },
+  {
+    "noun": "lollipop",
+    "options": ["lollipops", "lollipopes", "lollipopis", "lollipopos"],
+    "answer": "lollipops",
+    "explanation": "We add an 's' because there are many yummy lollipops."
+  },
+  {
+    "noun": "bunny",
+    "options": ["bunnys", "bunnies", "bunnyes", "bunnis"],
+    "answer": "bunnies",
+    "explanation": "Change 'y' to 'ies' because bunny ends with a 'y'."
+  },
+  {
+    "noun": "puppy",
+    "options": ["puppys", "puppies", "puppyes", "puppis"],
+    "answer": "puppies",
+    "explanation": "Change the ending 'y' to 'ies' when there is more than one puppy."
+  },
+  {
+    "noun": "kitten",
+    "options": ["kittens", "kittenes", "kittenis", "kittenos"],
+    "answer": "kittens",
+    "explanation": "Simply add an 's' because kittens is more than one kitten."
+  },
+  {
+    "noun": "muffin",
+    "options": ["muffins", "muffines", "muffinis", "muffinos"],
+    "answer": "muffins",
+    "explanation": "We add an 's' at the end to show there are many muffins."
+  },
+  {
+    "noun": "watch",
+    "options": ["watchs", "watches", "watchies", "watchos"],
+    "answer": "watches",
+    "explanation": "For words ending in 'ch', we add 'es' to make them plural."
+  },
+  {
+    "noun": "match",
+    "options": ["matchs", "matchies", "matchets", "matches"],
+    "answer": "matches",
+    "explanation": "We add 'es' because match ends with 'ch'."
+  },
+  {
+    "noun": "bench",
+    "options": ["benchs", "benchies", "benches", "benchos"],
+    "answer": "benches",
+    "explanation": "Add 'es' since bench ends with 'ch'."
+  },
+  {
+    "noun": "peach",
+    "options": ["peachs", "peachies", "peachees", "peaches"],
+    "answer": "peaches",
+    "explanation": "We change the ending by adding 'es' because peach ends with 'ch'."
+  },
+  {
+    "noun": "lunch",
+    "options": ["lunchs", "lunchies", "lunches", "lunchos"],
+    "answer": "lunches",
+    "explanation": "For lunch, we add 'es' to show there are many lunches."
+  },
+  {
+    "noun": "crutch",
+    "options": ["crutchs", "crutchies", "crutches", "crutchos"],
+    "answer": "crutches",
+    "explanation": "When a word ends with 'ch' and sounds special, we add 'es' and change it to 'crutches'."
+  },
+  {
+    "noun": "branch",
+    "options": ["branchs", "branchies", "branches", "branchos"],
+    "answer": "branches",
+    "explanation": "We add 'es' to branch because it ends with 'ch'."
+  },
+  {
+    "noun": "beach",
+    "options": ["beachs", "beachies", "beaches", "beachos"],
+    "answer": "beaches",
+    "explanation": "Add 'es' since beach ends with 'ch'."
+  },
+  {
+    "noun": "leash",
+    "options": ["leashs", "leashes", "leashies", "leashos"],
+    "answer": "leashes",
+    "explanation": "We add an 'es' because leash ends with 'sh'."
+  },
+  {
+    "noun": "patch",
+    "options": ["patchs", "patchies", "patches", "patchos"],
+    "answer": "patches",
+    "explanation": "Change the ending by adding 'es' since patch ends with 'ch'."
+  },
+  {
+    "noun": "clutch",
+    "options": ["clutchs", "clutchies", "clutches", "clutchos"],
+    "answer": "clutches",
+    "explanation": "For clutch, we add 'es' to form the plural."
+  },
+  {
+    "noun": "splash",
+    "options": ["splashs", "splashies", "splashes", "splashos"],
+    "answer": "splashes",
+    "explanation": "We add 'es' to splash to show there are many splashes."
+  },
+  {
+    "noun": "squash",
+    "options": ["squashs", "squashies", "squashes", "squashos"],
+    "answer": "squashes",
+    "explanation": "Even though squash is also a vegetable, we add 'es' for the plural."
+  },
+  {
+    "noun": "couch",
+    "options": ["couchs", "couchies", "couches", "couchos"],
+    "answer": "couches",
+    "explanation": "Add 'es' because couch ends with 'ch'."
+  },
+  {
+    "noun": "hutch",
+    "options": ["hutchs", "hutchies", "hutches", "hutchos"],
+    "answer": "hutches",
+    "explanation": "We add 'es' to hutch since it ends with 'ch'."
+  },
+  {
+    "noun": "stitch",
+    "options": ["stitchs", "stitchies", "stitches", "stitchos"],
+    "answer": "stitches",
+    "explanation": "For stitch, change by adding 'es' at the end."
+  },
+  {
+    "noun": "daisy",
+    "options": ["daisys", "daisies", "daisyes", "daisyos"],
+    "answer": "daisies",
+    "explanation": "Change 'y' to 'ies' because daisy ends with 'y' after a consonant."
+  },
+  {
+    "noun": "rainbow",
+    "options": ["rainbows", "rainbowes", "rainbowis", "rainbowos"],
+    "answer": "rainbows",
+    "explanation": "Just add an 's' to show there are many rainbows."
+  },
+  {
+    "noun": "pencilcase",
+    "options": ["pencilcases", "pencilcasees", "pencilcaseis", "pencilcaseos"],
+    "answer": "pencilcases",
+    "explanation": "Add an 's' at the end to show there is more than one pencilcase."
+  },
+  {
+    "noun": "marker",
+    "options": ["markers", "markeres", "markeris", "markeros"],
+    "answer": "markers",
+    "explanation": "Simply add an 's' because markers come in many."
+  },
+  {
+    "noun": "crayon",
+    "options": ["crayons", "crayonies", "crayonis", "crayonos"],
+    "answer": "crayons",
+    "explanation": "We add an 's' to show there are lots of crayons."
+  },
+  {
+    "noun": "butterfly",
+    "options": ["butterflys", "butterflies", "butterflyes", "butterflyos"],
+    "answer": "butterflies",
+    "explanation": "Change the 'y' to 'ies' because butterfly ends with 'y' after a consonant."
+  },
+  {
+    "noun": "teddy",
+    "options": ["teddys", "teddies", "teddyies", "teddyos"],
+    "answer": "teddies",
+    "explanation": "We add 'ies' by changing 'y' to 'ies' because teddy ends with y."
+  },
+  {
+    "noun": "swing",
+    "options": ["swings", "swinges", "swingis", "swingos"],
+    "answer": "swings",
+    "explanation": "Just add an 's' to show there are many swings on the playground."
+  },
+  {
+    "noun": "slide",
+    "options": ["slides", "slidees", "slideis", "slideos"],
+    "answer": "slides",
+    "explanation": "Simply add an 's' because there are many slides."
+  },
+  {
+    "noun": "sandbox",
+    "options": ["sandboxes", "sandboxes", "sandboxis", "sandboxos"],
+    "answer": "sandboxes",
+    "explanation": "We add 'es' since sandbox ends with 'x'."
+  },
+  {
+    "noun": "dinosaur",
+    "options": ["dinosaurs", "dinosaures", "dinosauris", "dinosauros"],
+    "answer": "dinosaurs",
+    "explanation": "Just add an 's' to show there are many dinosaurs."
+  },
+  {
+    "noun": "rocket",
+    "options": ["rockets", "rocketes", "rocketis", "rocketos"],
+    "answer": "rockets",
+    "explanation": "Simply add an 's' because there are many rockets."
+  },
+  {
+    "noun": "spaceship",
+    "options": ["spaceships", "spaceshipes", "spaceshipis", "spaceshipos"],
+    "answer": "spaceships",
+    "explanation": "Add an 's' to show there are many spaceships."
+  },
+  {
+    "noun": "castle",
+    "options": ["castles", "castlees", "castleis", "castleos"],
+    "answer": "castles",
+    "explanation": "Just add an 's' because castles come in many shapes."
+  },
+  {
+    "noun": "dragon",
+    "options": ["dragons", "dragones", "dragonis", "dragonos"],
+    "answer": "dragons",
+    "explanation": "Simply add an 's' to show there are many dragons in stories."
+  },
+  {
+    "noun": "fairy",
+    "options": ["fairys", "fairies", "fairyees", "fairyos"],
+    "answer": "fairies",
+    "explanation": "Change the 'y' to 'ies' because fairy ends with 'y' after a consonant."
+  },
+  {
+    "noun": "unicorn",
+    "options": ["unicorns", "unicornes", "unicornis", "unicornos"],
+    "answer": "unicorns",
+    "explanation": "Just add an 's' to show there are many unicorns."
+  },
+  {
+    "noun": "tiger",
+    "options": ["tigers", "tigeres", "tigeris", "tigeros"],
+    "answer": "tigers",
+    "explanation": "Simply add an 's' because tigers are many in the jungle."
+  },
+  {
+    "noun": "lion",
+    "options": ["lions", "liones", "lionis", "lionos"],
+    "answer": "lions",
+    "explanation": "Add an 's' to show there are many lions."
+  },
+  {
+    "noun": "bear",
+    "options": ["bears", "beares", "bearis", "bearos"],
+    "answer": "bears",
+    "explanation": "We add an 's' because there are many bears."
+  },
+  {
+    "noun": "zebra",
+    "options": ["zebras", "zebraes", "zebrais", "zebraos"],
+    "answer": "zebras",
+    "explanation": "Just add an 's' to show there are many zebras."
+  },
+  {
+    "noun": "elephant",
+    "options": ["elephants", "elephantes", "elephantis", "elephantos"],
+    "answer": "elephants",
+    "explanation": "Simply add an 's' because elephants are big and many."
+  },
+  {
+    "noun": "giraffe",
+    "options": ["giraffes", "giraffees", "giraffeis", "giraffos"],
+    "answer": "giraffes",
+    "explanation": "We add an 's' at the end to show there are many giraffes."
+  },
+  {
+    "noun": "penguin",
+    "options": ["penguins", "penguines", "penguinis", "penguinos"],
+    "answer": "penguins",
+    "explanation": "Just add an 's' because there are many penguins."
+  },
+  {
+    "noun": "koala",
+    "options": ["koalas", "koalaes", "koalais", "koalaos"],
+    "answer": "koalas",
+    "explanation": "Simply add an 's' to show there are many koalas."
+  },
+  {
+    "noun": "squirrel",
+    "options": ["squirrels", "squirreles", "squirrelis", "squirrelos"],
+    "answer": "squirrels",
+    "explanation": "Add an 's' to show that there are many squirrels."
+  },
+  {
+    "noun": "caterpillar",
+    "options": ["caterpillars", "caterpillares", "caterpillaris", "caterpillaros"],
+    "answer": "caterpillars",
+    "explanation": "We add an 's' because there are lots of caterpillars."
+  },
+  {
+    "noun": "raincoat",
+    "options": ["raincoats", "raincoates", "raincoatis", "raincoatos"],
+    "answer": "raincoats",
+    "explanation": "Simply add an 's' to show there are many raincoats."
+  },
+  {
+    "noun": "backpack",
+    "options": ["backpacks", "backpackes", "backpackis", "backpackos"],
+    "answer": "backpacks",
+    "explanation": "Just add an 's' because many kids have backpacks."
+  },
+  {
+    "noun": "jelly",
+    "options": ["jellies", "jellys", "jellyes", "jellyos"],
+    "answer": "jellies",
+    "explanation": "Change 'y' to 'ies' because jelly ends with 'y' after a consonant."
+  },
+  {
+    "noun": "bookcase",
+    "options": ["bookcases", "bookcasees", "bookcaseis", "bookcaseos"],
+    "answer": "bookcases",
+    "explanation": "We add an 's' to show that there are many bookcases."
+  },
+  {
+    "noun": "lamp",
+    "options": ["lamps", "lampes", "lampis", "lampos"],
+    "answer": "lamps",
+    "explanation": "Simply add an 's' to show there are many lamps."
+  },
+  {
+    "noun": "candle",
+    "options": ["candles", "candlees", "candleis", "candleos"],
+    "answer": "candles",
+    "explanation": "Just add an 's' because there are many candles."
+  },
+  {
+    "noun": "sugar",
+    "options": ["sugars", "sugares", "sugaris", "sugaros"],
+    "answer": "sugars",
+    "explanation": "We add an 's' to show there are many types of sugar."
+  }
+]
+
 ];
 
 // Fetch user-selected number of questions
