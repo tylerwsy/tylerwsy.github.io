@@ -2,7 +2,6 @@
 
 // Paste your manually provided JSON data here.
 const quizData = [
-  [
   {
     "noun": "cat",
     "options": ["cats", "cates", "caties", "catys"],
@@ -885,8 +884,6 @@ const quizData = [
     "answer": "sugars",
     "explanation": "We add an 's' to show there are many types of sugar."
   }
-]
-
 ];
 
 // Fetch user-selected number of questions
