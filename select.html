@@ -103,7 +103,8 @@
           </div>
         </div>
         <div style="margin-top:2rem; text-align:center;">
-          <button class="interactive-btn" onclick="window.history.back()">Back</button>
+          <!-- Updated back button -->
+          <button class="interactive-btn" onclick="window.location.href='index.html'">Back</button>
         </div>
       </div>
       <div class="right-column">
@@ -263,9 +264,9 @@
       const adminPasswordInput     = document.getElementById("adminPasswordInput");
 
       testSelect.addEventListener("change", () => {
-        testOptionsContainer.style.display  = "flex";
-        dictionaryBtn.style.display         = testSelect.value === "Chinese - Pronunciation Test" ? "inline-block" : "none";
-        startTestRow.style.display          = "flex";
+        testOptionsContainer.style.display = "flex";
+        dictionaryBtn.style.display        = testSelect.value === "Chinese - Pronunciation Test" ? "inline-block" : "none";
+        startTestRow.style.display         = "flex";
         updateExtraButtons();
         updateResultChart();
         updateDailyMission();
