@@ -7,20 +7,28 @@
   <link rel="stylesheet" href="style.css">
   <script src="english_plural.js" defer></script>
   <script>
-    // This function asks the user to confirm before exiting the quiz.
-    function confirmExit() {
-      if (confirm("Are you sure you want to exit the quiz? Your progress will be lost.")) {
-        window.location.href = "select.html";
+    // Unified back behavior: confirm if quiz in progress, no confirm on result page
+    function backClicked() {
+      const resultBox = document.getElementById('resultBox');
+      if (resultBox.style.display === 'block') {
+        // Test completed → go straight back
+        window.location.href = 'select.html';
+      } else {
+        // In progress → confirm
+        if (confirm("Are you sure you want to exit the quiz? Your progress will be lost.")) {
+          window.location.href = 'select.html';
+        }
       }
     }
   </script>
 </head>
 <body>
-  <!-- Back Button positioned in the top right corner with an inline SVG icon -->
-  <button class="back-btn interactive-btn" onclick="confirmExit()">
+  <!-- Top‐right Back Button -->
+  <button class="back-btn interactive-btn" onclick="backClicked()">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
       xmlns="http://www.w3.org/2000/svg">
-      <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </button>
 
@@ -28,21 +36,27 @@
     <header>
       <h1>English Singular vs Plural Test</h1>
     </header>
-    <!-- Question number display -->
+
+    <!-- Question Number -->
     <p id="questionCount" style="font-weight: bold; text-align: center;"></p>
+
     <!-- Quiz Section -->
     <div id="quizBox" style="text-align: center;">
-      <p id="question" style="font-size: 2rem; background-color: lightyellow; padding: 0.5rem; margin: 0 auto;"></p>
-      <!-- Options Container -->
+      <p id="question"
+         style="font-size: 2rem; background-color: lightyellow; padding: 0.5rem; margin: 0 auto;">
+      </p>
       <div id="optionsContainer"></div>
     </div>
+
     <!-- Result Section (initially hidden) -->
     <div id="resultBox" style="display: none; text-align: center;">
       <h2>Test Results</h2>
-      <p id="scoreText" style="font-size: 2rem; background-color: lightyellow; padding: 0.5rem; margin: 0 auto;"></p>
+      <p id="scoreText"
+         style="font-size: 2rem; background-color: lightyellow; padding: 0.5rem; margin: 0 auto;">
+      </p>
       <button class="interactive-btn" onclick="window.location.reload()">Test Again</button>
-      <button class="interactive-btn" onclick="confirmExit()">Back</button>
     </div>
+
     <footer>
       <p>© 2025 Learning App. All rights reserved.</p>
     </footer>

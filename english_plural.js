@@ -1037,46 +1037,37 @@ function loadQuestion() {
 
 // Show the final test results
 function showResult() {
-  quizBox.style.display = "none";
+  quizBox.style.display   = "none";
   resultBox.style.display = "block";
+
+  // Build and insert the final message
   const percentage = Math.round((correctCount / totalQuestions) * 100);
-  scoreText.textContent = `You got ${correctCount}/${totalQuestions} correct (${percentage}%)`;
-  
   const finalMessage = document.createElement("p");
-  finalMessage.style.fontSize = "2rem";
-  finalMessage.style.backgroundColor = "lightyellow";
-  finalMessage.style.padding = "0.5rem";
-  finalMessage.style.textAlign = "center";
-  finalMessage.style.margin = "0.5rem auto";
+  finalMessage.style.cssText = `
+    font-size: 2rem; background-color: lightyellow;
+    padding: 0.5rem; margin: 0.5rem auto; text-align: center;
+  `;
   finalMessage.textContent = `You got ${correctCount}/${totalQuestions} correct (${percentage}%)`;
-  
+
+  // “Test Again” button
   const tryAgainBtn = document.createElement("button");
-  tryAgainBtn.textContent = "Try Again";
+  tryAgainBtn.textContent = "Test Again";
   tryAgainBtn.classList.add("interactive-btn");
   tryAgainBtn.onclick = () => window.location.reload();
-  
-  const backBtn = document.createElement("button");
-  backBtn.textContent = "Back";
-  backBtn.classList.add("interactive-btn");
-  backBtn.onclick = () => window.location.href = "select.html";
-  
+
+  // Clear any old content, then append
   resultBox.innerHTML = "";
   resultBox.appendChild(finalMessage);
   resultBox.appendChild(tryAgainBtn);
-  resultBox.appendChild(backBtn);
-  
-  saveQuizResult("english_plural");
-}
 
-// Save results to local storage
-function saveQuizResult(mode) {
+  // Save to localStorage for charts/daily missions
   const logs = JSON.parse(localStorage.getItem("quizResults") || "[]");
   logs.push({
-    mode,
-    date: new Date().toISOString(),
-    total: totalQuestions,
+    mode:    "english_plural",
+    date:    new Date().toISOString(),
+    total:   totalQuestions,
     correct: correctCount,
-    wrong: wrongCount
+    wrong:   totalQuestions - correctCount
   });
   localStorage.setItem("quizResults", JSON.stringify(logs));
 }
