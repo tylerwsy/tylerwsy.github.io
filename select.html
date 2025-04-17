@@ -89,7 +89,7 @@
           </select>
           <div>
             <label for="wordCountInput">Number of Words:</label>
-            <input id="wordCountInput" type="number" value="50" min="50">
+            <input id="wordCountInput" type="number" value="40" min="40">
           </div>
           <div id="adminPasswordContainer" style="display: none;">
             <label for="adminPasswordInput">Admin Password:</label>
@@ -103,7 +103,6 @@
           </div>
         </div>
         <div style="margin-top:2rem; text-align:center;">
-          <!-- Updated back button -->
           <button class="interactive-btn" onclick="window.location.href='index.html'">Back</button>
         </div>
       </div>
@@ -264,16 +263,16 @@
       const adminPasswordInput     = document.getElementById("adminPasswordInput");
 
       testSelect.addEventListener("change", () => {
-        testOptionsContainer.style.display = "flex";
-        dictionaryBtn.style.display        = testSelect.value === "Chinese - Pronunciation Test" ? "inline-block" : "none";
-        startTestRow.style.display         = "flex";
+        testOptionsContainer.style.display  = "flex";
+        dictionaryBtn.style.display         = testSelect.value === "Chinese - Pronunciation Test" ? "inline-block" : "none";
+        startTestRow.style.display          = "flex";
         updateExtraButtons();
         updateResultChart();
         updateDailyMission();
       });
 
       wordCountInput.addEventListener("input", () => {
-        if (parseInt(wordCountInput.value, 10) < 50) {
+        if (parseInt(wordCountInput.value, 10) < 40) {
           adminPasswordContainer.style.display = "block";
         } else {
           adminPasswordContainer.style.display = "none";
@@ -282,11 +281,11 @@
 
       goTestBtn.onclick = () => {
         let count = parseInt(wordCountInput.value, 10);
-        if (count < 50) {
+        if (count < 40) {
           const adminPass = adminPasswordInput.value.trim();
           if (adminPass !== "2104") {
-            alert("Minimum number of questions is 50 unless the admin password is provided.");
-            wordCountInput.value = 50;
+            alert("Minimum number of questions is 40 unless the admin password is provided.");
+            wordCountInput.value = 40;
             adminPasswordContainer.style.display = "none";
             return;
           }
