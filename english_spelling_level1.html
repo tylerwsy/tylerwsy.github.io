@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Spelling (Level 1)</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="english_spelling_level1.js" defer></script>
+  <script>
+    function confirmExit() {
+      if (confirm("Are you sure you want to exit the quiz? Your progress will be lost.")) {
+        window.location.href = "select.html";
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- Back Button -->
+  <button class="back-btn interactive-btn" onclick="confirmExit()">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+      xmlns="http://www.w3.org/2000/svg">
+      <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <div class="container">
+    <header>
+      <h1>English Spelling (Level 1)</h1>
+    </header>
+
+    <!-- Question counter -->
+    <p id="questionCount" style="font-weight: bold; text-align: center;"></p>
+
+    <!-- Quiz area -->
+    <div id="quizBox" style="text-align: center;">
+      <p id="question"
+         style="font-size: 2rem; background-color: lightyellow; padding: 0.5rem; margin: 0 auto;">
+      </p>
+      <div id="optionsContainer"></div>
+    </div>
+
+    <!-- Result screen -->
+    <div id="resultBox" style="display: none; text-align: center;">
+      <h2>Test Results</h2>
+      <p id="scoreText"
+         style="font-size: 2rem; background-color: lightyellow; padding: 0.5rem; margin: 0 auto;">
+      </p>
+      <button class="interactive-btn" onclick="window.location.reload()">Retry</button>
+      <button class="interactive-btn" onclick="confirmExit()">Back</button>
+    </div>
+
+    <footer>
+      <p>© 2025 Learning App. All rights reserved.</p>
+    </footer>
+  </div>
+</body>
+</html>

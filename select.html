@@ -85,13 +85,12 @@
             <option value="" disabled selected>Select a test...</option>
             <option value="Chinese - Pronunciation Test">Chinese - Pronunciation Test</option>
             <option value="English - Singular vs Plural">English - Singular vs Plural</option>
+            <option value="English - Spelling (Level 1)">English - Spelling (Level 1)</option>
           </select>
           <div>
             <label for="wordCountInput">Number of Words:</label>
-            <!-- Updated: default and min value set to 50 -->
             <input id="wordCountInput" type="number" value="50" min="50">
           </div>
-          <!-- Admin password field; only visible when count is below 50 -->
           <div id="adminPasswordContainer" style="display: none;">
             <label for="adminPasswordInput">Admin Password:</label>
             <input id="adminPasswordInput" type="password" placeholder="Enter admin password">
@@ -123,18 +122,21 @@
       function updateDailyMission() {
         const missionStatus = document.getElementById("missionStatus");
         const logs = JSON.parse(localStorage.getItem("quizResults") || "[]");
-        // Compute current date in Singapore time (UTC+8)
         const singaporeTime = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Singapore" }));
         const today = singaporeTime.toISOString().split("T")[0];
 
-        // Check if today's quiz results meet or exceed a 70% correct rate
-        const hasChinese = logs.some(r => 
+        const hasChinese = logs.some(r =>
           r.mode === "chinese" &&
           r.date.startsWith(today) &&
           (r.correct / r.total) >= 0.7
         );
-        const hasPlural = logs.some(r => 
+        const hasPlural = logs.some(r =>
           r.mode === "english_plural" &&
+          r.date.startsWith(today) &&
+          (r.correct / r.total) >= 0.7
+        );
+        const hasSpell = logs.some(r =>
+          r.mode === "english_spelling_level1" &&
           r.date.startsWith(today) &&
           (r.correct / r.total) >= 0.7
         );
@@ -142,6 +144,7 @@
         missionStatus.innerHTML = `
           <div>Chinese Pronunciation: ${hasChinese ? "✅" : "⬜"}</div>
           <div>English Plural: ${hasPlural ? "✅" : "⬜"}</div>
+          <div>English Spelling L1: ${hasSpell ? "✅" : "⬜"}</div>
         `;
       }
 
@@ -154,6 +157,7 @@
         let mode = "";
         if (selectedTest === "Chinese - Pronunciation Test") mode = "chinese";
         else if (selectedTest === "English - Singular vs Plural") mode = "english_plural";
+        else if (selectedTest === "English - Spelling (Level 1)") mode = "english_spelling_level1";
 
         const allLogs = JSON.parse(localStorage.getItem("quizResults") || "[]");
         const results = allLogs.filter(r => r.mode === mode);
@@ -211,6 +215,7 @@
         let mode = "";
         if (selectedTest === "Chinese - Pronunciation Test") mode = "chinese";
         else if (selectedTest === "English - Singular vs Plural") mode = "english_plural";
+        else if (selectedTest === "English - Spelling (Level 1)") mode = "english_spelling_level1";
 
         let allLogs = JSON.parse(localStorage.getItem("quizResults") || "[]");
         allLogs = allLogs.filter(r => r.mode !== mode);
@@ -248,25 +253,24 @@
         updateDailyMission();
       });
 
-      const testSelect = document.getElementById("testSelect");
-      const testOptionsContainer = document.getElementById("testOptionsContainer");
-      const dictionaryBtn = document.getElementById("dictionaryBtn");
-      const startTestRow = document.getElementById("startTestRow");
-      const goTestBtn = document.getElementById("goTestBtn");
-      const wordCountInput = document.getElementById("wordCountInput");
+      const testSelect             = document.getElementById("testSelect");
+      const testOptionsContainer   = document.getElementById("testOptionsContainer");
+      const dictionaryBtn          = document.getElementById("dictionaryBtn");
+      const startTestRow           = document.getElementById("startTestRow");
+      const goTestBtn              = document.getElementById("goTestBtn");
+      const wordCountInput         = document.getElementById("wordCountInput");
       const adminPasswordContainer = document.getElementById("adminPasswordContainer");
-      const adminPasswordInput = document.getElementById("adminPasswordInput");
+      const adminPasswordInput     = document.getElementById("adminPasswordInput");
 
       testSelect.addEventListener("change", () => {
-        testOptionsContainer.style.display = "flex";
-        dictionaryBtn.style.display = testSelect.value === "Chinese - Pronunciation Test" ? "inline-block" : "none";
-        startTestRow.style.display = "flex";
+        testOptionsContainer.style.display  = "flex";
+        dictionaryBtn.style.display         = testSelect.value === "Chinese - Pronunciation Test" ? "inline-block" : "none";
+        startTestRow.style.display          = "flex";
         updateExtraButtons();
         updateResultChart();
         updateDailyMission();
       });
 
-      // Show admin password input if the word count is below 50.
       wordCountInput.addEventListener("input", () => {
         if (parseInt(wordCountInput.value, 10) < 50) {
           adminPasswordContainer.style.display = "block";
@@ -292,6 +296,8 @@
           window.location.href = "chinese_pronunication.html";
         } else if (selected === "English - Singular vs Plural") {
           window.location.href = "english_plural.html";
+        } else if (selected === "English - Spelling (Level 1)") {
+          window.location.href = "english_spelling_level1.html";
         }
       };
 
