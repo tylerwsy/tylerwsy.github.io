@@ -88,10 +88,10 @@
           </select>
           <div>
             <label for="wordCountInput">Number of Words:</label>
-            <!-- Set min to 1 so admin override can choose fewer than 30 -->
-            <input id="wordCountInput" type="number" value="30" min="1">
+            <!-- Updated: default and min value set to 50 -->
+            <input id="wordCountInput" type="number" value="50" min="50">
           </div>
-          <!-- Admin password field; only visible when count is below 30 -->
+          <!-- Admin password field; only visible when count is below 50 -->
           <div id="adminPasswordContainer" style="display: none;">
             <label for="adminPasswordInput">Admin Password:</label>
             <input id="adminPasswordInput" type="password" placeholder="Enter admin password">
@@ -115,7 +115,7 @@
       </div>
     </div>
     <footer>
-      <p>© 2025 Learning App. All rights reserved. v1.0</p>
+      <p>© 2025 Learning App. All rights reserved.</p>
     </footer>
     <script>
       let showAll = false;
@@ -266,9 +266,9 @@
         updateDailyMission();
       });
 
-      // Show admin password input if the word count is below 30.
+      // Show admin password input if the word count is below 50.
       wordCountInput.addEventListener("input", () => {
-        if (parseInt(wordCountInput.value, 10) < 30) {
+        if (parseInt(wordCountInput.value, 10) < 50) {
           adminPasswordContainer.style.display = "block";
         } else {
           adminPasswordContainer.style.display = "none";
@@ -277,11 +277,11 @@
 
       goTestBtn.onclick = () => {
         let count = parseInt(wordCountInput.value, 10);
-        if (count < 30) {
+        if (count < 50) {
           const adminPass = adminPasswordInput.value.trim();
           if (adminPass !== "2104") {
-            alert("Minimum number of questions is 30 unless the admin password is provided.");
-            wordCountInput.value = 30;
+            alert("Minimum number of questions is 50 unless the admin password is provided.");
+            wordCountInput.value = 50;
             adminPasswordContainer.style.display = "none";
             return;
           }
